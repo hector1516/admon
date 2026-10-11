@@ -5659,19 +5659,26 @@ def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
     try:
         conn = get_connection()
         cursor = conn.cursor(as_dict=True)
-        cursor.execute("""
+        # Cliente y proyecto/servicio pueden venir del TICKET o, si el ticket no
+        # los trae (el formulario de Field ya no los captura), del VALE enlazado
+        # por IdSolicitudVale. Se usa COALESCE y el clientes único (alias) para
+        # no multiplicar filas con los IdCliente duplicados.
+        cursor.execute(f"""
             SELECT TOP 300
-                T.Id, T.FolioTicket, T.FechaRegistro, T.Estacion, T.Descripcion,
+                T.Id, T.FolioTicket, T.FechaRegistro, T.Estacion,
+                COALESCE(NULLIF(LTRIM(RTRIM(T.Descripcion)), ''), S.Descripcion) AS Descripcion,
                 CASE WHEN T.ImagenTicket IS NOT NULL THEN 1 ELSE 0 END AS TieneFoto,
-                C.Cliente, A.MarcaModelo, A.Placas, U.Nombre AS Capturo,
-                S.FechaSolicitud AS ValeSolicitud
+                COALESCE(C.Cliente, SC.Cliente) AS Cliente,
+                A.MarcaModelo, A.Placas, U.Nombre AS Capturo,
+                S.FechaSolicitud AS ValeSolicitud, S.Id AS ValeId
             FROM HUB_OxxoGasTickets T
-            LEFT JOIN clientes C ON C.IdCliente = T.IdCliente
+            LEFT JOIN {_CLIENTES_UNICOS} C ON C.IdCliente = T.IdCliente
             LEFT JOIN HUB_Automoviles A ON A.Id = T.IdVehiculo
             LEFT JOIN HUB_Users U ON U.Id = T.IdUsuario
             LEFT JOIN HUB_SolicitudVales S
                    ON S.Id = T.IdSolicitudVale
                   AND S.IdSolicitante = T.IdUsuario
+            LEFT JOIN {_CLIENTES_UNICOS} SC ON SC.IdCliente = S.IdCliente
             ORDER BY T.FechaRegistro DESC
         """)
         tickets = cursor.fetchall()
@@ -5719,6 +5726,7 @@ def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
                 "descripcion": t["Descripcion"] or "",
                 "tiene_foto": bool(t["TieneFoto"]),
                 "cliente": t["Cliente"],
+                "vale": f"VL-{int(t['ValeId']):05d}" if t.get("ValeId") else None,
                 "marca_modelo": t["MarcaModelo"],
                 "placas": t["Placas"],
                 "capturo": t["Capturo"],

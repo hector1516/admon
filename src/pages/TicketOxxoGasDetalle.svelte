@@ -256,6 +256,9 @@
 						{/if}
 					</div>
 					<div class="info-line"><span>🎫 Folio</span><strong class="folio-inline">#{t.folio}</strong></div>
+					{#if t.vale}
+						<div class="info-line"><span>🎫 Vale</span><strong class="folio-inline">{t.vale}</strong></div>
+					{/if}
 					<div class="info-line"><span>🚗 Auto</span><strong>{[t.marca_modelo, t.placas].filter(Boolean).join(' · ') || '—'}</strong></div>
 					<div class="info-line"><span>🏢 Empresa</span><strong>{t.cliente || '—'}</strong></div>
 					<div class="info-line"><span>📝 Proyecto / Servicio</span><strong>{t.descripcion || '—'}</strong></div>
