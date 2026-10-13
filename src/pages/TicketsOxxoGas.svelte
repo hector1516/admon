@@ -159,7 +159,10 @@
 				<button class="card-ticket" onclick={() => navigate(`/tickets_oxxogas/${t.id}`)} title="Ver detalle completo">
 					<div class="body">
 						<div class="folio">#{t.folio}</div>
-						<div class="fecha">🕐 {fmtFecha(t.fecha)}</div>
+						<div class="fecha">🧾 Ticket: {fmtFecha(t.fecha)}</div>
+						{#if t.fecha_vale}
+							<div class="fecha">🎫 Vale: {fmtFecha(t.fecha_vale)}</div>
+						{/if}
 						<div class="chips">
 							{#if t.factura}
 								<span class="chip ok" title="Factura enlazada">🧾 {t.factura}</span>
