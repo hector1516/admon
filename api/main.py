@@ -3578,6 +3578,21 @@ async def api_get_reporte(id_reporte: int, current_user: dict = Depends(get_curr
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 
+# El formulario de reportes captura FECHA (input date) y HORA (input time) por
+# separado. FechaHoraInicio/Fin son DATETIME: guardar solo la hora ("09:25")
+# hace que SQL Server le ponga 1900-01-01 (los reportes que salieron con fecha
+# 1900). Aquí se combinan con la fecha del reporte.
+def _fecha_hora(fecha, hora):
+    if not hora:
+        return None
+    h = str(hora).strip()
+    if not fecha:
+        return h
+    partes = h.split(":")
+    es_solo_hora = len(partes) in (2, 3) and all(p.isdigit() for p in partes)
+    return f"{str(fecha).strip()} {h}" if es_solo_hora else h
+
+
 @app.post("/api/reportes")
 async def api_create_reporte(body: ReporteCreate, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
@@ -3607,8 +3622,8 @@ async def api_create_reporte(body: ReporteCreate, current_user: dict = Depends(g
             body.descripcion.strip() if body.descripcion else None,
             body.notas.strip() if body.notas else None,
             body.maquina_linea.strip() if body.maquina_linea else None,
-            body.fecha_inicio,
-            body.fecha_fin,
+            _fecha_hora(fecha_str, body.fecha_inicio),
+            _fecha_hora(fecha_str, body.fecha_fin),
             float(body.tiempo_traslado or 0.0),
             1 if body.tiempo_comida else 0,
         ))
@@ -3650,6 +3665,15 @@ async def api_update_reporte(id_reporte: int, body: ReporteUpdate, current_user:
         # Build dynamic update
         fields = []
         vals = []
+        # La fecha y la hora vienen SEPARADAS (input date + input time).
+        # FechaHoraInicio/Fin son DATETIME: guardar solo la hora ("09:25") hacía
+        # que SQL Server le pusiera 1900-01-01. Se combinan con la fecha del
+        # reporte (la del body, o la que ya está en la BD si no viene).
+        fecha_reporte = str(body.fecha).strip() if body.fecha else None
+        if not fecha_reporte and (body.fecha_inicio or body.fecha_fin):
+            cursor.execute("SELECT Fecha FROM ReportesServicio WHERE IdReporte = %s", (int(id_reporte),))
+            fr = cursor.fetchone()
+            fecha_reporte = fr[0] if fr else None
         if body.cliente:
             fields.append("Cliente = %s"); vals.append(body.cliente.strip())
         if body.contacto is not None:
@@ -3669,9 +3693,9 @@ async def api_update_reporte(id_reporte: int, body: ReporteUpdate, current_user:
         if body.maquina_linea is not None:
             fields.append("MaquinaLinea = %s"); vals.append(body.maquina_linea.strip() if body.maquina_linea else None)
         if body.fecha_inicio:
-            fields.append("FechaHoraInicio = %s"); vals.append(body.fecha_inicio)
+            fields.append("FechaHoraInicio = %s"); vals.append(_fecha_hora(fecha_reporte, body.fecha_inicio))
         if body.fecha_fin:
-            fields.append("FechaHoraFin = %s"); vals.append(body.fecha_fin)
+            fields.append("FechaHoraFin = %s"); vals.append(_fecha_hora(fecha_reporte, body.fecha_fin))
         if body.tiempo_traslado is not None:
             fields.append("TiempoTraslado = %s"); vals.append(float(body.tiempo_traslado or 0.0))
         if body.tiempo_comida is not None:
