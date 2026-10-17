@@ -107,11 +107,14 @@
 		return d.toISOString().split('T')[0];
 	}
 
-	function toInputTime(val) {
+	// Para <input type="datetime-local">: "YYYY-MM-DDTHH:MM" en hora LOCAL
+	// (no usar toISOString, que pasa a UTC y puede correr el día).
+	function toInputDateTime(val) {
 		if (!val) return '';
-		const d = new Date(val);
-		if (isNaN(d)) return '';
-		return d.toTimeString().slice(0, 5);
+		const d = new Date(String(val).replace(' ', 'T'));
+		if (isNaN(d.getTime())) return '';
+		const p = (n) => String(n).padStart(2, '0');
+		return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
 	}
 
 	function estatusHtml(est) {
@@ -293,8 +296,8 @@
 			descripcion: reporte.DescripcionServicio || '',
 			estatus: reporte.Estatus || 'Borrador',
 			notas: reporte.Notas || '',
-			fecha_inicio: toInputTime(reporte.FechaHoraInicio),
-			fecha_fin: toInputTime(reporte.FechaHoraFin),
+			fecha_inicio: toInputDateTime(reporte.FechaHoraInicio),
+			fecha_fin: toInputDateTime(reporte.FechaHoraFin),
 			tiempo_traslado: Number(reporte.TiempoTraslado || 0),
 			tiempo_comida: Number(reporte.TiempoComida || 0),
 			maquina_linea: reporte.MaquinaLinea || '',
@@ -427,9 +430,11 @@
 					<label>Notas internas</label>
 					<textarea class="input" bind:value={editForm.notas} rows="2"></textarea>
 				</div>
-				<div class="grid-4">
-					<div class="field"><label>Hora inicio</label><input type="time" class="input" bind:value={editForm.fecha_inicio} /></div>
-					<div class="field"><label>Hora fin</label><input type="time" class="input" bind:value={editForm.fecha_fin} /></div>
+				<div class="grid-2">
+					<div class="field"><label>Fecha y hora inicio</label><input type="datetime-local" class="input" bind:value={editForm.fecha_inicio} /></div>
+					<div class="field"><label>Fecha y hora fin</label><input type="datetime-local" class="input" bind:value={editForm.fecha_fin} /></div>
+				</div>
+				<div class="grid-2">
 					<div class="field"><label>Traslado (h)</label><input type="number" step="0.5" min="0" class="input" bind:value={editForm.tiempo_traslado} /></div>
 					<div class="field"><label>Comida</label><select class="input" bind:value={editForm.tiempo_comida}><option value="0">No</option><option value="1">Sí</option></select></div>
 				</div>

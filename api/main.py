@@ -3586,6 +3586,10 @@ def _fecha_hora(fecha, hora):
     if not hora:
         return None
     h = str(hora).strip()
+    # <input type="datetime-local"> manda "YYYY-MM-DDTHH:MM": ya trae la fecha,
+    # solo se cambia la 'T' por espacio (SQL Server lo prefiere así).
+    if "T" in h:
+        return h.replace("T", " ")
     if not fecha:
         return h
     partes = h.split(":")
