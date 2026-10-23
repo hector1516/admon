@@ -1,12 +1,11 @@
 {
   "app": "admon",
-  "version": "1.7.4",
+  "version": "1.8.0",
   "cambios": [
-    "🔔 Activa los avisos al teléfono desde Configuración y revisa en qué equipos están dados de alta.",
-    "🧪 Botón de aviso de prueba: te llega solo a ti, para comprobar que funciona.",
-    "🔒 Solo recibes avisos de los módulos que tienes abiertos.",
-    "🕘 Fuera del horario de oficina no suenan: se acumulan y salen juntos al día siguiente.",
-    "📣 El aviso de un reporte firmado ahora dice quién lo firmó.",
-    "🐛 «Enviar aviso push» ya llega a los equipos: antes buscaba en una tabla vacía."
+    "🏆 Legends se rediseñó en Admon: ranking semanal, temporada, racha y 20 logros.",
+    "💵 Ahora los puntos siguen el dinero: cotización pagada +15 a +75 según el subtotal, entregada +10, cliente nuevo cotizado +5 y cobranza +3.",
+    "📸 El reporte suma por fotos de evidencia y por cerrarse el mismo día del servicio.",
+    "⛔ Los vales sin comprobante, los reportes tardíos y el retrabajo restan puntos.",
+    "🧭 La pantalla quedó más limpia, con la regla económica y la guía de puntos a la vista."
   ]
 }

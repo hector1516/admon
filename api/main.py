@@ -7,6 +7,7 @@ from api.lugar import lugar_de
 from api import sat_helper
 from api import usuarios_foto as _foto_usuario
 from api import ficha_nfc as _ficha_nfc
+from api import legends_core as _legends_core
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 import pymssql
@@ -2175,11 +2176,20 @@ async def cotizacion_create(body: CotizacionCreate, current_user: dict = Depends
             conn.close()
             raise HTTPException(status_code=400, detail=f"El ID de cliente {idc} no existe.")
         folio = _db_create_quotation(cursor, idc, body.contacto, body.descripcion, current_user.get("nombre") or current_user.get("email"))
+        # ¿Es la primera cotización de este cliente? Se consulta antes del
+        # commit, con la fila recién insertada ya visible en la transacción.
+        cursor.execute(
+            "SELECT COUNT(*) FROM IndiceMateriales WHERE IdCliente = %s AND Folio <> %s",
+            (idc, int(folio)),
+        )
+        primera = int((cursor.fetchone() or [1])[0] or 0) == 0
         conn.commit()
         conn.close()
-        # Legends: +2 por cotización creada (idempotente por folio)
+        # Legends: +2 por cotización creada y +5 si es cliente nuevo.
         try:
             legends_registrar_metrica(current_user["id"], "cotizacion_creada", referencia_id=int(folio))
+            if primera:
+                legends_registrar_metrica(current_user["id"], "cliente_nuevo_cotizado", referencia_id=int(folio))
         except Exception:
             pass
         return {"folio": folio, "folio_fmt": _fmt_folio(folio)}
@@ -2200,24 +2210,52 @@ async def cotizacion_update(folio: int, body: CotizacionUpdate, current_user: di
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT IdCliente, Contacto, Descripcion, Color FROM IndiceMateriales WHERE Folio = %s", (int(folio),))
+        cursor.execute("SELECT IdCliente, Contacto, Descripcion, Color, Autor FROM IndiceMateriales WHERE Folio = %s", (int(folio),))
         cur_row = cursor.fetchone()
         if not cur_row:
             conn.close()
             raise HTTPException(status_code=404, detail="Cotización no encontrada")
         cur_color = int(cur_row[3] or 0)
+        autor = cur_row[4] or ""
         if cur_color in (1, 2):
             # Bloqueada: solo se permite transición de estatus, no editar datos
             if ((cur_row[0] or "") != idc or (cur_row[1] or "") != body.contacto.strip()
                     or (cur_row[2] or "") != body.descripcion.strip()):
                 conn.close()
                 raise HTTPException(status_code=400, detail="Cotización bloqueada (lista para facturar/facturada).")
+        nuevo_color = int(body.color)
         cursor.execute(
             "UPDATE IndiceMateriales SET IdCliente = %s, Contacto = %s, Descripcion = %s, Color = %s WHERE Folio = %s",
-            (idc, body.contacto.strip(), body.descripcion.strip(), int(body.color), int(folio)),
+            (idc, body.contacto.strip(), body.descripcion.strip(), nuevo_color, int(folio)),
         )
+        subtotal = 0.0
+        if nuevo_color == 2 and cur_color != 2:
+            subtotal = legends_subtotal_cotizacion(cursor, folio)
         conn.commit()
         conn.close()
+
+        # Legends: se premia la TRANSICIÓN, no cada edición. Si se marca
+        # PAGADA una cotización que ya lo estaba, no se vuelve a pagar.
+        try:
+            uid_autor = legends_usuario_por_nombre(autor)
+            if nuevo_color >= 1 and cur_color == 0 and uid_autor:
+                legends_registrar_metrica(uid_autor, "cotizacion_entregada", referencia_id=int(folio))
+            if nuevo_color == 2 and cur_color != 2:
+                pts = _legends_core.puntos_cotizacion_pagada(subtotal)
+                if uid_autor:
+                    legends_registrar_metrica(
+                        uid_autor, "cotizacion_pagada",
+                        referencia_id=int(folio), puntos_override=pts,
+                    )
+                # El que cobra también mueve dinero, pero solo si no es el
+                # mismo autor (evita duplicar el premio de la venta).
+                if current_user["id"] != uid_autor:
+                    legends_registrar_metrica(
+                        current_user["id"], "cobranza_registrada",
+                        referencia_id=int(folio),
+                    )
+        except Exception:
+            pass
         return {"ok": True}
     except HTTPException:
         raise
@@ -2459,6 +2497,13 @@ async def cotizacion_partida_add(folio: int, body: PartidaCreate, current_user: 
         if color in (1, 2):
             conn.close()
             raise HTTPException(status_code=400, detail="Cotización bloqueada.")
+        cursor.execute("SELECT COUNT(*) FROM Partidas WHERE Folio = %s", (int(folio),))
+        primera_partida = int((cursor.fetchone() or [1])[0] or 0) == 0
+        autor = ""
+        if primera_partida:
+            cursor.execute("SELECT Autor FROM IndiceMateriales WHERE Folio = %s", (int(folio),))
+            fila_autor = cursor.fetchone()
+            autor = (fila_autor[0] or "") if fila_autor else ""
         num = _db_add_partida(cursor, folio, body.cantidad, body.descripcion, body.precio_compra,
                               body.factor, body.proveedor, body.tiempo_entrega, body.dolar, body.flete,
                               body.articulo_generico)
@@ -2471,6 +2516,18 @@ async def cotizacion_partida_add(folio: int, body: PartidaCreate, current_user: 
             raise HTTPException(status_code=400, detail=str(e))
         conn.commit()
         conn.close()
+        # Legends: +2 por la primera partida (cotización completa). Se le
+        # acredita al autor de la cotización, no a quien la capturó.
+        if primera_partida:
+            try:
+                uid_autor = legends_usuario_por_nombre(autor)
+                if uid_autor:
+                    legends_registrar_metrica(
+                        uid_autor, "cotizacion_con_partidas",
+                        referencia_id=int(folio),
+                    )
+            except Exception:
+                pass
         return {"ok": True, "partida": num, "sat": sat}
     except HTTPException:
         raise
@@ -3734,12 +3791,27 @@ async def api_delete_reporte(id_reporte: int, current_user: dict = Depends(get_c
         conn = get_connection()
         cursor = conn.cursor()
         # Soft delete: marcar como eliminado en lugar de borrar
-        cursor.execute("SELECT Folio FROM ReportesServicio WHERE IdReporte = %s", (int(id_reporte),))
+        cursor.execute(
+            "SELECT Folio, Tecnico, Estatus, FirmaConformidad "
+            "FROM ReportesServicio WHERE IdReporte = %s",
+            (int(id_reporte),),
+        )
         row = cursor.fetchone()
         folio = row[0] if row else str(id_reporte)
+        tecnico = row[1] if row else ""
+        era_firmado = bool(row and (row[2] == "Firmado" or row[3]))
         cursor.execute("UPDATE ReportesServicio SET Eliminado = 1, FechaEliminado = GETDATE() WHERE IdReporte = %s", (int(id_reporte),))
         conn.commit()
         conn.close()
+        # Legends: -5 si se elimina un reporte ya firmado (retrabajo). Borrar
+        # un borrador no castiga; restaurarlo tampoco devuelve los puntos.
+        if era_firmado:
+            try:
+                uid = legends_usuario_por_nombre(tecnico)
+                if uid:
+                    legends_registrar_metrica(uid, "retrabajo", referencia_id=int(id_reporte))
+            except Exception:
+                pass
         return {"ok": True, "folio": folio, "message": "Movido a papelera"}
     except HTTPException:
         raise
@@ -3831,13 +3903,20 @@ async def api_save_fotos(id_reporte: int, body: ReporteFotosSave, current_user: 
                 raise HTTPException(status_code=400, detail=f"Foto {i + 1}: base64 inválido.")
         for i, foto_bytes in enumerate(fotos_bytes):
             cursor.execute("INSERT INTO ReportesServicioFotos (IdReporte, FotoComprimida, Orden) VALUES (%s, %s, %s)", (int(id_reporte), foto_bytes, i))
+        cursor.execute("SELECT Tecnico FROM ReportesServicio WHERE IdReporte = %s", (int(id_reporte),))
+        fila_tec = cursor.fetchone()
+        tecnico = (fila_tec[0] or "") if fila_tec else ""
+        ya_puntuado = legends_tiene_score_global(cursor, "reporte_fotos", int(id_reporte))
         conn.commit()
         conn.close()
         # Legends: +2 por evidencia fotográfica, 1× por reporte aunque se
-        # vuelvan a guardar las fotos (el endpoint reemplaza el set completo)
-        if body.fotos:
+        # vuelvan a guardar las fotos. El punto es del TÉCNICO del reporte,
+        # no de quien sube la foto desde la oficina.
+        if body.fotos and not ya_puntuado:
             try:
-                legends_registrar_metrica(current_user["id"], "reporte_fotos", referencia_id=int(id_reporte))
+                uid = legends_usuario_por_nombre(tecnico)
+                if uid:
+                    legends_registrar_metrica(uid, "reporte_fotos", referencia_id=int(id_reporte))
             except Exception:
                 pass
         return {"ok": True, "guardadas": len(body.fotos)}
@@ -3904,13 +3983,15 @@ async def api_save_firma(id_reporte: int, body: ReporteSignatureSave, current_us
         cursor = conn.cursor()
         cursor.execute("UPDATE ReportesServicio SET FirmaConformidad = %s, Estatus = 'Firmado' WHERE IdReporte = %s", (body.signature_base64, int(id_reporte)))
         conn.commit()
-        cursor.execute("SELECT Folio FROM ReportesServicio WHERE IdReporte = %s", (int(id_reporte),))
+        cursor.execute("SELECT Folio, Tecnico FROM ReportesServicio WHERE IdReporte = %s", (int(id_reporte),))
         row = cursor.fetchone()
         conn.close()
-        # Legends: mismos puntos que Field al firmar (+10 al firmante y
-        # horas de servicio a los participantes; idempotente por ReferenciaId)
+        # Legends: +10 al TÉCNICO del reporte (no a quien captura la firma
+        # desde la oficina) + horas de servicio a los participantes.
         try:
-            legends_registrar_metrica(current_user["id"], "reporte_firmado", referencia_id=int(id_reporte))
+            uid_tec = legends_usuario_por_nombre(row[1] if row else "")
+            if uid_tec:
+                legends_registrar_metrica(uid_tec, "reporte_firmado", referencia_id=int(id_reporte))
         except Exception:
             pass
         try:
@@ -4864,7 +4945,7 @@ async def passkey_delete(pid: int, current_user: dict = Depends(get_current_user
 # Sistema gamificado de puntos/ranking sobre las MISMAS tablas compartidas:
 #   HUB_UserScores (semanal+total+nivel+racha), HUB_ScoreLog (bitácora),
 #   HUB_UserAvatars, HUB_WeeklyWinners, HUB_Users.Nickname + HUB_Passkeys.
-# El cron semanal (ganador + reset domingo 3 AM) y el audit cada 5 min los
+# El cron semanal (ganador del domingo 03:00, sin reset) y el audit cada 5 min los
 # ejecuta el contenedor `workersadmon` (programas legends_cron y legends_audit;
 # migración del 2026-09-26 — antes eran programs del supervisord de Field) sobre
 # la misma BD; aquí solo exponemos los endpoints de lectura, /award y el cálculo
@@ -4874,61 +4955,46 @@ async def passkey_delete(pid: int, current_user: dict = Depends(get_current_user
 # push adaptado al esquema de Admon (HUB_PushSubscriptions.UserEmail +
 # VAPID en HUB_PushConfig), y conexiones siempre cerradas.
 
-LEGENDS_METRICAS = {
-    "reporte_firmado":  10,
-    "kilometro":         5,
-    "ticket_oxxogas":    3,
-    "vale_generado":    -2,
-    "comida_reporte":   -1,
-    "firma_remota":      8,
-    "servicio":          0,  # Calculado dinámicamente por legends_registrar_puntos_servicio
-    "racha_dia":         3,
-    # ── Métricas propias de Admon (oficina) ──
-    "cotizacion_enviada":  6,   # Envío real por correo (1× por folio)
-    "cliente_alta":        4,   # Alta de cliente nuevo
-    "reporte_creado":      3,   # Registro de reporte de servicio
-    "reporte_fotos":       2,   # Evidencia fotográfica (1× por reporte)
-    "cotizacion_creada":   2,   # Cotización creada desde cero
-}
+LEGENDS_METRICAS = dict(_legends_core.METRICAS)
 
-LEGENDS_NIVELES = [
-    ("Diamante", 3500),
-    ("Oro",      1500),
-    ("Plata",     500),
-    ("Bronce",      0),
-]
+LEGENDS_NIVELES = [(n["nombre"], n["min"]) for n in reversed(_legends_core.NIVELES)]
 
-LEGENDS_ICONO = {
-    "Diamante": "💎",
-    "Oro":      "🥇",
-    "Plata":    "🥈",
-    "Bronce":   "🥉",
-}
+LEGENDS_ICONO = {n["nombre"]: n["icono"] for n in _legends_core.NIVELES}
 
 # Descripciones legibles de las métricas (para /score-log)
 LEGENDS_METRICA_DESC = {
     "reporte_firmado":  ("Reporte firmado", "✍️", 10),
-    "kilometro":        ("Kilómetros registrados", "⛽", 5),
+    "kilometro":        ("Kilómetros registrados", "⛽", 4),
     "ticket_oxxogas":   ("Ticket OxxoGas", "🎫", 3),
-    "vale_generado":    ("Vale generado", "💰", -2),
+    "vale_generado":    ("Vale generado", "💰", -1),
     "comida_reporte":   ("Hora de comida en reporte", "🍽️", -1),
-    "firma_remota":     ("Firma remota de reporte", "📱", 8),
+    "firma_remota":     ("Firma remota de reporte", "📱", 6),
     "servicio":         ("Servicio registrado", "🔧", 0),
-    "racha_dia":        ("Racha diaria activa", "🔥", 3),
-    "cotizacion_enviada": ("Cotización enviada", "📤", 6),
+    "racha_dia":        ("Racha diaria activa", "🔥", 2),
+    "logro":            ("Logro desbloqueado", "🏅", 0),
+    "cotizacion_enviada": ("Cotización enviada", "📤", 5),
     "cliente_alta":     ("Cliente nuevo registrado", "📇", 4),
     "reporte_creado":   ("Reporte de servicio registrado", "🗂️", 3),
     "reporte_fotos":    ("Fotos de evidencia subidas", "📸", 2),
     "cotizacion_creada": ("Cotización creada", "🧾", 2),
+    # Métricas económicas (2026-10-23)
+    "cliente_nuevo_cotizado": ("Cliente nuevo cotizado", "🎯", 5),
+    "cotizacion_con_partidas": ("Cotización con partidas", "📋", 2),
+    "cotizacion_entregada": ("Cotización entregada", "🤝", 10),
+    # El valor real es dinámico (+15 a +75 según subtotal); 15 es la base.
+    "cotizacion_pagada": ("Cotización pagada", "💵", 15),
+    "cobranza_registrada": ("Cobranza registrada", "🏦", 3),
+    "reporte_mismo_dia": ("Reporte cerrado el mismo día", "📅", 3),
+    "vale_con_comprobante": ("Vale con comprobante", "🧾", 2),
+    "vale_sin_comprobante": ("Vale sin comprobante", "🚫", -2),
+    "reporte_tardio": ("Reporte tardío", "⏰", -2),
+    "retrabajo": ("Retrabajo de reporte", "🔁", -5),
 }
 
 
 def legends_calcular_nivel(puntos: int) -> str:
-    """Nivel gamificado según puntuación total acumulada."""
-    for nombre, min_pts in LEGENDS_NIVELES:
-        if puntos >= min_pts:
-            return nombre
-    return "Bronce"
+    """Nivel de temporada para esos puntos (Bronce → Leyenda)."""
+    return _legends_core.nivel_de(puntos)["nombre"]
 
 
 def legends_push_all(title: str, body: str):
@@ -5064,41 +5130,69 @@ def legends_usuario_pasado(user_id: int, old_pos: int) -> Optional[int]:
         conn.close()
 
 
+def legends_usuario_por_nombre(nombre: str) -> Optional[int]:
+    """Id del usuario activo con ese nombre (mismo criterio que Field)."""
+    if not nombre:
+        return None
+    try:
+        conn = get_connection()
+        try:
+            cursor = conn.cursor(as_dict=True)
+            cursor.execute(
+                "SELECT TOP 1 Id FROM HUB_Users "
+                "WHERE LTRIM(RTRIM(Nombre)) = LTRIM(RTRIM(%s)) AND Activo = 1 "
+                "ORDER BY Id",
+                (nombre,),
+            )
+            row = cursor.fetchone()
+            return int(row["Id"]) if row else None
+        finally:
+            conn.close()
+    except Exception:
+        return None
+
+
+def legends_subtotal_cotizacion(cursor, folio: int) -> float:
+    """Subtotal SIN IVA de una cotización: material con factor + flete."""
+    cursor.execute(
+        "SELECT ISNULL(SUM(ISNULL(Cantidad, 0) * ISNULL(PrecioCompraUnitario, 0) "
+        "* (1 + ISNULL(Factor, 0)) + ISNULL(Flete, 0)), 0) AS total "
+        "FROM Partidas WHERE Folio = %s",
+        (int(folio),),
+    )
+    row = cursor.fetchone()
+    return float(row[0] or 0) if row else 0.0
+
+
+def legends_tiene_score_global(cursor, metrica: str, referencia_id: int) -> bool:
+    """¿Ya existe el score para esa entidad, sin importar el usuario?
+
+    Se usa para `reporte_fotos`: el punto es del reporte, no de quien subió la
+    foto. Sin esto, Admon y Field pueden premiar el mismo reporte dos veces
+    (una por el oficinista y otra por el técnico).
+    """
+    cursor.execute(
+        "SELECT TOP 1 1 AS existe FROM HUB_ScoreLog "
+        "WHERE Metrica = %s AND ReferenciaId = %s",
+        (metrica, int(referencia_id)),
+    )
+    return cursor.fetchone() is not None
+
+
 def legends_registrar_metrica(id_usuario: int, metrica: str, referencia_id: int = None, puntos_override: int = None):
-    """Registra una métrica y actualiza la puntuación del usuario.
-    Solo otorga puntos si el usuario tiene passkey (nickname).
-    Detecta cambios de nivel y ranking para notificar. Port exacto de
-    Field `_registrar_metrica` (idempotencia por ReferenciaId incluida)."""
+    """Registra una métrica y recalcula la fila del usuario.
+
+    Usa el motor compartido `legends_core`: los puntos se recalculan desde
+    `HUB_ScoreLog` (no se suman a mano) y el nivel es el de la temporada.
+    Solo otorga puntos si el usuario tiene passkey + nickname.
+    """
     if metrica not in LEGENDS_METRICAS and puntos_override is None:
         return
     puntos = puntos_override if puntos_override is not None else LEGENDS_METRICAS[metrica]
 
-    # Idempotencia: métricas con ReferenciaId = entidad única no deben repetirse.
-    # 'kilometro' excluido: su ReferenciaId es el vehículo, no el registro de km.
-    _idempotent = {
-        "reporte_firmado", "ticket_oxxogas", "vale_generado",
-        "comida_reporte", "servicio", "firma_remota",
-        # Admon: reenviar cotización, reintentar insert o volver a guardar
-        # las fotos del MISMO reporte no debe volver a sumar.
-        "cotizacion_enviada", "cotizacion_creada", "reporte_creado", "reporte_fotos",
-    }
-    if metrica in _idempotent and referencia_id is not None:
-        conn0 = get_connection()
-        try:
-            with conn0.cursor() as cur0:
-                cur0.execute(
-                    "SELECT 1 AS existe FROM HUB_ScoreLog WHERE IdUsuario=%s AND Metrica=%s AND ReferenciaId=%s",
-                    (id_usuario, metrica, referencia_id),
-                )
-                if cur0.fetchone():
-                    return
-        finally:
-            conn0.close()
-
-    old_level = None
-    old_pos = None
-    new_level = None
-    nueva_semanal = 0
+    old_level = "Bronce"
+    old_pos = 999
+    new_level = "Bronce"
 
     conn = get_connection()
     try:
@@ -5113,52 +5207,40 @@ def legends_registrar_metrica(id_usuario: int, metrica: str, referencia_id: int 
             if not cur.fetchone():
                 return
 
-            # Capturar estado ANTES del update
-            cur.execute("SELECT PuntuacionSemanal, PuntuacionTotal, Nivel FROM HUB_UserScores WHERE IdUsuario = %s", (id_usuario,))
-            row = cur.fetchone()
-            old_level = row["Nivel"] if row else "Bronce"
-            old_weekly = row["PuntuacionSemanal"] if row else 0
-            old_total = row["PuntuacionTotal"] if row else 0
-
-            # Posición anterior
-            cur.execute("""
-                SELECT COUNT(*) AS total FROM HUB_UserScores s
-                JOIN HUB_Users u ON s.IdUsuario = u.Id
-                WHERE u.Activo = 1 AND s.PuntuacionSemanal > %s
-            """, (old_weekly,))
-            old_pos = (cur.fetchone()["total"] + 1) if row else 999
-
-            # Insertar log (re-chequeo dentro de la misma conexión por si hubo carrera)
-            if metrica in _idempotent and referencia_id is not None:
+            # Idempotencia por (usuario, métrica, referencia). Vale para todas
+            # las métricas con referencia, incluida `kilometro` (que ahora usa
+            # el Id del registro, no el del vehículo).
+            if referencia_id is not None:
                 cur.execute(
-                    "SELECT 1 AS existe FROM HUB_ScoreLog WHERE IdUsuario=%s AND Metrica=%s AND ReferenciaId=%s",
+                    "SELECT TOP 1 1 AS existe FROM HUB_ScoreLog "
+                    "WHERE IdUsuario=%s AND Metrica=%s AND ReferenciaId=%s",
                     (id_usuario, metrica, referencia_id),
                 )
                 if cur.fetchone():
                     return
+
             cur.execute(
-                "INSERT INTO HUB_ScoreLog (IdUsuario, Metrica, Puntos, ReferenciaId) VALUES (%s, %s, %s, %s)",
-                (id_usuario, metrica, puntos, referencia_id)
+                "SELECT PuntuacionSemanal, PuntuacionTotal, Nivel "
+                "FROM HUB_UserScores WHERE IdUsuario = %s",
+                (id_usuario,),
+            )
+            row = cur.fetchone()
+            old_level = row["Nivel"] if row else "Bronce"
+            old_pos = next(
+                (u["posicion"] for u in _legends_core.ranking(cur, id_usuario)
+                 if u["id_usuario"] == int(id_usuario)),
+                999,
             )
 
-            # Actualizar score
-            if row:
-                nueva_semanal = old_weekly + puntos
-                nueva_total = old_total + puntos
-                new_level = legends_calcular_nivel(nueva_total)
-                cur.execute(
-                    "UPDATE HUB_UserScores SET PuntuacionSemanal = %s, PuntuacionTotal = %s, Nivel = %s, UltimoActivo = GETDATE(), FechaCalculo = GETDATE() WHERE IdUsuario = %s",
-                    (nueva_semanal, nueva_total, new_level, id_usuario)
-                )
-            else:
-                nueva_semanal = max(puntos, 0)
-                nueva_total = max(puntos, 0)
-                new_level = legends_calcular_nivel(nueva_total)
-                cur.execute(
-                    "INSERT INTO HUB_UserScores (IdUsuario, PuntuacionSemanal, PuntuacionTotal, Nivel, UltimoActivo) VALUES (%s, %s, %s, %s, GETDATE())",
-                    (id_usuario, nueva_semanal, nueva_total, new_level)
-                )
+            cur.execute(
+                "INSERT INTO HUB_ScoreLog (IdUsuario, Metrica, Puntos, ReferenciaId) "
+                "VALUES (%s, %s, %s, %s)",
+                (id_usuario, metrica, puntos, referencia_id),
+            )
 
+            stats = _legends_core.stats_usuario(cur, id_usuario)
+            _legends_core.guardar_scores(cur, id_usuario, stats)
+            new_level = stats["nivel"]
             conn.commit()
     finally:
         conn.close()
@@ -5195,24 +5277,43 @@ def legends_registrar_puntos_servicio(id_reporte: int):
         try:
             with conn.cursor(as_dict=True) as cur:
                 cur.execute("""
-                    SELECT IdReporte, Tecnico, FechaHoraInicio, FechaHoraFin,
+                    SELECT IdReporte, Tecnico, Fecha, FechaHoraInicio, FechaHoraFin,
                            TiempoTraslado, TiempoComida, Estatus
                     FROM ReportesServicio WHERE IdReporte = %s
                 """, (id_reporte,))
                 reporte = cur.fetchone()
                 if not reporte or reporte['Estatus'] != 'Firmado':
                     return 0
+
+                # Buscar IdUsuario del técnico principal (el premio es suyo,
+                # no de quien capture la firma desde la oficina).
+                cur.execute(
+                    "SELECT TOP 1 Id FROM HUB_Users "
+                    "WHERE LTRIM(RTRIM(Nombre)) = LTRIM(RTRIM(%s)) AND Activo = 1 "
+                    "ORDER BY Id",
+                    (reporte['Tecnico'],),
+                )
+                u = cur.fetchone()
+                uid_tec = int(u['Id']) if u else None
+
+                # +10 por reporte firmado, aunque falten las horas.
+                if uid_tec:
+                    legends_registrar_metrica(uid_tec, 'reporte_firmado', referencia_id=id_reporte)
+
+                # Calidad del cierre: mismo día (+3) o tardío (−2).
+                fin = reporte.get('FechaHoraFin')
+                fecha = reporte.get('Fecha')
+                if uid_tec and fin and fecha:
+                    fecha_dia = fecha.date() if hasattr(fecha, 'date') else fecha
+                    fin_dia = fin.date() if hasattr(fin, 'date') else fin
+                    if fin_dia == fecha_dia:
+                        legends_registrar_metrica(uid_tec, 'reporte_mismo_dia', referencia_id=id_reporte)
+                    inicio_dia = datetime.combine(fecha_dia, datetime.min.time())
+                    if (fin - inicio_dia).total_seconds() > 48 * 3600:
+                        legends_registrar_metrica(uid_tec, 'reporte_tardio', referencia_id=id_reporte)
+
                 if not reporte['FechaHoraInicio'] or not reporte['FechaHoraFin']:
                     return 0
-
-                # Otorgar +10 por reporte_firmado si no existe en ScoreLog
-                cur.execute("SELECT 1 AS existe FROM HUB_ScoreLog WHERE ReferenciaId = %s AND Metrica = 'reporte_firmado'", (id_reporte,))
-                if not cur.fetchone():
-                    # Buscar IdUsuario del técnico principal
-                    cur.execute("SELECT Id FROM HUB_Users WHERE Nombre = %s AND Activo = 1", (reporte['Tecnico'],))
-                    u = cur.fetchone()
-                    if u:
-                        legends_registrar_metrica(u['Id'], 'reporte_firmado', referencia_id=id_reporte)
 
                 horas_totales = (reporte['FechaHoraFin'] - reporte['FechaHoraInicio']).total_seconds() / 3600.0
                 if horas_totales <= 0:
@@ -5258,6 +5359,49 @@ def legends_registrar_puntos_servicio(id_reporte: int):
 
 # --- Legends endpoints ---
 
+@app.get("/api/legends/overview")
+async def legends_overview(current_user: dict = Depends(get_current_user)):
+    """Todo lo que pinta la pantalla de Legends en una sola llamada.
+
+    Contrato compartido con Field (`legends_core.overview`): usuario, ranking,
+    semana, temporada, ganador anterior, logros, historial y guía de puntos.
+    Los avatares se piden recortados a 128 px: el base64 crudo pesa 150-310 KB
+    por usuario y antes hacía que el ranking tardara segundos.
+    """
+    conn = get_connection()
+    try:
+        with conn.cursor(as_dict=True) as cur:
+            data = _legends_core.overview(cur, current_user["id"])
+            ids = [data["usuario"]["id_usuario"]] + [r["id_usuario"] for r in data["ranking"]]
+            if data.get("ganador_semana"):
+                ids.append(data["ganador_semana"]["id_usuario"])
+            ids = sorted({int(i) for i in ids if i})
+            urls = {}
+            if ids:
+                marcas = ",".join(str(i) for i in ids)
+                cur.execute(
+                    f"SELECT IdUsuario, LEN(AvatarBase64) AS AvatarLen, AvatarUrl "
+                    f"FROM HUB_UserAvatars WHERE IdUsuario IN ({marcas})"
+                )
+                for r in cur.fetchall():
+                    _THUMBS_LEN[int(r["IdUsuario"])] = int(r["AvatarLen"] or 0)
+                    urls[int(r["IdUsuario"])] = r.get("AvatarUrl")
+
+        thumbs = _avatares_miniatura(conn, ids) if ids else {}
+
+        def _avatar(uid):
+            return thumbs.get(int(uid)) or urls.get(int(uid))
+
+        data["usuario"]["avatar"] = _avatar(data["usuario"]["id_usuario"])
+        for r in data["ranking"]:
+            r["avatar"] = _avatar(r["id_usuario"])
+        if data.get("ganador_semana"):
+            data["ganador_semana"]["avatar"] = _avatar(data["ganador_semana"]["id_usuario"])
+        return data
+    finally:
+        conn.close()
+
+
 @app.get("/api/legends/score")
 async def legends_score(current_user: dict = Depends(get_current_user)):
     """Puntuación del usuario actual (semanal + total + nivel + racha)."""
@@ -5300,7 +5444,8 @@ async def legends_score(current_user: dict = Depends(get_current_user)):
 async def legends_score_log(current_user: dict = Depends(get_current_user)):
     """Bitácora semanal de puntos del usuario actual.
     Muestra cada evento que sumó o restó puntos esta semana.
-    Se resetea cada domingo 3 AM igual que los puntos."""
+    La semana cambia el domingo 00:00; los puntos se reconstruyen desde
+    HUB_ScoreLog, no se resetean a mano."""
     import datetime as _dt
     # Domingo 00:00 en HORA MÉXICO. El contenedor corre en UTC y con
     # date.today() la semana empezaba el sábado 18:00 hora México, dejando la
@@ -5350,7 +5495,7 @@ async def legends_score_log(current_user: dict = Depends(get_current_user)):
             "semana_inicio": sunday.isoformat(),
             "total_semana": total_semana,
             "eventos": result,
-            "cron_info": "Los puntos se sincronizan en tiempo real. El ranking se calcula cada domingo a las 3:00 AM y los puntos se resetean.",
+            "cron_info": "La semana cierra el domingo 00:00 (hora México). El ganador se publica a las 03:00. Los puntos se reconstruyen cada 5 minutos; la temporada y los logros no se resetean.",
         }
     finally:
         conn.close()
@@ -5568,78 +5713,53 @@ async def legends_celebrations(current_user: dict = Depends(get_current_user)):
 
 @app.get("/api/legends/metrics/config")
 async def legends_metrics_config():
-    """Configuración actual de métricas y puntos (pública dentro de la API)."""
+    """Catálogo de puntos, niveles, logros y guía (para la UI)."""
     return {
         "nombre_puntos": "ECCSA Points",
         "metricas": LEGENDS_METRICAS,
-        "niveles": {n: p for n, p in LEGENDS_NIVELES},
-        "iconos": LEGENDS_ICONO,
+        "niveles": {n["nombre"]: n["min"] for n in _legends_core.NIVELES},
+        "iconos": {n["nombre"]: n["icono"] for n in _legends_core.NIVELES},
+        "guia": _legends_core.guia(),
+        "logros": _legends_core.LOGROS,
+        "temporada": {
+            k: v for k, v in _legends_core.temporada_actual().items()
+            if k not in ("inicio_dt", "fin_dt_exclusivo")
+        },
     }
 
 
 @app.post("/api/legends/cron/weekly-calculate")
 async def legends_weekly_calculate():
-    """Calcula ganador de la semana anterior, guarda historial, resetea puntos semanales.
-    En producción lo ejecuta el worker legends_cron de Field (domingo 3 AM);
-    este endpoint permite el cálculo manual. Idempotente por FechaInicio/FechaFin."""
-    import pytz
-    from datetime import datetime, timedelta
+    """Cierra la semana anterior y rellena el historial. NO resetea puntos.
 
-    mexico_tz = pytz.timezone("America/Mexico_City")
-    ahora = datetime.now(mexico_tz)
-    fin = ahora - timedelta(days=(ahora.weekday() + 1) % 7)
-    inicio = fin - timedelta(days=7)
-
-    print(f"[LEGENDS CRON] Calculando ganador: {inicio.date()} al {fin.date()}", flush=True)
-
+    En producción lo ejecuta el worker `legends_cron` (domingo 03:00, hora
+    México). `PuntuacionSemanal` la reconstruye `legends_audit` desde
+    `HUB_ScoreLog`: el reset de las 3 AM borraba los puntos que la gente ya
+    había ganado desde la medianoche del domingo.
+    """
     conn = get_connection()
     try:
         with conn.cursor(as_dict=True) as cur:
-            # Usuario con más puntos semanales
-            cur.execute("""
-                SELECT TOP 1 IdUsuario, PuntuacionSemanal
-                FROM HUB_UserScores
-                WHERE PuntuacionSemanal > 0
-                ORDER BY PuntuacionSemanal DESC
-            """)
-            winner = cur.fetchone()
-
-            if not winner:
-                print("[LEGENDS CRON] Sin actividad en la semana.", flush=True)
-                return {"ok": False, "detail": "Sin actividad"}
-
-            # Verificar si ya existe registro (idempotencia)
-            cur.execute(
-                "SELECT Id FROM HUB_WeeklyWinners WHERE FechaInicio = %s AND FechaFin = %s",
-                (inicio.date(), fin.date())
+            inicio, fin = _legends_core.semana_anterior_mx()
+            ganador = _legends_core.guardar_ganador(
+                cur, inicio, fin, conn=conn, notificar=False
             )
-            if cur.fetchone():
-                print("[LEGENDS CRON] Ya existe ganador para esta semana.", flush=True)
-                return {"ok": False, "detail": "Ya calculado"}
-
-            # Guardar ganador
-            cur.execute(
-                "INSERT INTO HUB_WeeklyWinners (IdUsuario, PuntuacionSemana, FechaInicio, FechaFin) VALUES (%s, %s, %s, %s)",
-                (winner["IdUsuario"], winner["PuntuacionSemanal"], inicio.date(), fin.date())
+            nuevos = _legends_core.backfill_ganadores(
+                cur, conn=conn, notificar=False
             )
-
-            # Resetear puntos semanales de TODOS
-            cur.execute("UPDATE HUB_UserScores SET PuntuacionSemanal = 0")
-            conn.commit()
-
-            cur.execute("SELECT Nombre FROM HUB_Users WHERE Id = %s", (winner["IdUsuario"],))
-            u = cur.fetchone()
-            nombre = u["Nombre"] if u else "Desconocido"
-            print(f"[LEGENDS CRON] Ganador: {nombre} con {winner['PuntuacionSemanal']} ECCSA Points", flush=True)
-
-        # Notificar a todos (fuera del cursor; best-effort)
-        legends_notify_weekly_winner(winner["IdUsuario"], winner["PuntuacionSemanal"])
-
+        if not ganador:
+            return {
+                "ok": False,
+                "detail": "La semana anterior ya estaba guardada o no tuvo actividad.",
+                "backfill": len(nuevos),
+            }
+        legends_notify_weekly_winner(ganador["id_usuario"], ganador["puntos"])
         return {
             "ok": True,
-            "ganador": nombre,
-            "puntos": winner["PuntuacionSemanal"],
-            "semana": f"{inicio.date()} al {fin.date()}",
+            "ganador": legends_get_display_name(ganador["id_usuario"]),
+            "puntos": ganador["puntos"],
+            "semana": f"{ganador['fecha_inicio']} al {ganador['fecha_fin']}",
+            "backfill": len(nuevos),
         }
     finally:
         conn.close()

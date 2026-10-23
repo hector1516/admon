@@ -3,6 +3,32 @@
 > App de administración ECCSA (`AdmonApp`). Versión y novedades visibles para
 > el usuario en `public/changelog.json` y en el popup 📋 del shell.
 
+## [1.8.0] - 2026-10-23
+
+### Nuevo
+- **ECCSA Legends rediseñado en Admon**: la misma experiencia que Field, con
+  ranking semanal, temporada trimestral, racha, nivel y 20 logros. La pantalla
+  usa `/api/legends/overview` y ya no tiene partículas ni canvas.
+- **Puntos por dinero**: cotización pagada +15 a +75 según el subtotal sin IVA,
+  entregada +10, cliente nuevo cotizado +5, primeras partidas +2, cobranza +3,
+  fotos de evidencia +2 y cierre el mismo día +3.
+- **Castigos**: vale sin comprobante −2, reporte tardío −2 y retrabajo −5.
+  Los vales solo se castigan en la semana actual.
+- **Logros de dinero**: Primer cliente, Cazador de clientes, Primer pago,
+  Cerrador, Evidencia, Mismo día y Vale limpio.
+
+### Cambiado
+- **La cotización pagada se premia por transición** a `Color=2`, no por estado,
+  y el auditor solo revisa cotizaciones de la semana actual.
+- **El reporte suma para el técnico**, no para quien sube la foto: el punto de
+  fotos se protege globalmente y se registra una sola vez.
+- **El borrado de un reporte firmado** ahora genera retrabajo −5.
+
+### Base de datos
+- **Migración `0046_legends_rediseno.sql`**: agrega `RachaMax`, `SemanaKey`,
+  `HUB_UserLogros` y los índices de idempotencia. Ya aplicada y validada en
+  `ECCSA_Admon_Pruebas`; en producción requiere aprobación explícita.
+
 ## [1.7.4] - 2026-10-06
 
 ### Agregado
