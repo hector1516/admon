@@ -1,11 +1,19 @@
 # Deploy de la app Admon (FastAPI + Svelte)
 
+> ⚠️ **Documento LEGACY en su mayor parte.** La imagen ya no es `hub-admon:latest`:
+> se construye en `ubuntu-latest` y se publica como
+> **`ghcr.io/hector1516/admon`**. El deploy vigente está en `ReglasUpdateAdmon.md`
+> (CI → ghcr.io → Arcane → *Updates → Update*). Lo de `run_app.sh`, los tags
+> `hub-admon:*` y el "flujo canónico" de abajo solo aplican a una instalación
+> fuera de Arcane.
+
 Runbook de despliegue de `admon` (la PWA en `admon.ecc-sa.com.mx`). Repo: **hector1516/AdmonApp**
 (no confundir con `hector1516/Admon`, que es el HUB de Streamlit).
 
 ## Topología
 
-- Contenedor `admon` → imagen `hub-admon:latest`, puerto host `8103` → `8000` interno.
+- Contenedor `admon` → imagen **`ghcr.io/hector1516/admon:latest`** (legacy:
+  `hub-admon:latest`), puerto host `8103` → `8000` interno.
 - Servidor: **WebbApps, Debian, `10.188.141.17`** (el ServerVM `10.188.141.31` ya no publica la app).
 - Config del contenedor: **`/opt/apps/admon/app.conf`** en el servidor, aplicada con
   `/opt/apps/_lib/run_app.sh`. Secretos en `/etc/admon.env` (root, 600). Nada de eso está en el repo.
@@ -92,8 +100,8 @@ archivos** cambió:
 
 | Modo | Cuándo | Qué hace | Tiempo |
 |---|---|---|---|
-| **hotsync** | No cambió `Dockerfile`, `requirements.txt` ni `api/requirements.txt` | Compila el frontend en un `node:20-alpine` **descartable** y copia `dist/` + `api/` al contenedor que ya corre, y lo reinicia (`deploy/hotsync-linux.sh`) | ~2 min |
-| **rebuild** | Cambió alguno de esos | `docker build` de `hub-admon:latest` y recreación del contenedor con `/opt/apps/_lib/run_app.sh` (`deploy/rebuild-linux.sh`) | ~4 min |
+| **hotsync** | No cambió `Dockerfile`, `requirements.txt` ni `api/requirements.txt` | **Con Arcane como dueño delega en rebuild y no toca el contenedor.** En legacy compila el frontend en un `node:20-alpine` descartable, copia `dist/` + `api/` al contenedor que corre y lo reinicia (`deploy/hotsync-linux.sh`) | ~2 min |
+| **rebuild** | Cambió alguno de esos | Baja de `ghcr.io/hector1516/admon` la imagen que publicó `build-image`; **no compila y no recrea** si el contenedor es un Project de Arcane. En legacy hace `docker build` y recrea con `run_app.sh` (`deploy/rebuild-linux.sh`) | ~1 min |
 
 El hotsync **no reconstruye la imagen**: por eso compila dentro de un
 contenedor y no en el host (WebbApps no tiene node).

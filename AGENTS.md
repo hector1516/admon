@@ -73,40 +73,57 @@ Al sacar una versión, en este orden:
 ## Deploy
 
 La app vive en **WebbApps** (`10.188.141.17`, Debian): contenedor `admon`,
-imagen `hub-admon:latest`, puerto host `8103` → `8000` interno. Ya NO se
-despliega en el ServerVM (10.188.141.31); ese pipeline quedó como un éxito
-falso, porque GitHub reportaba `success` y la app no cambiaba.
+imagen **`ghcr.io/hector1516/admon:latest`**, puerto host `8103` → `8000`
+interno. Ya NO se despliega en el ServerVM (10.188.141.31); ese pipeline quedó
+como un éxito falso, porque GitHub reportaba `success` y la app no cambiaba.
 
-`deploy.yml` dispara en cada push a `master`:
+**El estándar es el de las 6 apps:** build en `ubuntu-latest` → `ghcr.io` →
+Arcane ve el digest → el operador da `Update`. Ver `ReglasUpdateAdmon.md`.
 
-1. El **gate** corre en `ubuntu-latest` (bash): compara contra el push anterior
-   con la API de GitHub y decide el modo. Que no dependa del runner es
-   deliberado: si el gate necesita un runner, no puede avisar que falta.
-2. El **deploy** corre en el runner `WebbApps-Runner` (Linux, etiqueta
-   `admon-deploy`, servicio systemd `actions-runner-admonapp`). Se pide esa
-   etiqueta y no `self-hosted` porque en este repo todavía hay un runner
-   Windows registrado y con `self-hosted` el job caería ahí.
+`deploy.yml` dispara en cada push a `master` y tiene cuatro jobs:
+
+1. **desbloquear** (`ubuntu-latest`): cancela deploys atascados más de 10 min.
+2. **gate** (`ubuntu-latest`): compara contra el push anterior con la API de
+   GitHub y decide el modo. Que no dependa del runner es deliberado: si el gate
+   necesita un runner, no puede avisar que falta.
+3. **build-image** (`ubuntu-latest`): construye y publica en
+   `ghcr.io/hector1516/admon` (`:latest` + `:<sha>`). **Acá se compila.**
+4. **deploy** (runner `WebbApps-Runner`, Linux, etiqueta `admon-deploy`, servicio
+   systemd `actions-runner-admonapp`): solo baja la imagen. Se pide esa etiqueta y
+   no `self-hosted` porque en este repo todavía hay un runner Windows registrado
+   y con `self-hosted` el job caería ahí.
 
 Modos:
 
-- **hotsync** — no cambió nada de la imagen: compila el frontend en un
-  contenedor `node:20-alpine` descartable y copia `dist/` y `api/` al
-  contenedor que ya corre, luego lo reinicia. ~2 min.
-  `deploy/hotsync-linux.sh` (tiene `--dry-run`).
+- **hotsync** — no cambió nada de la imagen. **Si Arcane es el dueño, no aplica:
+  delega en rebuild**, porque lo que se copia al contenedor se pierde en el
+  siguiente `Update` de Arcane. Solo en una instalación legacy compila el
+  frontend en un contenedor `node:20-alpine` y copia `dist/` y `api/` al
+  contenedor que ya corre. ~2 min. `deploy/hotsync-linux.sh` (tiene `--dry-run`).
 - **rebuild** — cambió `Dockerfile`, `requirements.txt` o `api/requirements.txt`:
-  compila el front, arma el contexto, `docker build` y recrea el contenedor con
-  `/opt/apps/_lib/run_app.sh`. ~4 min. `deploy/rebuild-linux.sh`.
+  **no compila acá**, baja la imagen que ya publicó `build-image` desde
+  `ghcr.io` y se detiene. El `docker build` en el servidor se quitó: competía por
+  RAM con producción. ~1 min. `deploy/rebuild-linux.sh`.
 
-**El host no tiene node instalado**: por eso el build del frontend va dentro
-de un contenedor, no en el host. El contenedor node corre con el usuario del
+**Arcane es el dueño del contenedor.** Los dos scripts consultan la etiqueta
+`com.docker.compose.project`; si está, imprimen
+`ATENCION: 'admon' lo administra Arcane` y **no recrean nada**. Solo en una
+instalación legacy (sin esa etiqueta) se recurre a `run_app.sh`. Si alguien
+recrea el contenedor a mano, el Project queda sin contenedor y Arcane **deja de
+marcar actualizaciones**.
+
+**El host no tiene node instalado**: en el camino legacy, por eso el build del
+frontend va dentro de un contenedor. El contenedor node corre con el usuario del
 runner (`--user`), porque como root dejaba archivos que el runner no podía
 borrar y la limpieza fallaba.
 
 La configuración del contenedor (puertos, red, credenciales) **no está en este
-repo**: sale de `/opt/apps/admon/app.conf` en el servidor y la aplica
-`/opt/apps/_lib/run_app.sh`. El env con secretos está en `/etc/admon.env`
-(root, 600). El runner tiene sudo sin password solo para `run_app.sh`,
-`verify_app.sh` y el helper `admon-set-secret`: nunca para leer el env.
+repo**. Con Arcane sale de `/app/data/projects/admon/compose.yaml`, dentro del
+volumen `arcane_arcane-data`; el camino legacy (`/opt/apps/admon/app.conf` +
+`/opt/apps/_lib/run_app.sh`) sigue existiendo pero **no debe usarse**. El env con
+secretos está en `/etc/admon.env` (root, 600). El runner tiene sudo sin password
+solo para `run_app.sh`, `verify_app.sh` y el helper `admon-set-secret`: nunca
+para leer el env.
 
 El backend corre **uvicorn como PID 1**, sin supervisor: para que cargue código
 nuevo hay que reiniciar el contenedor, no un programa de supervisor. Y
