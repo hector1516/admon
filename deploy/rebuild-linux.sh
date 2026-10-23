@@ -52,8 +52,29 @@ die() { say "ERROR: $*" >&2; exit 1; }
 # ── 0. Precondiciones ──────────────────────────────────────────────────────────
 [ "$DRY" = "0" ] && { docker ps >/dev/null 2>&1 || die "'docker' no responde desde $(id -un)"; }
 
-# ── 1. Bajar la imagen ─────────────────────────────────────────────────────────
-say "1/3 bajando ${IMAGE_REF} (la construyó el job build-image en la nube)"
+# ── 1. ¿Arcane es el dueño? ───────────────────────────────────────────────────
+# Va ANTES del pull. Bajar la imagen y retaguear :latest movería el tag que
+# Arcane usa para comparar, y lo dejaría creyendo que el contenedor ya está
+# actualizado: has_update=false con producción atrasada. Comprobado el
+# 2026-10-23 con colaboradores. El único que mueve :latest es Arcane.
+COMPOSE_PROJECT=""
+if [ "$DRY" = "0" ]; then
+  COMPOSE_PROJECT=$(docker inspect \
+    -f '{{ index .Config.Labels "com.docker.compose.project" }}' \
+    "$CONTAINER" 2>/dev/null || echo "")
+fi
+
+if [ -n "$COMPOSE_PROJECT" ]; then
+  say "1/3 '$CONTAINER' lo administra Arcane (project=$COMPOSE_PROJECT): no lo toco."
+  say "    La imagen nueva ya está publicada en el registry."
+  say "    Para aplicarla: Arcane → Projects → $CONTAINER → Updates → Update."
+  say "2/3 sin pull y sin retag: mover el tag :latest esconde la actualización."
+  say "3/3 sin verificación de salud: el contenedor sigue con la imagen anterior."
+  exit 0
+fi
+
+# ── 2. Bajar la imagen (solo instalación legacy) ──────────────────────────────
+say "2/3 bajando ${IMAGE_REF} (la construyó el job build-image en la nube)"
 if [ "${GHCR_TOKEN:-}" != "" ]; then
   printf '%s' "$GHCR_TOKEN" \
     | docker login ghcr.io -u "${GHCR_USER:-hector1516}" --password-stdin >/dev/null
@@ -67,24 +88,6 @@ if [ "$DRY" = "0" ]; then
   say "    ${IMAGE} -> $(docker images --format '{{.ID}}' "$IMAGE" | head -1)"
 fi
 [ "${GHCR_TOKEN:-}" != "" ] && docker logout ghcr.io >/dev/null 2>&1 || true
-
-# ── 2. ¿Arcane es el dueño? ───────────────────────────────────────────────────
-# La etiqueta com.docker.compose.project es la que escribe Arcane al crear el
-# Project. Si está, el contenedor NO se toca acá.
-COMPOSE_PROJECT=""
-if [ "$DRY" = "0" ]; then
-  COMPOSE_PROJECT=$(docker inspect \
-    -f '{{ index .Config.Labels "com.docker.compose.project" }}' \
-    "$CONTAINER" 2>/dev/null || echo "")
-fi
-
-if [ -n "$COMPOSE_PROJECT" ]; then
-  say "2/3 '$CONTAINER' lo administra Arcane (project=$COMPOSE_PROJECT): no lo recreo."
-  say "    La imagen nueva ya está publicada en el registry."
-  say "    Para aplicarla: Arcane → Projects → $CONTAINER → Updates → Update."
-  say "3/3 sin verificación de salud: el contenedor sigue corriendo la imagen anterior."
-  exit 0
-fi
 
 # ── 3. Recrear y verificar ─────────────────────────────────────────────────────
 # Solo llega aquí si la app NO está en Arcane (instalación legacy).
