@@ -1,5 +1,6 @@
 """api/routers/reportes.py — endpoints de reportes (Fase 4)."""
 from fastapi import APIRouter, HTTPException, Depends, Request
+from api.pdf_reporte import build_service_report_pdf
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
