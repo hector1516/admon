@@ -3,14 +3,19 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from typing import Optional, List
 
 def _latido_scan(conn):
-    """Último ciclo del escáner de red y minutos desde entonces."""
+    """Último ciclo del escáner de red y minutos desde entonces.
+
+    El escáner del HOST escribe en HUB_NetworkScanResults (no en
+    HUB_NetworkScanRuns, que quedó congelada en octubre). Se toma el MAX de
+    FechaScan de esa tabla como el último ciclo real.
+    """
     try:
         cur = conn.cursor(as_dict=True)
-        cur.execute("SELECT TOP 1 FechaScan FROM HUB_NetworkScanRuns ORDER BY Id DESC")
+        cur.execute("SELECT MAX(FechaScan) AS ultimo FROM HUB_NetworkScanResults")
         row = cur.fetchone()
         cur.close()
-        if row and row.get("FechaScan"):
-            ciclo = row["FechaScan"]
+        if row and row.get("ultimo"):
+            ciclo = row["ultimo"]
             minutos = int((__import__("datetime").datetime.now() - ciclo).total_seconds() / 60)
             return ciclo, minutos
     except Exception:
