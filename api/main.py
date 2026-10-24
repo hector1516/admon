@@ -1444,6 +1444,30 @@ class KPIData(BaseModel):
     etiqueta: str
 
 
+# --- SPA estática (dist/) ---
+try:
+    from pathlib import Path
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.responses import FileResponse
+
+    _dist = Path(__file__).resolve().parent.parent / "dist"
+    _has_spa = _dist.is_dir() and (_dist / "index.html").exists()
+    _NO_STORE = {"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"}
+    _NO_STORE_FILES = {"index.html"}
+
+    def _spa_file(name: str):
+        return FileResponse(str(_dist / name))
+
+    if _has_spa and (_dist / "assets").is_dir():
+        app.mount("/assets", StaticFiles(directory=str(_dist / "assets")), name="assets")
+except Exception:
+    _has_spa = False
+    _dist = None
+
+    def _spa_file(name: str):
+        return None
+
+
 @app.get("/")
 async def spa_root():
     if _has_spa:
