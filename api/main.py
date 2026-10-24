@@ -187,19 +187,9 @@ def _user_from_header_or_query(request: Request):
 # Si existe el frontend compilado (dist/), "/" sirve la SPA; la info JSON
 # de la API se mueve a "/api". Sin dist/, "/" sigue devolviendo JSON.
 
-@app.get("/api")
-async def api_info():
-    return {"message": "HUB Admon API", "version": "1.0.0"}
-
-
-@app.get("/health")
-async def health():
-    return {"status": "ok"}
-
-
-@app.get("/api/health")
-async def api_health():
-    return {"status": "ok"}
+# --- Routers por dominio (Fase 1 del refactor) ---
+from api.routers import core as core_router
+app.include_router(core_router.router)
 
 
 # --- Auth Endpoints ---
