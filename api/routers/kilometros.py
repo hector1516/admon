@@ -29,6 +29,37 @@ def __getattr__(name):
     return getattr(_m, name)
 
 
+def _ahora_mexico():
+    """Fecha/hora de México. Sin horario de verano desde 2022, así que UTC-6 fijo."""
+    from datetime import timedelta
+    return datetime.utcnow() - timedelta(hours=6)
+
+def _rango_semana(anio=None, semana=None):
+    """(inicio, fin_exclusivo) de una semana ISO: lunes 00:00 -> lunes 00:00.
+
+    Sin argumentos devuelve la semana en curso. Los límites se calculan en hora
+    de México para que coincidan con los registros que captura el HUB.
+    """
+    from datetime import date, timedelta
+    hoy = _ahora_mexico().date()
+    try:
+        if anio and semana:
+            lunes = date.fromisocalendar(int(anio), int(semana), 1)
+        else:
+            lunes = hoy - timedelta(days=hoy.weekday())
+    except (ValueError, TypeError):
+        lunes = hoy - timedelta(days=hoy.weekday())
+    return (
+        datetime(lunes.year, lunes.month, lunes.day),
+        datetime(lunes.year, lunes.month, lunes.day) + timedelta(days=7),
+        lunes,
+    )
+
+def _require_registro_kilometros(current_user: dict):
+    """Gate del módulo: permiso 'Registro Kilómetros' (AccesoRegistroKilometros)."""
+    if not current_user.get("acceso_registro_kilometros"):
+        raise HTTPException(status_code=403, detail="No access")
+
 @router.get("/api/kilometros/vehiculos")
 async def kilometros_vehiculos(current_user: dict = Depends(get_current_user)):
     """Flota completa con el último odómetro leído, para el selector de captura."""

@@ -2,6 +2,22 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from typing import Optional, List
 
+def _latido_scan(conn):
+    """Último ciclo del escáner de red y minutos desde entonces."""
+    try:
+        cur = conn.cursor(as_dict=True)
+        cur.execute("SELECT TOP 1 FechaScan FROM HUB_NetworkScanRuns ORDER BY Id DESC")
+        row = cur.fetchone()
+        cur.close()
+        if row and row.get("FechaScan"):
+            ciclo = row["FechaScan"]
+            minutos = int((__import__("datetime").datetime.now() - ciclo).total_seconds() / 60)
+            return ciclo, minutos
+    except Exception:
+        pass
+    return None, None
+
+
 router = APIRouter()
 
 def get_connection():

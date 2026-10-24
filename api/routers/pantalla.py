@@ -19,6 +19,59 @@ def __getattr__(name):
     from api import main as _m
     return getattr(_m, name)
 
+def _panel_estado() -> dict:
+    """Estado del kiosco: pantallas publicadas por la TV + último comando.
+
+    No pide token. Si el snapshotter está caído devuelve el error en vez de
+    reventar la vista, que para eso está el try/except en el endpoint.
+    """
+    url = f"{_pantalla.PANEL_URL}/api/panel/estado"
+    try:
+        with _urlreq.urlopen(url, timeout=5) as r:
+            return _json.loads(r.read().decode("utf-8"))
+    except Exception as e:
+        return {"error": f"No se pudo leer el estado de la pantalla: {e}"}
+
+def _panel_comando(accion: str, pantalla: str = None) -> dict:
+    """Manda un comando al kiosco (ver | avanzar | pausa | seguir).
+
+    Exige el token compartido: sin él el panel responde 403 a propósito
+    (escribir en la TV necesita credencial). NUNCA se manda en blanco.
+    """
+    if not _pantalla.PANEL_TOKEN:
+        return {"ok": False, "error": "Falta HUB_PANEL_TOKEN en el servidor; el control remoto queda deshabilitado."}
+    cuerpo = {"accion": accion}
+    if pantalla:
+        cuerpo["pantalla"] = pantalla
+    req = _urlreq.Request(
+        f"{_pantalla.PANEL_URL}/api/panel/comando",
+        data=_json.dumps(cuerpo).encode("utf-8"),
+        headers={"Content-Type": "application/json", "X-Panel-Token": _pantalla.PANEL_TOKEN},
+        method="POST",
+    )
+    try:
+        with _urlreq.urlopen(req, timeout=5) as r:
+            return _json.loads(r.read().decode("utf-8"))
+    except _urlerr.HTTPError as e:
+        # El cuerpo trae {"ok": false, "error": "..."}: se reenvía tal cual
+        # para que la UI lo muestre en vez de tragárselo.
+        try:
+            return _json.loads(e.read().decode("utf-8"))
+        except Exception:
+            return {"ok": False, "error": f"El panel rechazó el comando (HTTP {e.code})."}
+    except Exception as e:
+        return {"ok": False, "error": f"No se pudo hablar con la pantalla: {e}"}
+
+def _serializable(fila):
+    """pymssql → JSON: datetime a ISO y las claves en snake_case (Id → id)."""
+    if fila is None:
+        return None
+    out = {}
+    for k, v in fila.items():
+        v = v.isoformat() if hasattr(v, "isoformat") else v
+        out[k.lower()] = v
+    return out
+
 @router.get("/api/pantalla/estado")
 async def pantalla_estado(current_user: dict = Depends(get_current_user)):
     """Estado del kiosco: si la TV está conectada, qué pantallas hay y qué

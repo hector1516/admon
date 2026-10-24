@@ -31,6 +31,10 @@ def __getattr__(name):
     return getattr(_m, name)
 
 
+def _require_reporte(current_user: dict):
+    if not (current_user.get("acceso_registro_reportes") or current_user.get("acceso_reportes")):
+        raise HTTPException(status_code=403, detail="Requiere permiso de Reportes de Servicio")
+
 @router.get("/api/reportes")
 async def api_list_reportes(tecnico: str = "", eliminados: bool = False, current_user: dict = Depends(get_current_user)):
     """Lista reportes (top 500). Filtra por técnico si se pasa. eliminados=true muestra papelera."""

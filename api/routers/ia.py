@@ -31,6 +31,31 @@ def __getattr__(name):
     return getattr(_m, name)
 
 
+def _require_ia(current_user: dict):
+    """En el HUB, Jarvis está disponible para todos los usuarios logueados sin permiso especial."""
+    pass  # No restriction
+
+def _cleanup_fifo_conversaciones(cursor, user_id: int):
+    """FIFO cleanup: mantiene solo las últimas 10 conversaciones por usuario (igual que HUB)."""
+    cursor.execute("""
+        DELETE FROM HUB_JarvisMensajes 
+        WHERE IdConversacion IN (
+            SELECT Id FROM HUB_JarvisConversaciones 
+            WHERE IdUsuario = %s 
+            ORDER BY FechaCreacion DESC
+            OFFSET 10 ROWS
+        )
+    """, (user_id,))
+    cursor.execute("""
+        DELETE FROM HUB_JarvisConversaciones 
+        WHERE Id IN (
+            SELECT Id FROM HUB_JarvisConversaciones 
+            WHERE IdUsuario = %s 
+            ORDER BY FechaCreacion DESC
+            OFFSET 10 ROWS
+        )
+    """, (user_id,))
+
 @router.get("/api/ia/conversaciones")
 async def ia_list_conversaciones(current_user: dict = Depends(get_current_user)):
     _require_ia(current_user)

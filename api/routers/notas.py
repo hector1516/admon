@@ -39,6 +39,28 @@ def __getattr__(name):
     return getattr(_m, name)
 
 
+def _color_nota(valor) -> str:
+    """Solo #RRGGBB o #RGB; cualquier otra cosa cae al ámbar del kiosco."""
+    s = str(valor or "").strip()
+    if s.startswith("#"):
+        hexa = s[1:]
+        if all(c in "0123456789abcdefABCDEF" for c in hexa) and len(hexa) in (3, 6):
+            return s
+    return COLOR_NOTA_DEFECTO
+
+def _nota_desde_row(r: dict) -> dict:
+    """Normaliza una fila de HUB_DashboardNotas al JSON que consume el front."""
+    return {
+        "id": int(r["Id"]),
+        "titulo": r["Titulo"],
+        "contenido": r["Contenido"] or "",
+        "color": r["Color"] or COLOR_NOTA_DEFECTO,
+        "autor": r["Autor"] or "—",
+        "fija": bool(r["Fija"]),
+        "fecha_creacion": r["FechaCreacion"].isoformat() if r["FechaCreacion"] else None,
+        "fecha_modificado": r["FechaModificado"].isoformat() if r["FechaModificado"] else None,
+    }
+
 @router.get("/api/notas")
 async def notas_listar(current_user: dict = Depends(get_current_user)):
     """Notas del tablero, en el mismo orden que las ve el kiosco (fijas primero)."""

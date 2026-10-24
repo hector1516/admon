@@ -29,6 +29,11 @@ def __getattr__(name):
     return getattr(_m, name)
 
 
+def _require_vales_oxxogas(current_user: dict):
+    """Gate del módulo: mismo permiso que 'Vales OxxoGas' en el HUB."""
+    if not current_user.get("acceso_vales_oxxogas"):
+        raise HTTPException(status_code=403, detail="No access")
+
 @router.get("/api/tickets-oxxogas")
 def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
     """Índice de tickets de OxxoGas con la relación factura ↔ vale.
