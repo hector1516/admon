@@ -80,20 +80,19 @@ como un éxito falso, porque GitHub reportaba `success` y la app no cambiaba.
 **El estándar es el de las 6 apps:** build en `ubuntu-latest` → `ghcr.io` →
 Arcane ve el digest → el operador da `Update`. Ver `ReglasUpdateAdmon.md`.
 
-`deploy.yml` dispara en cada push a `master` y tiene cuatro jobs:
+`build-image.yml` dispara en cada push a `master` y tiene **un solo job**:
 
-1. **desbloquear** (`ubuntu-latest`): cancela deploys atascados más de 10 min.
-2. **gate** (`ubuntu-latest`): compara contra el push anterior con la API de
-   GitHub y decide el modo. Que no dependa del runner es deliberado: si el gate
-   necesita un runner, no puede avisar que falta.
-3. **build-image** (`ubuntu-latest`): construye y publica en
-   `ghcr.io/hector1516/admon` (`:latest` + `:<sha>`). **Acá se compila.**
-4. **deploy** (runner `WebbApps-Runner`, Linux, etiqueta `admon-deploy`, servicio
-   systemd `actions-runner-admonapp`): solo baja la imagen. Se pide esa etiqueta y
-   no `self-hosted` porque en este repo todavía hay un runner Windows registrado
-   y con `self-hosted` el job caería ahí.
+- **build** (`ubuntu-latest`): construye y publica en `ghcr.io/hector1516/admon`
+  (`:latest` + `:<sha>`). **Acá se compila.** No toca el servidor: no hace pull,
+  no recrea nada.
 
-Modos:
+Hasta el 2026-10-23 había cuatro jobs (`desbloquear`, `gate`, `build-image`,
+`deploy` en el runner `admon-deploy`). Se retiraron al estandarizar: el
+servidor ya no interviene en el despliegue, así que no hay nada que
+desbloquear ni que bajar. `deploy/hotsync-linux.sh` y `deploy/rebuild-linux.sh`
+quedan solo para una instalación legacy fuera de Arcane.
+
+Modos (solo legacy, ya no los usa la CI):
 
 - **hotsync** — no cambió nada de la imagen. **Si Arcane es el dueño, no aplica:
   delega en rebuild**, porque lo que se copia al contenedor se pierde en el

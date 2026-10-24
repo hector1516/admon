@@ -7,9 +7,12 @@
 # Con esta etapa la imagen se arma completa en ubuntu-latest y el servidor
 # solamente la baja.
 #
-# node:20-alpine es el mismo que usaba el script del servidor.
+# Base estándar del ecosistema: mirror.gcr.io, el espejo pull-through de Docker
+# Hub. Docker Hub y ECR Public aplican cuotas POR IP a los pulls anónimos y ya
+# tumbaron la CI dos veces (2026-10-09 y 2026-10-23); el espejo sirve el MISMO
+# manifiesto y no tiene esa cuota.
 # ─────────────────────────────────────────────────────────────────────────────
-FROM node:20-alpine AS build
+FROM mirror.gcr.io/library/node:20-alpine AS build
 
 WORKDIR /app
 
@@ -25,7 +28,7 @@ RUN npm run build
 # Etapa 2 — runtime. Backend FastAPI. No lleva Node: la imagen final no carga
 # npm ni el contexto del frontend.
 # ─────────────────────────────────────────────────────────────────────────────
-FROM python:3.11-slim
+FROM mirror.gcr.io/library/python:3.11-slim
 
 WORKDIR /app
 
