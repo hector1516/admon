@@ -1,5 +1,6 @@
 """api/routers/cotizaciones.py — endpoints de cotizaciones, SAT y remisiones (Fase 3)."""
 from fastapi import APIRouter, HTTPException, Depends, Request
+from api.pdf_cotizacion import build_cotizacion_pdf
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
