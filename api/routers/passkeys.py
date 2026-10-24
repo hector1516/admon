@@ -5,7 +5,32 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 
+import time as _passkey_time
+from urllib.parse import urlparse as _urlparse
+
+import jwt as _pyjwt
+from webauthn import (
+    base64url_to_bytes,
+    generate_authentication_options,
+    generate_registration_options,
+    options_to_json,
+    verify_authentication_response,
+    verify_registration_response,
+)
+from webauthn.helpers.structs import (
+    AuthenticatorAttachment,
+    AuthenticatorSelectionCriteria,
+    PublicKeyCredentialDescriptor,
+    ResidentKeyRequirement,
+    UserVerificationRequirement,
+)
+
+
 RP_ID = "ecc-sa.com.mx"
+RP_NAME = "ECCSA"
+CHALLENGE_TTL = 5 * 60
+
+_PASSKEY_SECRET_CACHE: Dict[str, str] = {}
 
 class PasskeyRegisterOptionsReq(BaseModel):
     label: str = ""
@@ -37,6 +62,131 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 def __getattr__(name):
     from api import main as _m
     return getattr(_m, name)
+
+
+def _passkey_secret() -> str:
+    """Secreto para los JWT stateless de los challenges.
+    Orden: env JWT_SECRET > HUB_Config 'admon_passkey_secret' (se genera y
+    persiste la primera vez) > fallback temporal (solo si la BD no responde)."""
+    if _PASSKEY_SECRET_CACHE.get("secret"):
+        return _PASSKEY_SECRET_CACHE["secret"]
+    env = os.getenv("JWT_SECRET") or os.getenv("PASSKEY_JWT_SECRET")
+    if env:
+        _PASSKEY_SECRET_CACHE["secret"] = env
+        return env
+    secret = None
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(as_dict=True)
+        cursor.execute("SELECT Valor FROM HUB_Config WHERE Clave = 'admon_passkey_secret'")
+        row = cursor.fetchone()
+        secret = (row.get("Valor") or "").strip() if row else ""
+        if not secret:
+            secret = _passkey_b64.urlsafe_b64encode(os.urandom(48)).decode("ascii").rstrip("=")
+            cursor.execute(
+                "UPDATE HUB_Config SET Valor = %s, Actualizado = GETDATE() WHERE Clave = 'admon_passkey_secret'",
+                (secret,),
+            )
+            if cursor.rowcount == 0:
+                cursor.execute(
+                    "INSERT INTO HUB_Config (Clave, Valor) VALUES (%s, %s)",
+                    ("admon_passkey_secret", secret),
+                )
+        conn.close()
+    except Exception:
+        secret = "admon-passkey-boot-secret"  # inestable: solo si la BD falla
+    _PASSKEY_SECRET_CACHE["secret"] = secret
+    return secret
+
+
+def _is_allowed_origin(origin: str) -> bool:
+    """Allowlist: https://ecc-sa.com.mx o cualquier subdominio (*.ecc-sa.com.mx),
+    más localhost para desarrollo."""
+    if not origin:
+        return False
+    p = _urlparse(origin)
+    if p.hostname in ("localhost", "127.0.0.1"):
+        return True
+    if p.scheme != "https":
+        return False
+    host = p.hostname or ""
+    return host == "ecc-sa.com.mx" or host.endswith(".ecc-sa.com.mx")
+
+
+def _origin_for_request(request: Request) -> str:
+    """Origin real de la petición, validado contra la allowlist."""
+    origin = request.headers.get("origin", "") if request else ""
+    if not _is_allowed_origin(origin):
+        raise HTTPException(status_code=400, detail="Origin no permitido")
+    return origin
+
+
+def _b64url_encode(raw: bytes) -> str:
+    return _passkey_b64.urlsafe_b64encode(raw).rstrip(b"=").decode("ascii")
+
+
+def _issue_challenge(purpose: str):
+    """Challenge aleatorio envuelto en JWT stateless (seguro entre reinicios)."""
+    raw = os.urandom(32)
+    now = int(_passkey_time.time())
+    token = _pyjwt.encode(
+        {"purpose": purpose, "ch": _b64url_encode(raw), "iat": now, "exp": now + CHALLENGE_TTL},
+        _passkey_secret(),
+        algorithm="HS256",
+    )
+    return token, raw
+
+
+def _read_challenge(state: str, purpose: str) -> bytes:
+    try:
+        data = _pyjwt.decode(state, _passkey_secret(), algorithms=["HS256"])
+    except _pyjwt.ExpiredSignatureError:
+        raise HTTPException(status_code=400, detail="Desafío expirado, intenta de nuevo")
+    except _pyjwt.InvalidTokenError:
+        raise HTTPException(status_code=400, detail="Desafío inválido")
+    if data.get("purpose") != purpose or not data.get("ch"):
+        raise HTTPException(status_code=400, detail="Desafío inválido")
+    return base64url_to_bytes(data["ch"])
+
+
+def _login_row_by_id(user_id: int):
+    """Fila completa (misma forma que api_login) para armar la respuesta de sesión."""
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT Id, Nombre, Email, Password, Activo, AccesoInventario, AccesoNominas, "
+        "AccesoCotizaciones, AccesoProveedores, AccesoOC, AccesoCalculo, AccesoTelegram, "
+        "AccesoUsuarios, AccesoReportes, AccesoRegistroReportes, AccesoIA, Nickname, "
+        "AccesoValesOxxoGas, AccesoRegistroKilometros "
+        "FROM HUB_Users WHERE Id = %s",
+        (user_id,),
+    )
+    row = cursor.fetchone()
+    conn.close()
+    return row
+
+
+# --- Modelos ---
+
+class PasskeyRegisterOptionsReq(BaseModel):
+    label: str = ""
+
+
+class PasskeyRegisterVerifyReq(BaseModel):
+    credential: dict
+    state: str
+    label: str = ""
+
+
+class PasskeyLoginOptionsReq(BaseModel):
+    rp: str = RP_ID  # el frontend siempre manda ecc-sa.com.mx (único rp válido aquí)
+
+
+class PasskeyLoginVerifyReq(BaseModel):
+    credential: dict
+    state: str
+
+
 
 
 @router.post("/api/passkeys/login/options")
