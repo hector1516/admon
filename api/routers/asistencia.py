@@ -27,6 +27,8 @@ AJUSTE_ENTRADA_MIN = 4
 
 VENTANA_SIN_ESCANER_MIN = 15
 
+MARCHA_SIMULTANEA_MIN = 3
+
 router = APIRouter()
 
 def get_connection():
