@@ -484,7 +484,7 @@
 
 				{#if reporte.FirmaConformidad}
 					<div style="margin-top: 0.75rem;"><strong>✍️ Firma de Conformidad:</strong></div>
-					<img src="data:image/png;base64,{reporte.FirmaConformidad}" alt="Firma" style="margin-top: 0.25rem; max-width: 280px; border: 1px solid var(--color-border); border-radius: 8px;" />
+					<img src={reporte.FirmaConformidad} alt="Firma" style="margin-top: 0.25rem; max-width: 280px; border: 1px solid var(--color-border); border-radius: 8px;" />
 				{/if}
 			{/if}
 		</div>

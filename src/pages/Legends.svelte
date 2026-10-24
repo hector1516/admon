@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+	import { navigate } from '$lib/router.js';
 	import { api } from '$lib/api.js';
 	import { auth } from '$lib/stores/auth.js';
 	import db from '$lib/db/admonDb.js';
@@ -104,6 +105,7 @@
 
 <div class="legends">
 	<header class="head">
+		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver">←</button>
 		<div>
 			<p class="kicker">ECCSA LEGENDS</p>
 			<h1>Competencia semanal</h1>
