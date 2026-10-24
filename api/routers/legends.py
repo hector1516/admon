@@ -1,5 +1,6 @@
 """api/routers/legends.py — endpoints de legends (Fase 4)."""
 from fastapi import APIRouter, HTTPException, Depends, Request
+from api import legends_core as _legends_core
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
