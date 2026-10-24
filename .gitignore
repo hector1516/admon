@@ -6,3 +6,6 @@ dist/
 
 # secretos locales del deploy (nunca al repo)
 .secrets/
+
+tok.txt
+lastrun.txt
