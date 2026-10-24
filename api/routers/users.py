@@ -113,6 +113,11 @@ def _user_from_header_or_query(request: Request):
 # Si existe el frontend compilado (dist/), "/" sirve la SPA; la info JSON
 # de la API se mueve a "/api". Sin dist/, "/" sigue devolviendo JSON.
 
+
+def _require_reporte(*a, **kw):
+    from api.routers import reportes as _r
+    return getattr(_r, "_require_reporte")(*a, **kw)
+
 @router.get("/api/users/me", response_model=UserInfo)
 async def get_me(current_user: dict = Depends(get_current_user)):
     return UserInfo(**current_user)
