@@ -10,6 +10,8 @@ class KilometroRegistroReq(BaseModel):
     kilometros: int
     fecha_hora: str = ""
 
+MONTO_VALE = 500.0
+
 router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
