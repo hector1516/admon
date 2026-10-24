@@ -9,7 +9,10 @@ def get_connection():
     from api import main as _m
     return _m.get_connection()
 
-def get_current_user(token: str = Depends(lambda: None)):
+from fastapi.security import OAuth2PasswordBearer
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
+
+def get_current_user(token: str = Depends(oauth2_scheme)):
     from api import main as _m
     return _m.get_current_user(token)
 

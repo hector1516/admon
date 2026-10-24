@@ -1,5 +1,6 @@
 """api/routers/pantalla.py — endpoints de pantalla/portada (Fase 4)."""
 from fastapi import APIRouter, HTTPException, Depends, Request
+from api import notas_pantalla as _pantalla
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import Optional, List
