@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
-import datetime
+from datetime import datetime
 
 class KilometroRegistroReq(BaseModel):
     id_automovil: int
