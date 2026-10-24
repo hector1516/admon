@@ -20,6 +20,11 @@ def _require_cotiz(*a, **kw):
 
 router = APIRouter()
 
+_CLIENTES_UNICOS = (
+    "(SELECT IdCliente, MIN(Cliente) AS Cliente, MIN(CondicionesPagoDias) AS Dias "
+    "FROM clientes GROUP BY IdCliente)"
+)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
 
