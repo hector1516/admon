@@ -24,7 +24,9 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     return _m.get_current_user(token)
 
 
-def _user_from_header_or_query(request):
+from fastapi import Request
+
+def _user_from_header_or_query(request: Request):
     from api import main as _m
     return _m._user_from_header_or_query(request)
 
