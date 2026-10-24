@@ -18,6 +18,8 @@ def _latido_scan(conn):
     return None, None
 
 
+AJUSTE_ENTRADA_MIN = 4
+
 router = APIRouter()
 
 def get_connection():
