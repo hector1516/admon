@@ -1,5 +1,6 @@
 """api/routers/tickets.py — endpoints de tickets (Fase 4)."""
 from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi.responses import Response
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
