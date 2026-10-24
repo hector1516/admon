@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 
 import os
+import base64 as _passkey_b64
 import time as _passkey_time
 from urllib.parse import urlparse as _urlparse
 
