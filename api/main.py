@@ -1454,6 +1454,7 @@ try:
     _has_spa = _dist.is_dir() and (_dist / "index.html").exists()
     _NO_STORE = {"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"}
     _NO_STORE_FILES = {"index.html"}
+    _SPA_ROUTES = {"login", "dashboard", "cotizaciones", "cotizaciones_materiales", "usuarios", "admin", "config", "clientes", "registro_reportes", "registro_reportes/", "ia", "legends", "tickets_oxxogas", "kilometros", "notas", "panel", "pantalla_tv"}
 
     def _spa_file(name: str):
         return FileResponse(str(_dist / name))
