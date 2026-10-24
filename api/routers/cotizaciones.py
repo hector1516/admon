@@ -93,6 +93,66 @@ class RemisionCreate(BaseModel):
     partidas: List[Dict[str, Any]] = []  # [{partida, cantidad, descripcion}]
 
 
+
+def _clean_articulo(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_clean_articulo")(*a, **kw)
+
+
+def _db_add_partida(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_db_add_partida")(*a, **kw)
+
+
+def _db_clone_quotation(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_db_clone_quotation")(*a, **kw)
+
+
+def _db_create_quotation(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_db_create_quotation")(*a, **kw)
+
+
+def _db_get_color(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_db_get_color")(*a, **kw)
+
+
+def _fmt_folio(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_fmt_folio")(*a, **kw)
+
+
+def _fstr(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_fstr")(*a, **kw)
+
+
+def _listar_cotizaciones(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_listar_cotizaciones")(*a, **kw)
+
+
+def _partida_row_to_dict(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_partida_row_to_dict")(*a, **kw)
+
+
+def _require_cotiz(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_require_cotiz")(*a, **kw)
+
+
+def _user_from_header_or_query(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_user_from_header_or_query")(*a, **kw)
+
+
+def _validate_partida_input(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_validate_partida_input")(*a, **kw)
+
 @router.get("/api/cotizaciones/resumen")
 def cotizaciones_resumen(pagina: int = 1, porPagina: int = TOP_COTIZACIONES,
                          q: str = "", current_user: dict = Depends(get_current_user)):

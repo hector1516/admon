@@ -191,6 +191,11 @@ class PasskeyLoginVerifyReq(BaseModel):
 
 
 
+
+def _build_login_response(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_build_login_response")(*a, **kw)
+
 @router.post("/api/passkeys/login/options")
 async def passkey_login_options(body: PasskeyLoginOptionsReq = None):
     """Opciones de login discoverable (sin correo) para el rp raíz."""

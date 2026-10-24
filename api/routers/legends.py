@@ -24,6 +24,11 @@ def __getattr__(name):
     return getattr(_m, name)
 
 
+
+def _avatares_miniatura(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_avatares_miniatura")(*a, **kw)
+
 @router.get("/api/legends/overview")
 async def legends_overview(current_user: dict = Depends(get_current_user)):
     """Todo lo que pinta la pantalla de Legends en una sola llamada.

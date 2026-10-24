@@ -13,6 +13,11 @@ class ClienteUpdate(BaseModel):
     nombre: str = ""
     dias_pago: int = 30
 
+def _require_cotiz(*a, **kw):
+    from api import main as _m
+    return _m._require_cotiz(*a, **kw)
+
+
 router = APIRouter()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
@@ -33,6 +38,11 @@ def __getattr__(name):
     from api import main as _m
     return getattr(_m, name)
 
+
+
+def _require_cotiz(*a, **kw):
+    from api import main as _m
+    return getattr(_m, "_require_cotiz")(*a, **kw)
 
 @router.get("/api/clientes")
 async def clientes_list(current_user: dict = Depends(get_current_user)):
