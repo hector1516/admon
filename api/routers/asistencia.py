@@ -20,6 +20,8 @@ def _latido_scan(conn):
 
 AJUSTE_ENTRADA_MIN = 4
 
+VENTANA_SIN_ESCANER_MIN = 15
+
 router = APIRouter()
 
 def get_connection():
