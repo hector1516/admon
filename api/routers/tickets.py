@@ -5,6 +5,11 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 
 router = APIRouter()
+_CLIENTES_UNICOS = (
+    "(SELECT IdCliente, MIN(Cliente) AS Cliente, MIN(CondicionesPagoDias) AS Dias "
+    "FROM clientes GROUP BY IdCliente)"
+)
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
