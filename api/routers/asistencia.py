@@ -1,6 +1,9 @@
 """api/routers/asistencia.py — endpoint de asistencia (Fase 4)."""
 from fastapi import APIRouter, HTTPException, Depends, Request
 from typing import Optional, List
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from tz_mx import now_mx
 
 def _latido_scan(conn):
     """Último ciclo del escáner de red y minutos desde entonces.
@@ -194,7 +197,7 @@ async def get_asistencia(current_user: dict = Depends(get_current_user)):
             WHERE FechaHora >= CAST(CAST(GETDATE() AS date) AS datetime)
         """)
         fila = cursor2.fetchone() or {}
-        ahora_servidor = fila.get("ahora") or datetime.now()
+        ahora_servidor = fila.get("ahora") or now_mx()
         ultimo_evento = fila.get("ultimo")
         minutos_movimiento = int(fila.get("minutos") or 0)
         hay_futuro = bool(fila.get("hay_futuro"))

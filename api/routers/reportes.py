@@ -220,7 +220,10 @@ async def api_reportes_excel(ids: str, current_user: dict = Depends(get_current_
     cliente = next(iter(clientes)) or "Cliente"
     nombre_cliente = unicodedata.normalize("NFKD", cliente).encode("ascii", "ignore").decode()
     nombre_cliente = re.sub(r"[^\w\s-]", "", nombre_cliente).strip().replace(" ", "_")[:40] or "Cliente"
-    nombre = f"Reportes_{nombre_cliente}_{datetime.now().strftime('%Y-%m-%d')}.xlsx"
+    import sys, os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    from tz_mx import now_mx
+    nombre = f"Reportes_{nombre_cliente}_{now_mx().strftime('%Y-%m-%d')}.xlsx"
 
     buf = io.BytesIO()
     wb.save(buf)

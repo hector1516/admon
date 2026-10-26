@@ -316,7 +316,10 @@ async def legends_award(payload: dict, current_user: dict = Depends(get_current_
 async def legends_celebrations(current_user: dict = Depends(get_current_user)):
     """Cumpleaños y aniversarios del mes actual, combinados."""
     import datetime as _dt
-    mes_actual = _dt.datetime.now().month
+    import sys, os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    from tz_mx import now_mx
+    mes_actual = now_mx().month
 
     conn = get_connection()
     try:

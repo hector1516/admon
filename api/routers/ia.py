@@ -3,6 +3,9 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
+import sys, os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+from tz_mx import now_mx
 
 class IaConversacionCreate(BaseModel):
     titulo: str = "Nueva conversacion"
@@ -93,7 +96,7 @@ async def ia_create_conversacion(body: IaConversacionCreate, current_user: dict 
         id_conv = int(row[0]) if row else None
         conn.commit()
         conn.close()
-        return {"Id": id_conv, "Titulo": body.titulo, "FechaCreacion": datetime.now().isoformat()}
+        return {"Id": id_conv, "Titulo": body.titulo, "FechaCreacion": now_mx().isoformat()}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
