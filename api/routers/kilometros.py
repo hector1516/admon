@@ -33,9 +33,11 @@ def __getattr__(name):
 
 
 def _ahora_mexico():
-    """Fecha/hora de México. Sin horario de verano desde 2022, así que UTC-6 fijo."""
-    from datetime import timedelta
-    return datetime.utcnow() - timedelta(hours=6)
+    """Fecha/hora de México. Usa tz_mx para no depender de la configuración del contenedor."""
+    import sys, os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    from tz_mx import now_mx
+    return now_mx()
 
 def _rango_semana(anio=None, semana=None):
     """(inicio, fin_exclusivo) de una semana ISO: lunes 00:00 -> lunes 00:00.
@@ -391,7 +393,10 @@ async def kilometros_registro(body: KilometroRegistroReq,
             # Cliente que envía con offset (p. ej. "...Z" = UTC): convertir a
             # hora de México (UTC−6). Antes se hacía .replace(tzinfo=None),
             # que guardaba la hora UTC cruda y dejaba el registro 6 h adelantado.
-            fecha = fecha.astimezone(_tz(_td(hours=-6))).replace(tzinfo=None)
+            import sys, os
+            sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+            from tz_mx import to_mx
+            fecha = to_mx(fecha)
         # Si viene sin offset (formato normal de la UI) ya ES hora de México:
         # la UI la genera con Intl en America/Mexico_City, se guarda tal cual.
     # El día del registro se calcula en hora de México (no con la fecha del

@@ -268,9 +268,11 @@ def _require_registro_kilometros(current_user: dict):
 
 
 def _ahora_mexico():
-    """Fecha/hora de México. Sin horario de verano desde 2022, así que UTC-6 fijo."""
-    from datetime import timedelta
-    return datetime.utcnow() - timedelta(hours=6)
+    """Fecha/hora de México. Usa tz_mx para no depender de la configuración del contenedor."""
+    import sys, os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    from tz_mx import now_mx
+    return now_mx()
 
 
 def _rango_semana(anio=None, semana=None):
