@@ -42,6 +42,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY api/ ./api/
+COPY tz_mx.py ./tz_mx.py
 # Frontend compilado por la etapa de arriba (npm run build) -> lo sirve FastAPI en "/"
 COPY --from=build /app/dist ./dist/
 # Versión del shell común (ECCSA-Shell): la lee GET /api/shell/state para el
