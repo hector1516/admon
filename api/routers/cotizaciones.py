@@ -273,11 +273,20 @@ async def cotizacion_update(folio: int, body: CotizacionUpdate, current_user: di
         cur_color = int(cur_row[3] or 0)
         autor = cur_row[4] or ""
         if cur_color in (1, 2):
-            # Bloqueada: solo se permite transición de estatus, no editar datos
-            if ((cur_row[0] or "") != idc or (cur_row[1] or "") != body.contacto.strip()
-                    or (cur_row[2] or "") != body.descripcion.strip()):
+            # Bloqueada: solo se permite transición de estatus (amarillo->verde), no editar datos
+            # Para verde (2): completamente bloqueada, no se permite ningún cambio
+            if cur_color == 2:
                 conn.close()
-                raise HTTPException(status_code=400, detail="Cotización bloqueada (lista para facturar/facturada).")
+                raise HTTPException(status_code=400, detail="Cotización bloqueada (facturada). No se puede modificar.")
+            # Para amarillo (1): solo se permite cambiar el color (a verde), no los datos
+            nuevo_color_check = int(body.color)
+            if nuevo_color_check == cur_color:
+                # Mismo color: verificar que no se editaron los datos
+                if ((str(cur_row[0] or "").strip().upper() != idc
+                        or str(cur_row[1] or "").strip() != body.contacto.strip()
+                        or str(cur_row[2] or "").strip() != body.descripcion.strip())):
+                    conn.close()
+                    raise HTTPException(status_code=400, detail="Cotización bloqueada (lista para facturar). Solo se puede cambiar el estatus.")
         nuevo_color = int(body.color)
         cursor.execute(
             "UPDATE IndiceMateriales SET IdCliente = %s, Contacto = %s, Descripcion = %s, Color = %s WHERE Folio = %s",
