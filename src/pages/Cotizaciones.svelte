@@ -5,7 +5,7 @@
 	import { online } from '$lib/stores/online.js';
 	import { listar } from '$lib/cotizacionesApi.js';
 	import { mapEstatus, fmtMXN, folioFmt } from '$lib/cotizaciones.js';
-	import Paginacion from '../components/Paginacion.svelte';
+	import Paginacion from '$lib/components/Paginacion.svelte';
 
 	let cotizaciones = $state([]);
 	let pagina = $state(1);

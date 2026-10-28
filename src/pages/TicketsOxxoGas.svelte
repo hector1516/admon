@@ -3,7 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
-	import Paginacion from '../components/Paginacion.svelte';
+	import Paginacion from '$lib/components/Paginacion.svelte';
 
 	// Tickets de OxxoGas: lectura de HUB_OxxoGasTickets (captura en Field/HUB)
 	// con factura CFDI enlazada y estación. Orden: más reciente arriba.

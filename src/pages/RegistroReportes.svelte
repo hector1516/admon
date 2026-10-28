@@ -3,8 +3,8 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
-	import OfflineNotice from '../components/OfflineNotice.svelte';
-	import Paginacion from '../components/Paginacion.svelte';
+	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
+	import Paginacion from '$lib/components/Paginacion.svelte';
 
 	// REGISTRO DE REPORTES (Admin) — clon del HUB views/registro_reportes.py
 	// Lista global con pestañas: Firmados / 📊 Excel (exportación) / Papelera

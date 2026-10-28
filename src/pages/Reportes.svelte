@@ -3,7 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { online } from '$lib/stores/online.js';
-	import Paginacion from '../components/Paginacion.svelte';
+	import Paginacion from '$lib/components/Paginacion.svelte';
 
 	// Lista de reportes como el HUB: buscar, filtrar por técnico, crear nuevo.
 

@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
-	import ActionsBar from '../components/ActionsBar.svelte';
+	import ActionsBar from '$lib/components/ActionsBar.svelte';
 
 	// Menú de módulos estilo home de Field: icon/title/desc/path/perm.
 	// Solo módulos funcionales; cada tarjeta requiere su permiso activo.

@@ -386,7 +386,7 @@ async def legends_metrics_config():
     """Catálogo de puntos, niveles, logros y guía (para la UI)."""
     return {
         "nombre_puntos": "ECCSA Points",
-        "metricas": LEGENDS_METRICAS,
+        "metricas": _legends_core.METRICAS,
         "niveles": {n["nombre"]: n["min"] for n in _legends_core.NIVELES},
         "iconos": {n["nombre"]: n["icono"] for n in _legends_core.NIVELES},
         "guia": _legends_core.guia(),

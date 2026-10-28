@@ -4,7 +4,7 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { clientes } from '$lib/cotizacionesApi.js';
 	import { api } from '$lib/api.js';
-	import OfflineNotice from '../components/OfflineNotice.svelte';
+	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
 
 	// Detalle de cliente como el HUB + administración de sus contactos.
 	// Los contactos se muestran con su origen: catálogo (HUB_ContactosClientes,

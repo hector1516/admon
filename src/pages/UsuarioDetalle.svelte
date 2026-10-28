@@ -3,7 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
-	import PasswordInput from '../components/PasswordInput.svelte';
+	import PasswordInput from '$lib/components/PasswordInput.svelte';
 
 	// id viene de la ruta /usuarios/:id (micro-router, modo runes -> $props)
 	let { id } = $props();

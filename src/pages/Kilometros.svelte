@@ -3,7 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
-	import OfflineNotice from '../components/OfflineNotice.svelte';
+	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
 
 	// Módulo Kilómetros — dos pestañas:
 	//  1) Consumo: por automóvil, km de la semana (último registro − primero) y

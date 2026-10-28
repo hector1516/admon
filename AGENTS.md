@@ -21,8 +21,7 @@ generado.
 `check.yml` falla el build si edita `src/styles/app.css` a mano (compara el
 SHA). No lo esquives: cambialo en el shell.
 
-Ojo: el CSS de Admon está en `src/styles/app.css`, **no** en `src/app.css`
-(que es el de Field). Es la variante Tailwind **v3**.
+Ojo: el CSS de Admon está en `src/app.css` (igual que Field). Es la variante Tailwind **v4**.
 
 ## Lo que SÍ es de Admon
 

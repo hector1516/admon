@@ -3,7 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { clientes } from '$lib/cotizacionesApi.js';
-	import OfflineNotice from '../components/OfflineNotice.svelte';
+	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
 
 	// Catálogo de clientes como el HUB: buscar, editar, eliminar y registrar.
 	// La lista se lee de Dexie (cotizacionesApi) así que abre sin conexión;

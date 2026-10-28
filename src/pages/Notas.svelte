@@ -3,7 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
-	import Paginacion from '../components/Paginacion.svelte';
+	import Paginacion from '$lib/components/Paginacion.svelte';
 
 	// Notas del equipo → tabla HUB_DashboardNotas, la MISMA que lee la pantalla
 	// 📌 del Dashboard de la oficina (kiosco, dashboard.ecc-sa.com.mx:8101).

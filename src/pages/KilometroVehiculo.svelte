@@ -3,7 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
-	import OfflineNotice from '../components/OfflineNotice.svelte';
+	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
 
 	// Detalle de un vehículo como PÁGINA COMPLETA (ruta /kilometros/vehiculo/:id),
 	// en lugar de un popup/overlay: patrón igual que TicketOxxoGasDetalle.

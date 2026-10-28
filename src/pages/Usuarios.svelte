@@ -3,7 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
-	import Paginacion from '../components/Paginacion.svelte';
+	import Paginacion from '$lib/components/Paginacion.svelte';
 
 	// Modo pestaña: lo usa src/pages/Admin.svelte, que pone el encabezado y la
 	// barra de pestañas del módulo. Así acá no se vuelve a pintar el .page ni el

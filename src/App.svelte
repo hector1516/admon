@@ -4,8 +4,8 @@
 	import { path, navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { online, onlinePing } from '$lib/stores/online.js';
-	import SyncHeader from './components/SyncHeader.svelte';
-	import Changelog from './components/Changelog.svelte';
+	import SyncHeader from '$lib/components/SyncHeader.svelte';
+	import Changelog from '$lib/components/Changelog.svelte';
 	import { syncPull, syncPush, pendingCount, syncing, refreshPending } from '$lib/sync.js';
 	import { prefetchOffline } from '$lib/offlinePrefetch.js';
 	import { APP_VERSION, SHELL_VERSION } from '$lib/shell.js';
@@ -34,7 +34,6 @@
 	import Kilometros from './pages/Kilometros.svelte';
 	import KilometroVehiculo from './pages/KilometroVehiculo.svelte';
 	import TicketOxxoGasDetalle from './pages/TicketOxxoGasDetalle.svelte';
-	import LogoTraceLoader from '$lib/effects/LogoTraceLoader.svelte';
 
 	let ready = $state(false);
 	let splashDone = $state(false);
@@ -132,7 +131,7 @@
 
 {#if !splashDone}
 	<div class="splash">
-		<LogoTraceLoader size={120} />
+		<img class="splash-logo-img" src="/admon_logo.png" alt="Admon ECCSA" />
 		<div class="splash-title">Admon</div>
 		<div class="splash-msg">{splashMsg}</div>
 		<div class="splash-bar">

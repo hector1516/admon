@@ -4,7 +4,7 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { header, actualizar } from '$lib/cotizacionesApi.js';
 	import { COLOR_LABEL, folioFmt } from '$lib/cotizaciones.js';
-	import Paginacion from '../components/Paginacion.svelte';
+	import Paginacion from '$lib/components/Paginacion.svelte';
 
 	// Cambio rápido de estatus (los 3 colores del HUB).
 
