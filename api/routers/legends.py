@@ -301,15 +301,9 @@ async def legends_weekly_winner(current_user: dict = Depends(get_current_user)):
         conn.close()
 
 
-@router.post("/api/legends/award")
-async def legends_award(payload: dict, current_user: dict = Depends(get_current_user)):
-    """Registra una métrica para el usuario autenticado."""
-    metrica = payload.get("metrica", "")
-    referencia_id = payload.get("referencia_id")
-    if metrica not in LEGENDS_METRICAS:
-        return {"error": f"Metrica '{metrica}' no reconocida. Disponibles: {list(LEGENDS_METRICAS.keys())}"}
-    legends_registrar_metrica(current_user["id"], metrica, referencia_id)
-    return {"ok": True, "metrica": metrica, "puntos": LEGENDS_METRICAS[metrica]}
+# Removed: /award and /cron/weekly-calculate endpoints
+# Write operations are centralized in WorkersAdmon.
+# Admon only reads from the DB via the read-only endpoints below.
 
 
 @router.get("/api/legends/celebrations")
@@ -404,41 +398,9 @@ async def legends_metrics_config():
     }
 
 
-@router.post("/api/legends/cron/weekly-calculate")
-async def legends_weekly_calculate():
-    """Cierra la semana anterior y rellena el historial. NO resetea puntos.
-
-    En producción lo ejecuta el worker `legends_cron` (domingo 03:00, hora
-    México). `PuntuacionSemanal` la reconstruye `legends_audit` desde
-    `HUB_ScoreLog`: el reset de las 3 AM borraba los puntos que la gente ya
-    había ganado desde la medianoche del domingo.
-    """
-    conn = get_connection()
-    try:
-        with conn.cursor(as_dict=True) as cur:
-            inicio, fin = _legends_core.semana_anterior_mx()
-            ganador = _legends_core.guardar_ganador(
-                cur, inicio, fin, conn=conn, notificar=False
-            )
-            nuevos = _legends_core.backfill_ganadores(
-                cur, conn=conn, notificar=False
-            )
-        if not ganador:
-            return {
-                "ok": False,
-                "detail": "La semana anterior ya estaba guardada o no tuvo actividad.",
-                "backfill": len(nuevos),
-            }
-        legends_notify_weekly_winner(ganador["id_usuario"], ganador["puntos"])
-        return {
-            "ok": True,
-            "ganador": legends_get_display_name(ganador["id_usuario"]),
-            "puntos": ganador["puntos"],
-            "semana": f"{ganador['fecha_inicio']} al {ganador['fecha_fin']}",
-            "backfill": len(nuevos),
-        }
-    finally:
-        conn.close()
+# Removed: /cron/weekly-calculate endpoint
+# Weekly calculation is handled by WorkersAdmon's cron_legends.py.
+# Admon only reads from the DB.
 
 
 # ============================================================================
