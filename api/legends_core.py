@@ -45,12 +45,12 @@ except Exception:  # pragma: no cover - respaldo para entornos sin pytz
 # Métricas que otorgan (o quitan) puntos. El orden importa para la guía.
 METRICAS: dict[str, int] = {
     "reporte_firmado": 10,
-    "kilometro": 4,
+    "kilometro": 5,
     "ticket_oxxogas": 3,
     "servicio": 0,          # se calcula por horas trabajadas
-    "firma_remota": 6,
-    "racha_dia": 2,         # bonus diario, lo otorga el auditor
-    "vale_generado": -1,    # solo cuando el vale queda GENERADO/CERRADO
+    "firma_remota": 8,
+    "racha_dia": 3,         # bonus diario, lo otorga el auditor
+    "vale_generado": -2,    # solo cuando el vale queda GENERADO/CERRADO
     "comida_reporte": -1,
     # Métricas de oficina (Admon)
     "cotizacion_creada": 2,
@@ -239,6 +239,7 @@ NIVELES: list[dict[str, Any]] = [
 ]
 
 NIVEL_POR_NOMBRE = {n["nombre"]: n for n in NIVELES}
+ICONO_NIVEL = {n["nombre"]: n["icono"] for n in NIVELES}
 
 
 def nivel_de(puntos: int) -> dict[str, Any]:
