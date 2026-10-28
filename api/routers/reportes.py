@@ -9,6 +9,7 @@ from typing import Optional, List, Dict, Any
 router = APIRouter()
 from api.routers.pdf import ReporteCreate, ReporteUpdate, ReporteFotosSave, ReporteTecnicosSave, ReporteSignatureSave
 from api.routers.ia import IaConversacionCreate, IaMensajeCreate
+from api.routers.passkeys import legends_registrar_metrica
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 

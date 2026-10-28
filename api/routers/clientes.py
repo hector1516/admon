@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
+from api.routers.passkeys import legends_registrar_metrica
 
 class ClienteCreate(BaseModel):
     id_cliente: str = ""
