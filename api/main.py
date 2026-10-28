@@ -29,7 +29,9 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 # siempre; este default solo aplica si faltara.
 DB_SERVER = os.getenv("HUB_DB_SERVER", "10.188.141.15")
 DB_USER = os.getenv("HUB_DB_USER", "sa")
-DB_PASSWORD = os.getenv("HUB_DB_PASSWORD", "eyccazo")
+DB_PASSWORD = os.getenv("HUB_DB_PASSWORD", "")
+if not DB_PASSWORD:
+    raise RuntimeError("HUB_DB_PASSWORD no definida — no se puede conectar a la BD")
 DB_DATABASE = os.getenv("HUB_DB_DATABASE", "ECCSA_Admon")
 
 
@@ -64,7 +66,9 @@ def send_email_with_multiple_pdfs(to_email: str, subject: str, body: str, attach
         smtp_host = os.getenv("HUB_SMTP_SERVER", "smtp.office365.com")
         smtp_port = int(os.getenv("HUB_SMTP_PORT", "587"))
         smtp_user = os.getenv("HUB_SMTP_USER", "sistemas@ecc-sa.com.mx")
-        smtp_pass = os.getenv("HUB_SMTP_PASSWORD", "eyccazo")
+        smtp_pass = os.getenv("HUB_SMTP_PASSWORD", "")
+        if not smtp_pass:
+            raise RuntimeError("HUB_SMTP_PASSWORD no definida — no se puede enviar correo")
 
         msg = MIMEMultipart()
         msg["Subject"] = subject

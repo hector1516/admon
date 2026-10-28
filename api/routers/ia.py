@@ -512,7 +512,7 @@ def _passkey_secret() -> str:
                 )
         conn.close()
     except Exception:
-        secret = "admon-passkey-boot-secret"  # inestable: solo si la BD falla
+        raise RuntimeError("No se pudo obtener el secreto de passkeys (BD no disponible y sin env JWT_SECRET)")
     _PASSKEY_SECRET_CACHE["secret"] = secret
     return secret
 

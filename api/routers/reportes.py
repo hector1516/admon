@@ -762,7 +762,9 @@ async def api_reporte_enviar(id_reporte: int, email: str, current_user: dict = D
         smtp_host = os.getenv("HUB_SMTP_SERVER", "smtp.office365.com")
         smtp_port = int(os.getenv("HUB_SMTP_PORT", "587"))
         smtp_user = os.getenv("HUB_SMTP_USER", "sistemas@ecc-sa.com.mx")
-        smtp_pass = os.getenv("HUB_SMTP_PASSWORD", "eyccazo")
+        smtp_pass = os.getenv("HUB_SMTP_PASSWORD", "")
+        if not smtp_pass:
+            raise RuntimeError("HUB_SMTP_PASSWORD no definida — no se puede enviar correo")
 
         msg = MIMEMultipart()
         msg["Subject"] = f"Reporte de Servicio {row[1]} - {row[2]}"
