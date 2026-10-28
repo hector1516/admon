@@ -1474,10 +1474,10 @@ def _registrar_metrica(id_usuario: int, metrica: str, referencia_id: int = None,
     }
     if metrica in _idempotent and referencia_id is not None:
         try:
-        from db import get_connection
-    except ImportError:
-        from api.db import get_connection
-    conn0 = get_connection()
+            from db import get_connection
+        except ImportError:
+            from api.db import get_connection
+        conn0 = get_connection()
         with conn0.cursor() as cur0:
             cur0.execute(
                 "SELECT 1 AS existe FROM HUB_ScoreLog WHERE IdUsuario=%s AND Metrica=%s AND ReferenciaId=%s",
