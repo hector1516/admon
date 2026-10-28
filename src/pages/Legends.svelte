@@ -273,13 +273,13 @@
 		if ($online) {
 			try {
 				const [s, a, r, w, wh, cel, sl] = await Promise.all([
-					api.get('/api/legends/score').catch(() => null),
-					api.get('/api/legends/avatar').catch(() => null),
-					api.get('/api/legends/ranking').catch(() => ({ ranking: [] })),
-					api.get('/api/legends/weekly-winner').catch(() => null),
-					api.get('/api/legends/winners').catch(() => ({ winners: [] })),
-					api.get('/api/legends/celebrations').catch(() => null),
-					api.get('/api/legends/score-log').catch(() => null),
+					api.get('/legends/score').catch(() => null),
+					api.get('/legends/avatar').catch(() => null),
+					api.get('/legends/ranking').catch(() => ({ ranking: [] })),
+					api.get('/legends/weekly-winner').catch(() => null),
+					api.get('/legends/winners').catch(() => ({ winners: [] })),
+					api.get('/legends/celebrations').catch(() => null),
+					api.get('/legends/score-log').catch(() => null),
 				]);
 				score = s;
 				avatar = a;
