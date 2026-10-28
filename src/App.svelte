@@ -34,7 +34,7 @@
 	import Kilometros from './pages/Kilometros.svelte';
 	import KilometroVehiculo from './pages/KilometroVehiculo.svelte';
 	import TicketOxxoGasDetalle from './pages/TicketOxxoGasDetalle.svelte';
-	import Panel from './pages/Panel.svelte';
+	import LogoTraceLoader from '$lib/effects/LogoTraceLoader.svelte';
 
 	let ready = $state(false);
 	let splashDone = $state(false);
@@ -132,7 +132,7 @@
 
 {#if !splashDone}
 	<div class="splash">
-		<img class="splash-logo-img" src="/admon_logo.png" alt="Admon ECCSA" />
+		<LogoTraceLoader size={120} />
 		<div class="splash-title">Admon</div>
 		<div class="splash-msg">{splashMsg}</div>
 		<div class="splash-bar">
