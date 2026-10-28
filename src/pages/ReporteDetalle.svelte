@@ -74,7 +74,7 @@
 				tiempo_traslado: Number(r.TiempoTraslado || 0),
 				tiempo_comida: Number(r.TiempoComida || 0),
 				maquina_linea: r.MaquinaLinea || '',
-				tecnicos_adicionales: (t || []).filter(x => x !== r.Tecnico).join(', ')
+				tecnicos_adicionales: (t || []).filter(x => x !== r.Tecnico)
 			};
 		} catch (e) {
 			error = e.message === 'Sesión expirada' ? e.message : `Error: ${e.message}`;
@@ -100,10 +100,9 @@
 		msg = '';
 		busy = true;
 		try {
-			const tecnicosAdic = editForm.tecnicos_adicionales
-				.split(',')
-				.map(s => s.trim())
-				.filter(Boolean);
+			const tecnicosAdic = Array.isArray(editForm.tecnicos_adicionales)
+				? editForm.tecnicos_adicionales
+				: (editForm.tecnicos_adicionales || '').split(',').map(s => s.trim()).filter(Boolean);
 			const res = await fetch(`/api/reportes/${idReporte}`, {
 				method: 'PUT',
 				headers: apiHeaders(),
@@ -385,8 +384,20 @@
 					<div class="field"><label>Comida</label><select class="input" bind:value={editForm.tiempo_comida}><option value="0">No</option><option value="1">Sí</option></select></div>
 				</div>
 				<div class="field">
-					<label>Ingenieros adicionales (coma)</label>
-					<input class="input" bind:value={editForm.tecnicos_adicionales} placeholder="Juan Pérez, María López…" />
+					<label>Ingenieros Adicionales:</label>
+					<div class="tech-grid">
+						{#each tecnicosHub.filter(t => t !== editForm.tecnico) as t}
+							<label class="tech-check">
+								<input type="checkbox" checked={Array.isArray(editForm.tecnicos_adicionales) && editForm.tecnicos_adicionales.includes(t)} onchange={() => {
+									if (!Array.isArray(editForm.tecnicos_adicionales)) editForm.tecnicos_adicionales = [];
+									const idx = editForm.tecnicos_adicionales.indexOf(t);
+									if (idx >= 0) editForm.tecnicos_adicionales.splice(idx, 1);
+									else editForm.tecnicos_adicionales.push(t);
+								}} />
+								{t}
+							</label>
+						{/each}
+					</div>
 				</div>
 				<div class="grid-2">
 					<button class="btn btn-secondary btn-block" on:click={() => { editando = false; editForm = { ...editForm }; }}>❌ Cancelar</button>
@@ -444,8 +455,20 @@
 			{/if}
 			{#if editando}
 				<div class="field" style="margin-top: 0.5rem;">
-					<label>Ingenieros adicionales (coma)</label>
-					<input class="input" bind:value={editForm.tecnicos_adicionales} placeholder="Juan Pérez, María López…" />
+					<label>Ingenieros Adicionales:</label>
+					<div class="tech-grid">
+						{#each tecnicosHub.filter(t => t !== editForm.tecnico) as t}
+							<label class="tech-check">
+								<input type="checkbox" checked={Array.isArray(editForm.tecnicos_adicionales) && editForm.tecnicos_adicionales.includes(t)} onchange={() => {
+									if (!Array.isArray(editForm.tecnicos_adicionales)) editForm.tecnicos_adicionales = [];
+									const idx = editForm.tecnicos_adicionales.indexOf(t);
+									if (idx >= 0) editForm.tecnicos_adicionales.splice(idx, 1);
+									else editForm.tecnicos_adicionales.push(t);
+								}} />
+								{t}
+							</label>
+						{/each}
+					</div>
 				</div>
 			{/if}
 		</div>

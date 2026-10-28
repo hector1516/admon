@@ -320,8 +320,14 @@ async def api_create_reporte(body: ReporteCreate, current_user: dict = Depends(g
         # Tecnicos adicionales
         if id_reporte and body.tecnicos_adicionales:
             for t in body.tecnicos_adicionales:
-                cursor.execute("SELECT Id FROM HUB_Users WHERE Nombre = %s", (t.strip(),))
+                t = (t or "").strip()
+                if not t:
+                    continue
+                cursor.execute("SELECT Id FROM HUB_Users WHERE LTRIM(RTRIM(Nombre)) = %s", (t,))
                 ur = cursor.fetchone()
+                if not ur:
+                    cursor.execute("SELECT Id FROM HUB_Users WHERE LTRIM(RTRIM(Nombre)) LIKE %s AND Activo = 1", (f"%{t}%",))
+                    ur = cursor.fetchone()
                 if ur:
                     cursor.execute("INSERT INTO ReportesServicioTecnicos (IdReporte, IdUsuario) VALUES (%s, %s)", (id_reporte, ur[0]))
             conn.commit()
@@ -394,8 +400,14 @@ async def api_update_reporte(id_reporte: int, body: ReporteUpdate, current_user:
         if body.tecnicos_adicionales is not None:
             cursor.execute("DELETE FROM ReportesServicioTecnicos WHERE IdReporte = %s", (int(id_reporte),))
             for t in body.tecnicos_adicionales:
-                cursor.execute("SELECT Id FROM HUB_Users WHERE Nombre = %s", (t.strip(),))
+                t = (t or "").strip()
+                if not t:
+                    continue
+                cursor.execute("SELECT Id FROM HUB_Users WHERE LTRIM(RTRIM(Nombre)) = %s", (t,))
                 ur = cursor.fetchone()
+                if not ur:
+                    cursor.execute("SELECT Id FROM HUB_Users WHERE LTRIM(RTRIM(Nombre)) LIKE %s AND Activo = 1", (f"%{t}%",))
+                    ur = cursor.fetchone()
                 if ur:
                     cursor.execute("INSERT INTO ReportesServicioTecnicos (IdReporte, IdUsuario) VALUES (%s, %s)", (id_reporte, ur[0]))
 
