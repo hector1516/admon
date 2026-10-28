@@ -1,0 +1,101 @@
+/* responsive.css — Mejoras responsive para Admon
+   Se importa en main.js después de app.css.
+   Breakpoints: móvil <768px, tablet 768-1024px, desktop >1024px */
+
+/* ── Base: touch targets mínimos ── */
+button, a, input, select, textarea {
+    min-height: 44px;
+}
+
+/* ── Móvil (<768px) ── */
+@media (max-width: 767px) {
+    /* Tablas: scroll horizontal */
+    .tabla, table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Formularios: una columna */
+    .empresa-form, form.grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Acciones: una columna */
+    .acciones {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Tarjetas: ancho completo */
+    .card, .tarjeta {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    /* Padding reducido */
+    .page, .container {
+        padding: 8px !important;
+    }
+
+    /* Texto más grande para legibilidad */
+    body {
+        font-size: 16px;
+    }
+
+    /* Inputs: evitar zoom en iOS */
+    input, select, textarea {
+        font-size: 16px !important;
+    }
+
+    /* Sidebar/nav: ocultar en móvil */
+    .sidebar {
+        display: none;
+    }
+}
+
+/* ── Tablet (768px-1024px) ── */
+@media (min-width: 768px) and (max-width: 1024px) {
+    /* Tablas: scroll horizontal si es necesario */
+    .tabla, table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Acciones: 2 columnas */
+    .acciones {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    /* Padding moderado */
+    .page, .container {
+        padding: 12px !important;
+    }
+
+    /* Touch targets */
+    button, a, input, select, textarea {
+        min-height: 44px;
+    }
+}
+
+/* ── iPad específico (4:3 aspect ratio) ── */
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) {
+    /* Layout de una columna en portrait */
+    .module-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    /* Layout de dos columnas en landscape */
+    .module-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ── Desktop (>1024px) ── */
+@media (min-width: 1025px) {
+    /* Layout normal de desktop */
+    .acciones {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+}
