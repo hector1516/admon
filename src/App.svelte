@@ -9,6 +9,7 @@
 	import { syncPull, syncPush, pendingCount, syncing, refreshPending } from '$lib/sync.js';
 	import { prefetchOffline } from '$lib/offlinePrefetch.js';
 	import { APP_VERSION, SHELL_VERSION } from '$lib/shell.js';
+	import './responsive.css';
 	import Login from './pages/Login.svelte';
 	import Dashboard from './pages/Dashboard.svelte';
 	import Cotizaciones from './pages/Cotizaciones.svelte';
