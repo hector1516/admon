@@ -98,4 +98,20 @@ button, a, input, select, textarea {
     .acciones {
         grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     }
+}/* Grid classes for report edit form */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+
+/* Responsive: stack on mobile */
+@media (max-width: 767px) {
+    .grid-2, .grid-3, .grid-4 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* Tablet: 2 columns for grid-3 and grid-4 */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
 }
