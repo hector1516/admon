@@ -473,24 +473,6 @@
 					</ul>
 				</div>
 			{/if}
-			{#if editando}
-				<div class="field" style="margin-top: 0.5rem;">
-					<label>Ingenieros Adicionales:</label>
-					<div class="tech-grid">
-						{#each tecnicosHub.filter(t => t !== editForm.tecnico) as t}
-							<label class="tech-check">
-								<input type="checkbox" checked={Array.isArray(editForm.tecnicos_adicionales) && editForm.tecnicos_adicionales.includes(t)} onchange={() => {
-									if (!Array.isArray(editForm.tecnicos_adicionales)) editForm.tecnicos_adicionales = [];
-									const idx = editForm.tecnicos_adicionales.indexOf(t);
-									if (idx >= 0) editForm.tecnicos_adicionales.splice(idx, 1);
-									else editForm.tecnicos_adicionales.push(t);
-								}} />
-								{t}
-							</label>
-						{/each}
-					</div>
-				</div>
-			{/if}
 		</div>
 
 		<!-- Fotos -->
