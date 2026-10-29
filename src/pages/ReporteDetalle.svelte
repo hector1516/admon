@@ -342,9 +342,20 @@
 						<label>Cliente *</label>
 						<input class="input" bind:value={editForm.cliente} />
 					</div>
-					<div class="field">
-						<label>Fecha *</label>
-						<input type="date" class="input" bind:value={editForm.fecha} />
+					<div class="datetime-group">
+						<div class="datetime-label">Inicio</div>
+						<div class="datetime-row">
+							<input class="input" type="date" bind:value={editForm.fecha} />
+							<input class="input" type="time" bind:value={editForm.fecha_inicio} />
+						</div>
+					</div>
+
+					<div class="datetime-group">
+						<div class="datetime-label">Fin</div>
+						<div class="datetime-row">
+							<input class="input" type="date" bind:value={editForm.fecha} />
+							<input class="input" type="time" bind:value={editForm.fecha_fin} />
+						</div>
 					</div>
 				</div>
 				<div class="grid-2">
@@ -541,11 +552,10 @@
 </div>
 
 <style>
-	.card-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
-	.hint { font-size: 0.75rem; color: var(--color-text-muted); margin-top: 0.15rem; }
-	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
-	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
-	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
-	.card { margin-bottom: 0.75rem; }
-	canvas { cursor: crosshair; }
+	.tech-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+	.tech-check { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; background: rgba(255,255,255,0.05); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer; }
+	.datetime-group { margin-bottom: 0.5rem; }
+	.datetime-label { font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem; }
+	.datetime-row { display: flex; gap: 0.5rem; }
+	.datetime-row .input { flex: 1; }
 </style>
