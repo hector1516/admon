@@ -40,7 +40,11 @@
 		try {
 			nombreCliente = await clienteNombre(idc);
 			if (nombreCliente) contactos = await clienteContactos(idc);
-			modoContacto = 'existe';
+			if (contactos.length === 0) {
+				modoContacto = 'nuevo';
+			} else {
+				modoContacto = 'existe';
+			}
 			contactoSel = '';
 		} catch (e) {
 			error = e.message === 'Sesión expirada' ? e.message : '';
@@ -56,11 +60,12 @@
 	}
 
 	let contactoFinal = $derived(
-		modoContacto === 'nuevo' ? contactoNuevo.trim() : contactoSel === 'nuevo' ? contactoNuevo.trim() : contactoSel
+		(contactos.length === 0 || modoContacto === 'nuevo') ? contactoNuevo.trim() :
+		(contactoSel === 'nuevo' ? contactoNuevo.trim() : contactoSel)
 	);
 
 	let listo = $derived(
-		idCliente.trim() && nombreCliente && contactoFinal && descripcion.trim() && !busy
+		idCliente.trim() && nombreCliente && (contactoFinal || contactoNuevo.trim()) && descripcion.trim() && !busy
 	);
 
 	async function onCrear() {
@@ -68,7 +73,8 @@
 		msg = '';
 		busy = true;
 		try {
-			const r = await crear({ id_cliente: idCliente, contacto: contactoFinal, descripcion: descripcion.trim() });
+			const contacto = contactoFinal || contactoNuevo.trim();
+		const r = await crear({ id_cliente: idCliente, contacto: contacto, descripcion: descripcion.trim() });
 			if (r.pendiente) msg = '⏳ Guardada offline. Se sincronizará al volver la red.';
 			navigate(`/cotizaciones/${r.folio ?? r.folioKey}`);
 		} catch (e) {
