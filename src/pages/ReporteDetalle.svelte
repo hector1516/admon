@@ -349,8 +349,17 @@
 				</div>
 				<div class="grid-2">
 					<div class="field">
-						<label>Contacto</label>
-						<input class="input" bind:value={editForm.contacto} />
+						<label>Contacto:</label>
+						{#if tecnicosHub.length > 0}
+							<select class="input" bind:value={editForm.contacto}>
+								<option value="">-- Seleccionar --</option>
+								{#each tecnicosHub as t}<option value={t.Nombre || t}>{t.Nombre || t}</option>{/each}
+								<option value="__custom">[+] Nuevo contacto</option>
+							</select>
+						{/if}
+						{#if tecnicosHub.length === 0 || editForm.contacto === '__custom'}
+							<input class="input" bind:value={editForm.contacto} placeholder="Nombre del contacto" />
+						{/if}
 					</div>
 					<div class="field">
 						<label>Correo</label>
