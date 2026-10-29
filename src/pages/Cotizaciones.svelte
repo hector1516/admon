@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
+import Spotlight from '$lib/components/effects/Spotlight.svelte';
 	import { auth } from '$lib/stores/auth.js';
 	import { online } from '$lib/stores/online.js';
 	import { listar } from '$lib/cotizacionesApi.js';
@@ -131,10 +132,11 @@
 	{:else}
 		<div class="list">
 			{#each pagActual as c (c.idLocal)}
-				<button
-					class="list-card"
-					on:click={() => navigate(`/cotizaciones/${c.folio ?? c.idLocal}`)}
-				>
+				<Spotlight class="list-card-spotlight">
+					<button
+						class="list-card"
+						on:click={() => navigate(`/cotizaciones/${c.folio ?? c.idLocal}`)}
+					>
 					<div style="flex: 1; min-width: 0;">
 						<div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
 							<strong>{c.folio != null ? folioFmt(c.folio) : '⏳ Sin folio'}</strong>
@@ -156,6 +158,7 @@
 						<span style="color: var(--color-text-muted);">›</span>
 					</div>
 				</button>
+				</Spotlight>
 			{/each}
 			<Paginacion total={busqueda.trim() ? filtradas.length : total} bind:pagina
 				porPagina={POR_PAGINA} etiqueta="cotizaciones" />
