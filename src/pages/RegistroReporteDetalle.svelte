@@ -301,11 +301,11 @@
 			tiempo_traslado: Number(reporte.TiempoTraslado || 0),
 			tiempo_comida: Number(reporte.TiempoComida || 0),
 			maquina_linea: reporte.MaquinaLinea || '',
-			tecnicos_adicionales: ''
+			tecnicos_adicionales: []
 		};
 		// Cargar técnicos adicionales actuales
 		if (reporte._tecnicos_adicionales) {
-			editForm.tecnicos_adicionales = reporte._tecnicos_adicionales.join(', ');
+			editForm.tecnicos_adicionales = reporte._tecnicos_adicionales;
 		}
 		editando = true;
 	}
@@ -327,10 +327,9 @@
 		msg = '';
 		busy = true;
 		try {
-			const tecnicosAdic = editForm.tecnicos_adicionales
-				.split(',')
-				.map(s => s.trim())
-				.filter(Boolean);
+			const tecnicosAdic = Array.isArray(editForm.tecnicos_adicionales)
+				? editForm.tecnicos_adicionales
+				: (editForm.tecnicos_adicionales || '').split(',').map(s => s.trim()).filter(Boolean);
 			const res = await fetch(`/api/reportes/${idReporte}`, {
 				method: 'PUT',
 				headers: apiHeaders(),
@@ -366,11 +365,11 @@
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/registro_reportes')} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/registro_reportes')} title="Volver">⬅️</button>
 		<h1>📋 {reporte.Folio || 'Cargando…'}</h1>
 		<div style="flex:1"></div>
 		{#if !editando && !loading}
-			<button class="btn btn-sm btn-primary" on:click={empezarEdicion}>✏️ Editar</button>
+			<button class="btn btn-sm btn-primary" onclick={empezarEdicion}>✏️ Editar</button>
 		{/if}
 	</div>
 
@@ -439,8 +438,20 @@
 					<div class="field"><label>Comida</label><select class="input" bind:value={editForm.tiempo_comida}><option value="0">No</option><option value="1">Sí</option></select></div>
 				</div>
 				<div class="field">
-					<label>Ingenieros adicionales (coma)</label>
-					<input class="input" bind:value={editForm.tecnicos_adicionales} placeholder="Juan Pérez, María López…" />
+					<label>Ingenieros Adicionales:</label>
+					<div class="tech-grid">
+						{#each tecnicosHub.filter(t => t !== editForm.tecnico) as t}
+							<label class="tech-check">
+								<input type="checkbox" checked={Array.isArray(editForm.tecnicos_adicionales) && editForm.tecnicos_adicionales.includes(t)} onchange={() => {
+									if (!Array.isArray(editForm.tecnicos_adicionales)) editForm.tecnicos_adicionales = [];
+									const idx = editForm.tecnicos_adicionales.indexOf(t);
+									if (idx >= 0) editForm.tecnicos_adicionales.splice(idx, 1);
+									else editForm.tecnicos_adicionales.push(t);
+								}} />
+								{t}
+							</label>
+						{/each}
+					</div>
 				</div>
 				<div class="field">
 					<label>Estatus</label>
@@ -452,8 +463,8 @@
 					</select>
 				</div>
 				<div class="grid-2" style="margin-top: 0.5rem;">
-					<button class="btn btn-secondary btn-block" on:click={cancelarEdicion}>❌ Cancelar</button>
-					<button class="btn btn-primary btn-block" on:click={guardarEdicion} disabled={busy}>💾 Guardar</button>
+					<button class="btn btn-secondary btn-block" onclick={cancelarEdicion}>❌ Cancelar</button>
+					<button class="btn btn-primary btn-block" onclick={guardarEdicion} disabled={busy}>💾 Guardar</button>
 				</div>
 			{:else}
 				<div class="grid-2" style="font-size: 0.9rem;">
@@ -494,14 +505,14 @@
 			<div class="card-title">📸 Evidencia Fotográfica ({(reporte._fotos?.length || 0)}/6)</div>
 
 			{#if (reporte._fotos?.length || 0) < maxFotos}
-				<input type="file" accept="image/*" multiple on:change={handleFotosSelect} class="input" style="margin: 0.5rem 0;" />
+				<input type="file" accept="image/*" multiple onchange={handleFotosSelect} class="input" style="margin: 0.5rem 0;" />
 				{#if fotosPreview.length > 0}
 					<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
 						{#each fotosPreview as p}
 							<img src={p} alt="Preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--color-border);" />
 						{/each}
 					</div>
-					<button class="btn btn-primary btn-sm" on:click={guardarFotos} disabled={busy}>💾 Guardar Fotos</button>
+					<button class="btn btn-primary btn-sm" onclick={guardarFotos} disabled={busy}>💾 Guardar Fotos</button>
 				{/if}
 			{:else}
 				<p style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 0.5rem;">ℹ️ Este reporte ya tiene el máximo de 6 fotos.</p>
@@ -522,30 +533,30 @@
 		<!-- Acciones -->
 		<div class="card">
 			<div class="grid-2" style="gap: 0.5rem;">
-				<button class="btn btn-primary" on:click={descargarPDF} disabled={pdfLoading} style="flex: 1;">
+				<button class="btn btn-primary" onclick={descargarPDF} disabled={pdfLoading} style="flex: 1;">
 					{pdfLoading ? '⏳ Cargando…' : '📥 Descargar PDF'}
 				</button>
-				<button class="btn btn-info" on:click={abrirPreview} disabled={pdfLoading} style="flex: 1;">
+				<button class="btn btn-info" onclick={abrirPreview} disabled={pdfLoading} style="flex: 1;">
 					👁️ Previsualizar
 				</button>
 			</div>
 			<div class="grid-2" style="margin-top: 0.5rem; gap: 0.5rem;">
-				<button class="btn btn-secondary" on:click={compartirPDF} disabled={pdfLoading} style="flex: 1;">
+				<button class="btn btn-secondary" onclick={compartirPDF} disabled={pdfLoading} style="flex: 1;">
 					📤 Compartir
 				</button>
 				{#if reporte.Eliminado === 1 || reporte.Eliminado === true}
-					<button class="btn btn-success" on:click={restaurar} disabled={busy} style="flex: 1;">
+					<button class="btn btn-success" onclick={restaurar} disabled={busy} style="flex: 1;">
 						♻️ Restaurar
 					</button>
 				{:else}
-					<button class="btn btn-danger" on:click={moverAPapelera} disabled={busy} style="flex: 1;">
+					<button class="btn btn-danger" onclick={moverAPapelera} disabled={busy} style="flex: 1;">
 						🗑️ Mover a papelera
 					</button>
 				{/if}
 			</div>
 			{#if reporte.Eliminado === 1 || reporte.Eliminado === true}
 				<div class="grid-1" style="margin-top: 0.5rem;">
-					<button class="btn btn-danger" on:click={eliminarDefinitivo} disabled={busy} style="width: 100%;">
+					<button class="btn btn-danger" onclick={eliminarDefinitivo} disabled={busy} style="width: 100%;">
 						💀 Eliminar definitivamente
 					</button>
 				</div>
@@ -571,4 +582,6 @@
 	.btn-info { background: var(--color-primary); color: white; border: none; }
 	.btn-info:hover:not(:disabled) { filter: brightness(1.1); }
 	.btn-info:disabled { opacity: 0.5; cursor: not-allowed; }
+	.tech-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+	.tech-check { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; background: rgba(255,255,255,0.05); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer; }
 </style>
