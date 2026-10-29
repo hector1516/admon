@@ -9,6 +9,8 @@
 		registerPasskey,
 		randomDeviceName
 	} from '$lib/passkey.js';
+import AuroraBackground from '$lib/components/effects/AuroraBackground.svelte';
+import TextGenerate from '$lib/components/effects/TextGenerate.svelte';
 
 	let email = $state('');
 	let password = $state('');
@@ -113,10 +115,11 @@
 	}
 </script>
 
-<div class="login-page">
+<AuroraBackground class="login-page">
+	<div class="login-page-inner">
 	<div class="login-card">
 		<img class="logo-img" src="/admon_logo.png" alt="Admon ECCSA" />
-		<h1>ADMON</h1>
+		<h1><TextGenerate text="ADMON" /></h1>
 		<p class="subtitle">ECCSA AUTOMATION</p>
 
 		{#if privateMode}
@@ -193,6 +196,7 @@
 		{/if}
 	</div>
 </div>
+</AuroraBackground>
 
 <style>
 	.login-page {
