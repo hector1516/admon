@@ -2,7 +2,7 @@
  * REGLA DURA (lección Field): solo interceptar GET. Nunca responder POST/PUT
  * con FormData: el SW perdería el body y el backend recibiría size=0 (422).
  */
-const CACHE = 'admon-v1.0.5';
+const CACHE = 'admon-v1.0.6';
 const APP_SHELL = [
 	'/',
 	'/index.html',
