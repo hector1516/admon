@@ -296,6 +296,26 @@ async def cotizacion_update(folio: int, body: CotizacionUpdate, current_user: di
         subtotal = 0.0
         if nuevo_color == 2 and cur_color != 2:
             subtotal = legends_subtotal_cotizacion(cursor, folio)
+        # Historial de cambios: registrar en HUB_ActivityLog
+        try:
+            cambios = []
+            if str(cur_row[0] or "").strip().upper() != idc:
+                cambios.append(f"Cliente: {cur_row[0]} -> {idc}")
+            if str(cur_row[1] or "").strip() != body.contacto.strip():
+                cambios.append(f"Contacto: {cur_row[1]} -> {body.contacto.strip()}")
+            if str(cur_row[2] or "").strip() != body.descripcion.strip():
+                cambios.append(f"Descripcion modificada")
+            if cur_color != nuevo_color:
+                cambios.append(f"Estatus: {cur_color} -> {nuevo_color}")
+            if cambios:
+                uid = current_user.get("id")
+                nombre = current_user.get("nombre", "Sistema")
+                cursor.execute(
+                    "INSERT INTO HUB_ActivityLog (Usuario, Modulo, Accion) VALUES (%s, %s, %s)",
+                    (nombre, "Cotizaciones", f"Folio {folio}: " + "; ".join(cambios)),
+                )
+        except Exception:
+            pass
         conn.commit()
         conn.close()
 
@@ -324,6 +344,23 @@ async def cotizacion_update(folio: int, body: CotizacionUpdate, current_user: di
         return {"ok": True}
     except HTTPException:
         raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@router.get("/api/cotizaciones/{folio:int}/historial")
+async def cotizacion_historial(folio: int, current_user: dict = Depends(get_current_user)):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT Usuario, Accion, FechaHora FROM HUB_ActivityLog WHERE Modulo = 'Cotizaciones' AND Accion LIKE %s ORDER BY Fecha DESC",
+            (f"%Folio {folio}%",),
+        )
+        rows = cursor.fetchall()
+        conn.close()
+        return [{"usuario": r[0], "accion": r[1], "fecha": str(r[2])} for r in rows]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 

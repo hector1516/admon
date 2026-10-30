@@ -13,6 +13,9 @@
 	let error = $state('');
 	let msg = $state('');
 	let busy = $state(false);
+	let mostrandoHistorial = $state(false);
+	let historial = $state([]);
+	let cargandoHistorial = $state(false);
 
 	// --- Remisiones (port del HUB) ---
 	let rems = $state([]);
@@ -35,6 +38,24 @@
 	let tots = $derived(totales(items));
 	let bloqueado = $derived((h?.color ?? 0) === 1 || (h?.color ?? 0) === 2);
 	let pendiente = $derived(!h || h.folio == null || !h.synced);
+
+	async function cargarHistorial() {
+		cargandoHistorial = true;
+		try {
+			const res = await fetch(`/api/cotizaciones/${h?.folio}/historial`, { headers: auth.authHeader() });
+			const data = await res.json().catch(() => []);
+			historial = Array.isArray(data) ? data : [];
+		} catch (e) {
+			historial = [];
+		} finally {
+			cargandoHistorial = false;
+		}
+	}
+
+	async function abrirHistorial() {
+		mostrandoHistorial = true;
+		await cargarHistorial();
+	}
 
 	async function cargar() {
 		loading = true;
@@ -386,6 +407,34 @@
 			<p class="hint" style="margin-top: 0.5rem;">🔒 Bloqueada (lista para facturar / facturada).</p>
 		{/if}
 	{/if}
+	{#if mostrandoHistorial}
+		<div class="modal-overlay" on:click={() => mostrandoHistorial = false}>
+			<div class="modal" on:click|stopPropagation>
+				<div class="modal-header">
+					<h3>📜 Historial de cambios</h3>
+					<button class="btn btn-sm btn-secondary" on:click={() => mostrandoHistorial = false}>✕</button>
+				</div>
+				{#if cargandoHistorial}
+					<div class="empty">Cargando historial…</div>
+				{:else if historial.length === 0}
+					<div class="empty">Sin cambios registrados.</div>
+				{:else}
+					<div class="historial-list">
+						{#each historial as h (h.fecha)}
+							<div class="historial-item">
+								<div class="historial-meta">
+									<span class="historial-user">{h.usuario}</span>
+									<span class="historial-fecha">{h.fecha}</span>
+								</div>
+								<div class="historial-accion">{h.accion}</div>
+							</div>
+						{/each}
+					</div>
+				{/if}
+			</div>
+		</div>
+	{/if}
+
 </div>
 
 <style>
@@ -395,4 +444,14 @@
 	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
 	.hint { font-size: 0.8rem; color: var(--color-text-muted); }
 	.card { margin-bottom: 0.75rem; }
+	.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+	.modal { width: 90%; max-width: 600px; max-height: 80vh; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+	.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+	.modal-header h3 { margin: 0; font-size: 1.1rem; color: #f1f5f9; }
+	.historial-list { padding: 1rem; overflow-y: auto; flex: 1; }
+	.historial-item { padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+	.historial-meta { display: flex; justify-content: space-between; margin-bottom: 0.25rem; }
+	.historial-user { font-weight: 600; color: #FFAE00; font-size: 0.8rem; }
+	.historial-fecha { font-size: 0.7rem; color: #64748b; }
+	.historial-accion { font-size: 0.85rem; color: #e2e8f0; }
 </style>
