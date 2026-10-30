@@ -289,10 +289,34 @@ async def ia_send_mensaje(id_conversacion: int, body: IaMensajeCreate, current_u
             except Exception as ex:
                 return f"Error al procesar reportes: {str(ex)}"
 
+        def search_emails(query: str, limite: int = 10) -> str:
+            """Busca correos electronicos en los buzones asignados al usuario."""
+            try:
+                cuentas = execute_readonly_sql(
+                    f"SELECT IdCuenta FROM HUB_MailboxCuentasLinks WHERE IdUsuario = {user_id}"
+                )
+                if not cuentas or (isinstance(cuentas, list) and len(cuentas) > 0 and "Error" in str(cuentas[0])):
+                    return "No tienes buzones de correo asignados."
+                cuenta_ids = [str(c.get("IdCuenta", c.get("idcuenta", ""))) for c in cuentas if isinstance(c, dict)]
+                if not cuenta_ids:
+                    return "No tienes buzones de correo asignados."
+
+                ids_str = ",".join(cuenta_ids)
+                q_safe = query.replace("'", "''")
+                sql = f"SELECT TOP {limite} Id, FechaCorreo, RemitenteNombre, RemitenteEmail, Asunto, Extracto, Carpeta FROM HUB_MailboxMensajes WHERE IdCuenta IN ({ids_str}) AND Eliminado = 0 AND (Asunto LIKE '%{q_safe}%' OR RemitenteNombre LIKE '%{q_safe}%' OR RemitenteEmail LIKE '%{q_safe}%' OR Extracto LIKE '%{q_safe}%') ORDER BY FechaCorreo DESC"
+                res = execute_readonly_sql(sql)
+                if not res or (isinstance(res, list) and len(res) > 0 and "Error" in str(res[0])):
+                    return "No se encontraron correos con ese criterio."
+                import json
+                return json.dumps(res, default=str, ensure_ascii=False)
+            except Exception as ex:
+                return f"Error al buscar correos: {str(ex)}"
+
         tools_dict = {
             "execute_query": execute_query,
             "send_quote_pdf": send_quote_pdf,
-            "send_service_reports": send_service_reports
+            "send_service_reports": send_service_reports,
+            "search_emails": search_emails
         }
 
         # 6. System instruction CLON EXACTO del HUB
@@ -316,6 +340,11 @@ REGLAS DE SEGURIDAD:
 - Si el usuario NO es Administrador (Administrador es cuando is_admin={is_admin} es True, actualmente is_admin={is_admin}), solo puedes mostrarle información perteneciente a su propio IdUsuario ({user_id}) de las tablas de horas extras, vacaciones, reportes de servicio, etc. Para esto, siempre inyecta la condición `IdUsuario = {user_id}` en tus consultas SQL.
 - Tienes prohibido inventar o consultar datos de nómina u horas de otros usuarios si el usuario no es administrador.
 
+HABILIDADES DE BUSQUEDA DE CORREOS:
+- Si el usuario te pide buscar correos, usa la herramienta `search_emails` pasandole la palabra o frase a buscar. Solo busca en los buzones asignados al usuario.
+- Puedes buscar por remitente, asunto o contenido del correo.
+- Presenta los resultados en una tabla con fecha, remitente, asunto y extracto.
+
 HABILIDADES DE ENVÍO DE DOCUMENTOS:
 - Si el usuario te pide que le envíes una cotización, llama a la herramienta `send_quote_pdf` pasándole el folio. Puede enviar a otro correo o usuario si te lo especifica en el argumento `recipient_email`.
 - Si te pide que le envíes reportes de servicio por correo, llama a la herramienta `send_service_reports` pasándole la lista de folios. Puede enviar a otro correo o usuario si te lo especifica en el argumento `recipient_email`.
@@ -334,7 +363,7 @@ Sé claro, directo, estructurado y presenta los datos de forma elegante en tabla
         model = genai.GenerativeModel(
             model_name=model_name,
             system_instruction=system_instruction,
-            tools=[execute_query, send_quote_pdf, send_service_reports]
+            tools=[execute_query, send_quote_pdf, send_service_reports, search_emails]
         )
         
         chat = model.start_chat(history=historial[:-1] if len(historial) > 1 else [])
