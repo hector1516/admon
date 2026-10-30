@@ -292,6 +292,7 @@ async def ia_send_mensaje(id_conversacion: int, body: IaMensajeCreate, current_u
         def search_emails(query: str, limite: int = 10) -> str:
             """Busca correos electronicos en los buzones asignados al usuario."""
             try:
+                from api.main import execute_readonly_sql
                 cuentas = execute_readonly_sql(
                     f"SELECT IdCuenta FROM HUB_MailboxCuentasLinks WHERE IdUsuario = {user_id}"
                 )
@@ -304,6 +305,7 @@ async def ia_send_mensaje(id_conversacion: int, body: IaMensajeCreate, current_u
                 ids_str = ",".join(cuenta_ids)
                 q_safe = query.replace("'", "''")
                 sql = f"SELECT TOP {limite} Id, FechaCorreo, RemitenteNombre, RemitenteEmail, Asunto, Extracto, Carpeta FROM HUB_MailboxMensajes WHERE IdCuenta IN ({ids_str}) AND Eliminado = 0 AND (Asunto LIKE '%{q_safe}%' OR RemitenteNombre LIKE '%{q_safe}%' OR RemitenteEmail LIKE '%{q_safe}%' OR Extracto LIKE '%{q_safe}%') ORDER BY FechaCorreo DESC"
+                from api.main import execute_readonly_sql
                 res = execute_readonly_sql(sql)
                 if not res or (isinstance(res, list) and len(res) > 0 and "Error" in str(res[0])):
                     return "No se encontraron correos con ese criterio."
