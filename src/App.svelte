@@ -13,6 +13,7 @@ import BusquedaGlobal from '$lib/components/BusquedaGlobal.svelte';
 	import './responsive.css';
 	import Login from './pages/Login.svelte';
 	import Dashboard from './pages/Dashboard.svelte';
+import Panel from './pages/Panel.svelte';
 	import Cotizaciones from './pages/Cotizaciones.svelte';
 	import CotizacionDetalle from './pages/CotizacionDetalle.svelte';
 	import CotizacionNueva from './pages/CotizacionNueva.svelte';
