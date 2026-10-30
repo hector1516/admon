@@ -135,6 +135,7 @@ import CotizacionComparar from './pages/CotizacionComparar.svelte';
 
 {#if !splashDone}
 	<div class="splash">
+		<img src="/oficina-eccsa.png" alt="Oficina ECCSA" style="max-width:300px;max-height:200px;object-fit:contain;margin-bottom:1rem;opacity:0.8;" />
 		<img class="splash-logo-img" src="/admon_logo.png" alt="Admon ECCSA" />
 		<div class="splash-title">Admon</div>
 		<div class="splash-msg">{splashMsg}</div>
