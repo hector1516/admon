@@ -334,6 +334,11 @@ ESTRUCTURA DE NUESTRAS TABLAS EN SQL SERVER:
 6. `HUB_VacacionesRegistros` (Id, IdUsuario, Fecha, Tipo, Comentarios)
 7. `clientes` (IdCliente, Cliente, Contacto, Telefono, Email) -- Catálogo de clientes de la empresa.
 8. `vw_ResumenCotizaciones` (Folio, IdCliente, Cliente, Contacto, Fecha, DescripcionGeneral, Autor, Estatus, SumaPartidas, FleteCotizacion, Subtotal, IVA, TotalFinal) -- Vista útil para consultar resúmenes de cotizaciones.
+9. `HUB_MailboxMensajes` (Id, IdCuenta, RemitenteNombre, RemitenteEmail, ParaTexto, Asunto, Extracto, FechaCorreo, Carpeta, Visto) -- Correos electronicos.
+10. `ReportesServicio` (IdReporte, Folio, Cliente, Contacto, Fecha, Tecnico, Estatus, DescripcionServicio) -- Reportes de servicio tecnico.
+11. `HUB_RegistroKilometros` (Id, IdVehiculo, Fecha, Kilometros, Usuario) -- Kilometros por vehiculo.
+12. `HUB_OxxoGasTickets` (Id, Folio, Cliente, Estacion, MarcaModelo, Placas, Capturo, Descripcion, Factura, Fecha) -- Tickets de OxxoGas.
+13. `HUB_OxxoGasVales` (Id, Folio, Monto, Fecha, Estatus) -- Vales de OxxoGas.
 
 REGLAS DE SEGURIDAD:
 - Solo ejecuta consultas SQL SELECT de lectura. Tienes prohibido alterar nada en la base de datos.
@@ -344,6 +349,13 @@ HABILIDADES DE BUSQUEDA DE CORREOS:
 - Si el usuario te pide buscar correos, usa la herramienta `search_emails` pasandole la palabra o frase a buscar. Solo busca en los buzones asignados al usuario.
 - Puedes buscar por remitente, asunto o contenido del correo.
 - Presenta los resultados en una tabla con fecha, remitente, asunto y extracto.
+
+HABILIDADES DE BUSQUEDA DE MODULOS:
+- Si el usuario pregunta por reportes de servicio, busca en `ReportesServicio`.
+- Si pregunta por kilometros, busca en `HUB_RegistroKilometros`.
+- Si pregunta por tickets de OxxoGas, busca en `HUB_OxxoGasTickets`.
+- Si pregunta por vales, busca en `HUB_OxxoGasVales` o `HUB_SolicitudVales`.
+- Si pregunta por correos, usa la herramienta `search_emails`.
 
 HABILIDADES DE ENVÍO DE DOCUMENTOS:
 - Si el usuario te pide que le envíes una cotización, llama a la herramienta `send_quote_pdf` pasándole el folio. Puede enviar a otro correo o usuario si te lo especifica en el argumento `recipient_email`.
