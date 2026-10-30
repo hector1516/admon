@@ -6,6 +6,7 @@
 	import { online, onlinePing } from '$lib/stores/online.js';
 	import SyncHeader from '$lib/components/SyncHeader.svelte';
 	import Changelog from '$lib/components/Changelog.svelte';
+import BusquedaGlobal from '$lib/components/BusquedaGlobal.svelte';
 	import { syncPull, syncPush, pendingCount, syncing, refreshPending } from '$lib/sync.js';
 	import { prefetchOffline } from '$lib/offlinePrefetch.js';
 	import { APP_VERSION, SHELL_VERSION } from '$lib/shell.js';
@@ -235,6 +236,7 @@
 			<Dashboard />
 		{/if}
 		<div class="version-badge">Admon v{APP_VERSION}</div>
+		<BusquedaGlobal />
 	</div>
 {:else}
 	<div class="splash">
