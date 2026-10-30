@@ -5,10 +5,6 @@
 	import { clientes } from '$lib/cotizacionesApi.js';
 	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
 
-	// Catálogo de clientes como el HUB: buscar, editar, eliminar y registrar.
-	// La lista se lee de Dexie (cotizacionesApi) así que abre sin conexión;
-	// los cambios (alta/edición/borrado) sí requieren conexión.
-
 	let lista = $state([]);
 	let loading = $state(true);
 	let error = $state('');
@@ -16,12 +12,10 @@
 	let busqueda = $state('');
 	let busy = $state(false);
 
-	// Selección / edición
 	let selId = $state(null);
 	let editNombre = $state('');
 	let editDias = $state(30);
 
-	// Nuevo
 	let mostrandoNuevo = $state(false);
 	let newId = $state('');
 	let newNombre = $state('');
@@ -165,8 +159,8 @@
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver">⬅️</button>
-		<h1>📇 Clientes</h1>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver">←</button>
+		<h1>🏢 Clientes</h1>
 		<div style="flex:1"></div>
 		<button
 			class="btn btn-sm btn-primary"
@@ -197,7 +191,7 @@
 			</div>
 			<div class="field">
 				<label for="nc-nombre">Razón social:</label>
-				<input id="nc-nombre" class="input" placeholder="Ej: Hussmann American…" bind:value={newNombre} />
+				<input id="nc-nombre" class="input" placeholder="Ej: Hussmann América…" bind:value={newNombre} />
 			</div>
 			<div class="field">
 				<label for="nc-dias">Días de pago:</label>
@@ -222,7 +216,7 @@
 				<button class="btn btn-secondary btn-block" on:click={() => (selId = null)}>❌ Cancelar</button>
 				<button class="btn btn-primary btn-block" on:click={guardarEdicion} disabled={busy}>💾 Guardar</button>
 			</div>
-			<button class="btn btn-danger btn-block" on:click={eliminar} disabled={busy}>🚨 Eliminar cliente</button>
+			<button class="btn btn-danger btn-block" on:click={eliminar} disabled={busy}>🗑️ Eliminar cliente</button>
 		</div>
 	{/if}
 
@@ -240,15 +234,13 @@
 	{:else if filtrados.length === 0}
 		<div class="empty">No hay clientes registrados.</div>
 	{:else}
-		<div class="list">
+		<div class="grid">
 			{#each filtrados as c (c.id_cliente)}
-				<button class="list-card" class:selected={selId === c.id_cliente} on:click={() => navigate(`/clientes/${c.id_cliente}`)}>
-					<div>
-						<div style="font-weight: 800; color: var(--color-primary-light);">{c.id_cliente}</div>
-						<div style="font-size: 0.9rem;">{c.nombre}</div>
-					</div>
-					<div style="text-align: right; font-size: 0.8rem; color: var(--color-text-muted);">
-						{c.dias_pago ?? 30} días
+				<button class="card-cliente" class:selected={selId === c.id_cliente} on:click={() => seleccionar(c)} title="Seleccionar para editar">
+					<div class="body">
+						<div class="id">{c.id_cliente}</div>
+						<div class="nombre">{c.nombre}</div>
+						<div class="dias">📅 {c.dias_pago ?? 30} días de pago</div>
 					</div>
 				</button>
 			{/each}
@@ -262,5 +254,34 @@
 	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
 	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
 	.card { margin-bottom: 0.75rem; }
-	.list-card.selected { border-color: var(--color-primary); }
+	.empty { text-align: center; color: #94a3b8; padding: 3rem 1rem; font-size: 0.9rem; }
+
+	.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem; }
+
+	.card-cliente {
+		text-align: left;
+		background: #1e293b;
+		border: 1px solid rgba(255, 255, 255, 0.07);
+		border-radius: 12px;
+		overflow: hidden;
+		padding: 0;
+		cursor: pointer;
+		transition: transform 0.15s, border-color 0.15s;
+		color: inherit;
+		font: inherit;
+		width: 100%;
+	}
+	.card-cliente:hover {
+		transform: translateY(-3px);
+		border-color: rgba(255, 107, 0, 0.5);
+	}
+	.card-cliente.selected {
+		border-color: var(--color-primary, #FFAE00);
+		background: rgba(255, 107, 0, 0.08);
+	}
+
+	.body { padding: 0.65rem 0.75rem 0.75rem; }
+	.id { font-family: ui-monospace, 'Cascadia Mono', monospace; font-weight: 800; font-size: 1.1rem; color: #FFAE00; letter-spacing: 0.5px; margin-bottom: 0.2rem; }
+	.nombre { font-size: 0.85rem; font-weight: 600; color: #e2e8f0; margin-bottom: 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.dias { font-size: 0.7rem; color: #94a3b8; }
 </style>

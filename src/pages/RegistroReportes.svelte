@@ -393,10 +393,10 @@
 			</div>
 		{/snippet}
 
-		<div class="list">
+		<div class="grid">
 			{#each pagActual as r (r.IdReporte)}
 				{#if tab === 'excel'}
-					<label class="list-card">
+					<label class="card-reporte">
 						<input
 							type="checkbox"
 							class="chk"
@@ -406,7 +406,7 @@
 						{@render cuerpo(r)}
 					</label>
 				{:else}
-					<button class="list-card" on:click={() => verDetalle(r)}>
+					<button class="card-reporte" on:click={() => verDetalle(r)}>
 						{@render cuerpo(r)}
 					</button>
 				{/if}
@@ -431,6 +431,30 @@
 	.badge { padding: 0.1rem 0.5rem; border-radius: 12px; font-weight: 600; font-size: 0.7rem; color: #fff; }
 	.tab-btn.active { color: var(--color-primary-light); border-bottom-color: var(--color-primary-light); }
 	.tab-btn:hover:not(.active) { color: var(--color-text-muted); }
+
+	.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem; }
+
+	.card-reporte {
+		text-align: left;
+		background: #1e293b;
+		border: 1px solid rgba(255, 255, 255, 0.07);
+		border-radius: 12px;
+		overflow: hidden;
+		padding: 0.75rem;
+		cursor: pointer;
+		transition: transform 0.15s, border-color 0.15s;
+		color: inherit;
+		font: inherit;
+		width: 100%;
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+	}
+	.card-reporte:hover {
+		transform: translateY(-3px);
+		border-color: rgba(255, 107, 0, 0.5);
+	}
+	.card-reporte.selected { border-color: var(--color-primary, #FFAE00); }
 
 	/* ── Pestaña 📊 Excel: barra de selección, chips y ayudas ─────────── */
 	.excel-bar {
