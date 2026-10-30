@@ -16,6 +16,7 @@ import BusquedaGlobal from '$lib/components/BusquedaGlobal.svelte';
 	import Cotizaciones from './pages/Cotizaciones.svelte';
 	import CotizacionDetalle from './pages/CotizacionDetalle.svelte';
 	import CotizacionNueva from './pages/CotizacionNueva.svelte';
+import CotizacionComparar from './pages/CotizacionComparar.svelte';
 	import CotizacionEditar from './pages/CotizacionEditar.svelte';
 	import CotizacionNota from './pages/CotizacionNota.svelte';
 	import PartidasAdmin from './pages/PartidasAdmin.svelte';
@@ -182,6 +183,8 @@ import BusquedaGlobal from '$lib/components/BusquedaGlobal.svelte';
 				<CotizacionEnviar clave={$path.split('/')[2]} />
 			{:else if $path.startsWith('/cotizaciones/') && $path.endsWith('/estatus')}
 				<CotizacionEstatus clave={$path.split('/')[2]} />
+			{:else if $path === '/cotizaciones/comparar'}
+				<CotizacionComparar />
 			{:else if $path.startsWith('/cotizaciones/')}
 				<CotizacionDetalle clave={$path.split('/')[2]} />
 {:else if $path === '/admin'}

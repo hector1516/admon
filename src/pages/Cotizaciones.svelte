@@ -93,6 +93,7 @@
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver">←</button>
 		<h1>📋 Cotizaciones</h1>
 		<div style="flex:1"></div>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/cotizaciones/comparar')} title="Comparar cotizaciones">⚖️</button>
 		<button class="btn btn-sm btn-primary" on:click={() => navigate('/cotizaciones/nueva')} title="Nueva cotización">➕</button>
 	</div>
 
