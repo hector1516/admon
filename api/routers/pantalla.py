@@ -20,6 +20,10 @@ def __getattr__(name):
     from api import main as _m
     return getattr(_m, name)
 
+import json as _json
+import urllib.request as _urlreq
+import urllib.error as _urlerr
+
 def _panel_estado() -> dict:
     """Estado del kiosco: pantallas publicadas por la TV + último comando.
 
