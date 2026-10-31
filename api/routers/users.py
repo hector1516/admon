@@ -1,5 +1,6 @@
 """api/routers/users.py — endpoints de usuarios (Fase 2 del refactor)."""
 from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi.responses import Response
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict
