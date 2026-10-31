@@ -24,6 +24,10 @@ import json as _json
 import urllib.request as _urlreq
 import urllib.error as _urlerr
 
+import json as _json
+import urllib.request as _urlreq
+import urllib.error as _urlerr
+
 def _panel_estado() -> dict:
     """Estado del kiosco: pantallas publicadas por la TV + último comando.
 

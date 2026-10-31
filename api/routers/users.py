@@ -4,6 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict
 from api import usuarios_foto as _foto_usuario
+from api import ficha_nfc as _ficha_nfc
 
 router = APIRouter()
 
