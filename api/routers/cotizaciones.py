@@ -314,6 +314,15 @@ async def cotizacion_update(folio: int, body: CotizacionUpdate, current_user: di
                     "INSERT INTO HUB_ActivityLog (Usuario, Modulo, Accion) VALUES (%s, %s, %s)",
                     (nombre, "Cotizaciones", f"Folio {folio}: " + "; ".join(cambios)),
                 )
+            # Registrar cambio de estatus en tabla dedicada
+            if cur_color != nuevo_color:
+                try:
+                    cursor.execute(
+                        "INSERT INTO HUB_CotizacionEstatusHistorial (Folio, EstatusAnterior, EstatusNuevo, Usuario) VALUES (%s, %s, %s, %s)",
+                        (int(folio), cur_color, nuevo_color, current_user.get("nombre", "Sistema")),
+                    )
+                except Exception:
+                    pass
         except Exception:
             pass
         conn.commit()
@@ -361,6 +370,52 @@ async def cotizacion_historial(folio: int, current_user: dict = Depends(get_curr
         rows = cursor.fetchall()
         conn.close()
         return [{"usuario": r[0], "accion": r[1], "fecha": str(r[2])} for r in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@router.get("/api/cotizaciones/lista-para-facturar")
+async def cotizaciones_lista_facturar(current_user: dict = Depends(get_current_user)):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(as_dict=True)
+        cursor.execute("""
+            SELECT i.Folio, i.IdCliente, c.Cliente, i.Contacto, i.Descripcion,
+                   i.Autor, i.Color, i.Fecha,
+                   h.FechaCambio AS FechaLista,
+                   DATEDIFF(day, ISNULL(h.FechaCambio, i.Fecha), GETDATE()) AS DiasTranscurridos
+            FROM IndiceMateriales i
+            LEFT JOIN clientes c ON i.IdCliente = c.IdCliente
+            OUTER APPLY (
+                SELECT TOP 1 FechaCambio
+                FROM HUB_CotizacionEstatusHistorial
+                WHERE Folio = i.Folio AND EstatusNuevo = 1
+                ORDER BY FechaCambio DESC
+            ) h
+            WHERE i.Color = 1
+            ORDER BY ISNULL(h.FechaCambio, i.Fecha) ASC
+        """)
+        rows = cursor.fetchall()
+        conn.close()
+        total = len(rows)
+        mas_antigua = rows[0] if rows else None
+        verdes = sum(1 for r in rows if (r.get("DiasTranscurridos") or 0) < 7)
+        amarillos = sum(1 for r in rows if 7 <= (r.get("DiasTranscurridos") or 0) <= 14)
+        rojos = sum(1 for r in rows if (r.get("DiasTranscurridos") or 0) > 14)
+        por_autor = {}
+        for r in rows:
+            autor = r.get("Autor") or "Sin autor"
+            por_autor[autor] = por_autor.get(autor, 0) + 1
+        return {
+            "total": total,
+            "cotizaciones": [dict(r) for r in rows],
+            "mas_antigua_dias": mas_antigua.get("DiasTranscurridos", 0) if mas_antigua else 0,
+            "verdes": verdes,
+            "amarillos": amarillos,
+            "rojos": rojos,
+            "por_autor": por_autor,
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
