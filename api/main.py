@@ -21,6 +21,14 @@ from typing import Optional, List, Dict, Any
 
 app = FastAPI(title="HUB Admon API", version="1.0.0")
 
+# Tracking de uso (middleware)
+try:
+    from api.usage_tracker import UsageTrackingMiddleware
+    app.add_middleware(UsageTrackingMiddleware, app_name="admon")
+except Exception as e:
+    import logging
+    logging.getLogger("usage_tracker").warning(f"No se pudo registrar middleware de tracking: {e}")
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
 # IP LOCAL del servidor SQL: la misma que usan Field y workersadmon. Antes el
