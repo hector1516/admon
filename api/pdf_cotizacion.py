@@ -83,6 +83,28 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     """header: folio, contacto, fecha (date/datetime/str), descripcion, autor,
     telefono, cliente_nombre, condiciones_pago. partidas: lista con partida,
     cantidad, descripcion, precio_compra, factor, flete, tiempo_entrega."""
+    # Validación de datos (área #10)
+    if not header:
+        header = {}
+    if not partidas:
+        partidas = []
+    # Limpiar partidas con datos inválidos
+    valid_parts = []
+    for item in partidas:
+        if not isinstance(item, dict):
+            continue
+        try:
+            cant = float(item.get("cantidad") or 0)
+            precio = float(item.get("precio_compra") or 0)
+            if cant <= 0 or precio < 0:
+                continue
+            valid_parts.append(item)
+        except (ValueError, TypeError):
+            continue
+    partidas = valid_parts
+    if not partidas:
+        raise ValueError("La cotizacion no tiene partidas validas.")
+
     buffer = io.BytesIO()
     doc = SimpleDocTemplate(
         buffer,
@@ -94,14 +116,16 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     )
 
     styles = getSampleStyleSheet()
-    style_normal = ParagraphStyle("Norm", fontName="Helvetica", fontSize=8.5, leading=10, textColor=colors.black)
-    style_bold = ParagraphStyle("Bld", fontName="Helvetica-Bold", fontSize=8.5, leading=10, textColor=colors.black)
-    style_meta_label = ParagraphStyle("MLbl", fontName="Helvetica-Bold", fontSize=9, leading=11, alignment=2, textColor=colors.black)
-    style_meta_value = ParagraphStyle("MVal", fontName="Helvetica", fontSize=9, leading=11, alignment=2, textColor=colors.black)
-    style_item_desc = ParagraphStyle("ItemDesc", fontName="Helvetica", fontSize=8, leading=9.5, textColor=colors.black)
-    style_item_header = ParagraphStyle("ItemHdr", fontName="Helvetica-Bold", fontSize=8.5, leading=10, textColor=colors.black)
-    style_words = ParagraphStyle("Words", fontName="Helvetica-Bold", fontSize=8.5, leading=10, textColor=colors.black)
+    style_normal = ParagraphStyle("Norm", fontName="Helvetica", fontSize=8.5, leading=10, textColor=colors.HexColor("#1e293b"))
+    style_bold = ParagraphStyle("Bld", fontName="Helvetica-Bold", fontSize=8.5, leading=10, textColor=colors.HexColor("#0f172a"))
+    style_meta_label = ParagraphStyle("MLbl", fontName="Helvetica-Bold", fontSize=9, leading=11, alignment=2, textColor=colors.HexColor("#0f172a"))
+    style_meta_value = ParagraphStyle("MVal", fontName="Helvetica", fontSize=9, leading=11, alignment=2, textColor=colors.HexColor("#334155"))
+    style_item_desc = ParagraphStyle("ItemDesc", fontName="Helvetica", fontSize=8, leading=9.5, textColor=colors.HexColor("#1e293b"))
+    style_item_header = ParagraphStyle("ItemHdr", fontName="Helvetica-Bold", fontSize=8.5, leading=10, textColor=colors.white)
+    style_words = ParagraphStyle("Words", fontName="Helvetica-Bold", fontSize=8.5, leading=10, textColor=colors.HexColor("#0f172a"))
     style_logo_subtext = ParagraphStyle("LogoSub", fontName="Helvetica-Bold", fontSize=6.5, leading=8, textColor=colors.HexColor("#334155"))
+    style_title = ParagraphStyle("Title", fontName="Helvetica-Bold", fontSize=14, leading=16, textColor=colors.HexColor("#1e40af"), alignment=1)
+    style_section = ParagraphStyle("Section", fontName="Helvetica-Bold", fontSize=9, leading=11, textColor=colors.HexColor("#1e40af"), spaceBefore=8, spaceAfter=4)
 
     story = []
 
@@ -117,13 +141,20 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     else:
         date_str = str(date_val or "")
 
+    # Título prominente
+    story.append(Paragraph("COTIZACION DE MATERIALES", style_title))
+    story.append(Spacer(1, 6))
+
+    autor = header.get("autor") or ""
+    author_email = f"{autor.lower().replace(' ', '.')}@ecc-sa.com.mx" if autor else ""
     meta_data = [
         [Paragraph(f"Cotizacion: {cot_number}", style_meta_label)],
         [Paragraph(f"Fecha: {date_str}", style_meta_value)],
         [Paragraph(f"Cliente: {header.get('contacto') or ''}", style_meta_value)],
         [Paragraph(f"{header.get('cliente_nombre') or ''}", style_meta_value)],
-        [Paragraph(f"Elaboro: {header.get('autor')}", style_meta_value)],
+        [Paragraph(f"Elaboro: {autor}", style_meta_value)],
         [Paragraph(f"Telefono: {header.get('telefono')}", style_meta_value)],
+        [Paragraph(f"Email: {author_email}", style_meta_value)],
     ]
     meta_table = Table(meta_data, colWidths=[380])
     meta_table.setStyle(TableStyle([
@@ -197,17 +228,19 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
             Paragraph(f"${total_item:,.2f}", style_item_desc),
         ])
 
-    items_table = Table(items_data, colWidths=[30, 30, 402, 60, 60])
+    items_table = Table(items_data, colWidths=[30, 30, 402, 60, 60], repeatRows=1)
     items_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#E2E8F0")),
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F8FAFC")),
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1e40af")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
         ("TOPPADDING", (0, 0), (-1, -1), 5),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
         ("LEFTPADDING", (0, 0), (-1, -1), 5),
         ("RIGHTPADDING", (0, 0), (-1, -1), 5),
         ("ALIGN", (0, 0), (1, -1), "CENTER"),
         ("ALIGN", (3, 0), (4, -1), "RIGHT"),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f1f5f9")]),
     ]))
     story.append(items_table)
     story.append(Spacer(1, 10))
@@ -239,16 +272,18 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ("TOPPADDING", (0, 0), (-1, -1), 0),
     ]))
-    story.append(totals_wrapper)
-    story.append(Spacer(1, 10))
-
+    # Totales + monto en letra envueltos en KeepTogether (#8)
+    totals_block = []
+    totals_block.append(totals_wrapper)
+    totals_block.append(Spacer(1, 4))
     words_table = Table([[Paragraph(total_letras, style_words)]], colWidths=[582])
     words_table.setStyle(TableStyle([
         ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
         ("TOPPADDING", (0, 0), (-1, -1), 5),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
     ]))
-    story.append(words_table)
+    totals_block.append(words_table)
+    story.append(KeepTogether(totals_block))
     story.append(Spacer(1, 10))
 
     # 7. TÉRMINOS Y CONDICIONES
