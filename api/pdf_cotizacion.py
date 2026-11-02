@@ -190,7 +190,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         date_str = str(date_val or "")
 
     # Título prominente
-    story.append(Paragraph("COTIZACION DE MATERIALES", style_title))
+    story.append(Paragraph("COTIZACION", style_title))
     story.append(Spacer(1, 6))
 
     autor = header.get("autor") or ""
