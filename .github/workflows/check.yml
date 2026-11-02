@@ -42,7 +42,7 @@ jobs:
       - name: El CSS no fue editado a mano
         run: |
           set -euo pipefail
-          CSS=src/styles/app.css
+          CSS=src/app.css
           ESPERADO="$(cat ECCSA_SHELL_SHA)"
           if [ ! -f "$CSS" ]; then
             echo "::error::no existe $CSS"
