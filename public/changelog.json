@@ -1,6 +1,6 @@
 {
   "app": "admon",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "cambios": [
     "🏆 Legends se rediseñó en Admon: ranking semanal, temporada, racha y 20 logros.",
     "💵 Ahora los puntos siguen el dinero: cotización pagada +15 a +75 según el subtotal, entregada +10, cliente nuevo cotizado +5 y cobranza +3.",
