@@ -1,7 +1,7 @@
 """api/routers/cotizaciones.py — endpoints de cotizaciones, SAT y remisiones (Fase 3)."""
 from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.responses import Response
-from api.pdf_cotizacion import build_cotizacion_pdf
+from api.pdf_cotizacion import build_cotizacion_pdf, generar_token_qr, verificar_token_qr
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
@@ -521,6 +521,19 @@ def _cotizacion_pdf_bytes(folio: int) -> tuple:
     if not parts:
         raise HTTPException(status_code=400, detail="La cotización no tiene partidas.")
     return f"Cotizacion_{_fmt_folio(folio)}.pdf", build_cotizacion_pdf(header, parts)
+
+
+@router.get("/cotizacion/{token}")
+async def cotizacion_verificar(token: str, request: Request):
+    """Verifica un token QR y retorna la cotizacion asociada. Sin auth (publico)."""
+    folio = verificar_token_qr(token)
+    if folio is None:
+        raise HTTPException(status_code=404, detail="Token invalido o expirado")
+    # Reutilizar el endpoint de PDF
+    filename, pdf_bytes = _cotizacion_pdf_bytes(folio)
+    return Response(content=pdf_bytes, media_type="application/pdf", headers={
+        "Content-Disposition": f'inline; filename="{filename}"',
+    })
 
 
 @router.get("/api/cotizaciones/{folio:int}/pdf")

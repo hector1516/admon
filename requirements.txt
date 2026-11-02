@@ -38,6 +38,7 @@ pytz
 # --- PDFs e imágenes (mandato) ----------------------------------------------
 reportlab==4.4.0
 Pillow==11.0.0
+qrcode==7.4.2
 
 # --- Exportación a Excel (propio de Admon, no va en el canónico de Field) ----
 # 2026-10-01: vuelve openpyxl para GET /api/reportes/excel (pestaña 📊 Excel

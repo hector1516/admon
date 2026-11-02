@@ -7,9 +7,12 @@ monto en letra (numbers_helper), términos corporativos y NumberedCanvas
 """
 
 import datetime
+import hashlib
+import hmac
 import io
 import os
 
+import qrcode
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
@@ -77,6 +80,51 @@ def _logo_flowables():
         except Exception:
             continue
     return []
+
+
+_QR_SECRET = os.getenv("COTIZACION_QR_SECRET", "eccsa-qr-verify-2026")
+
+
+def generar_token_qr(folio: int) -> str:
+    """Genera token HMAC para el QR de una cotizacion. Formato: {folio}-{sig8}."""
+    msg = str(folio).encode("utf-8")
+    sig = hmac.new(_QR_SECRET.encode("utf-8"), msg, hashlib.sha256).hexdigest()[:8]
+    return f"{folio}-{sig}"
+
+
+def verificar_token_qr(token: str) -> int | None:
+    """Verifica el token y retorna el folio si es valido, None si no."""
+    try:
+        folio_str, sig = token.rsplit("-", 1)
+        folio = int(folio_str)
+        expected = hmac.new(_QR_SECRET.encode("utf-8"), str(folio).encode("utf-8"), hashlib.sha256).hexdigest()[:8]
+        if hmac.compare_digest(sig, expected):
+            return folio
+    except (ValueError, Exception):
+        pass
+    return None
+
+
+def _generar_qr_image(folio: int) -> io.BytesIO | None:
+    """Genera una imagen QR (80x80) con la URL de verificacion."""
+    try:
+        token = generar_token_qr(folio)
+        url = f"https://admon.ecc-sa.com.mx/cotizacion/{token}"
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_M,
+            box_size=4,
+            border=2,
+        )
+        qr.add_data(url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="#1e40af", back_color="white")
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        buf.seek(0)
+        return buf
+    except Exception:
+        return None
 
 
 def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
@@ -283,6 +331,33 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
     ]))
     totals_block.append(words_table)
+
+    # QR de verificacion (Opcion 2: debajo de los totales)
+    folio = header.get("folio", 0)
+    qr_buf = _generar_qr_image(folio) if folio else None
+    if qr_buf:
+        qr_img = RLImage(qr_buf, width=70, height=70)
+        qr_label = Paragraph("Escanea para verificar<br/>esta cotizacion", ParagraphStyle(
+            "QRLabel", fontName="Helvetica", fontSize=7, leading=8,
+            textColor=colors.HexColor("#64748b"), alignment=1))
+        qr_table = Table([[qr_img], [qr_label]], colWidths=[70])
+        qr_table.setStyle(TableStyle([
+            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("TOPPADDING", (0, 0), (-1, -1), 2),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
+        ]))
+        qr_wrapper = Table([[Spacer(1, 1), qr_table]], colWidths=[512, 70])
+        qr_wrapper.setStyle(TableStyle([
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+            ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ]))
+        totals_block.append(Spacer(1, 6))
+        totals_block.append(qr_wrapper)
+
     story.append(KeepTogether(totals_block))
     story.append(Spacer(1, 10))
 
