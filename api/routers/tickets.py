@@ -110,15 +110,39 @@ def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
             if xv and xv not in por_folio:
                 por_folio[xv] = v
 
+        # Índice por usuario para matching por fecha
+        vales_por_usuario = {}
+        for v in vales:
+            uid = v.get("IdUsuario")
+            if uid not in vales_por_usuario:
+                vales_por_usuario[uid] = []
+            vales_por_usuario[uid].append(v)
+
         resultado = []
         for t in tickets:
             folio = (t["FolioTicket"] or "").strip()
             v = por_folio.get(folio) if folio else None
+            # Búsqueda LIKE en XML
             if v is None and folio:
                 for cand in vales:
                     if folio in str(cand["XmlContent"] or ""):
                         v = cand
                         break
+            # Matching por usuario + fecha (±3 días) si no se encontró por folio
+            if v is None:
+                uid = t.get("IdUsuario")
+                fecha_ticket = t.get("FechaRegistro")
+                if uid and fecha_ticket and uid in vales_por_usuario:
+                    mejores = []
+                    for cand in vales_por_usuario[uid]:
+                        fecha_vale = cand.get("Fecha")
+                        if fecha_vale:
+                            delta = abs((fecha_ticket - fecha_vale).days) if hasattr(fecha_ticket, 'date') else 999
+                            if delta <= 3:
+                                mejores.append((delta, cand))
+                    if mejores:
+                        mejores.sort(key=lambda x: x[0])
+                        v = mejores[0][1]
             estacion = (t["Estacion"] or "").strip()
             resultado.append({
                 "id": t["Id"],
@@ -131,7 +155,7 @@ def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
                 # FechaRegistro no representa cuándo se surtió el combustible.
                 # El JOIN exige que el solicitante sea el mismo usuario que
                 # capturó el ticket; si no, queda null y el front usa `fecha`.
-                "fecha_vale": t["ValeSolicitud"].isoformat() if t["ValeSolicitud"] else None,
+                "fecha_vale": (t["ValeSolicitud"].isoformat() if t["ValeSolicitud"] else (v["Fecha"].isoformat() if v and v.get("Fecha") else None)),
                 "estacion": estacion or None,          # null → front muestra "Pendiente"
                 "descripcion": t["Descripcion"] or "",
                 "tiene_foto": bool(t["TieneFoto"]),
