@@ -145,7 +145,7 @@ def _generar_qr_image(folio: int) -> io.BytesIO | None:
         )
         qr.add_data(url)
         qr.make(fit=True)
-        img = qr.make_image(fill_color="#000000", back_color="white")
+        img = qr.make_image(fill_color="#666666", back_color="white")
         buf = io.BytesIO()
         img.save(buf, format="PNG")
         buf.seek(0)
@@ -194,8 +194,8 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     style_item_header = ParagraphStyle("ItemHdr", fontName="Helvetica-Bold", fontSize=8, leading=9.5, textColor=colors.white)
     style_words = ParagraphStyle("Words", fontName="Helvetica", fontSize=8, leading=10, textColor=C_GRAY, alignment=1)
     style_logo_subtext = ParagraphStyle("LogoSub", fontName="Helvetica", fontSize=7, leading=8.5, textColor=C_GRAY)
-    style_title = ParagraphStyle("Title", fontName="Helvetica-Bold", fontSize=22, leading=24, textColor=C_ECCSA_BLUE, alignment=0, spaceAfter=2)
-    style_subtitle = ParagraphStyle("Subtitle", fontName="Helvetica", fontSize=9, leading=10.5, textColor=C_GRAY, alignment=0, spaceAfter=6)
+    style_title = ParagraphStyle("Title", fontName="Helvetica-Bold", fontSize=11, leading=13, textColor=C_GRAY, alignment=0, spaceAfter=2)
+    style_cotnum = ParagraphStyle("CotNum", fontName="Helvetica-Bold", fontSize=20, leading=22, textColor=C_ECCSA_BLUE, alignment=2, spaceAfter=4)
     style_cond = ParagraphStyle("Cond", fontName="Helvetica", fontSize=7, leading=8.5, textColor=C_GRAY)
 
     story = []
@@ -218,13 +218,20 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     cliente = header.get("contacto") or ""
     cliente_nombre = header.get("cliente_nombre") or ""
 
-    # Título grande en azul ECCSA
-    story.append(Paragraph("COTIZACION", style_title))
-    # Número de cotización grande en azul ECCSA
-    story.append(Paragraph(cot_number, ParagraphStyle(
-        "CotNum", fontName="Helvetica-Bold", fontSize=18, leading=20,
-        textColor=C_ECCSA_BLUE, alignment=0, spaceAfter=4)))
-    story.append(Paragraph("Cotizacion de materiales y servicios", style_subtitle))
+    # Título pequeño + CM00... grande en azul ECCSA a la derecha
+    header_title_data = [[
+        Paragraph("COTIZACION", style_title),
+        Paragraph(cot_number, style_cotnum),
+    ]]
+    header_title_table = Table(header_title_data, colWidths=[280, 280])
+    header_title_table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(header_title_table)
     # Línea de acento
     accent_line = Table([[""]], colWidths=[560])
     accent_line.setStyle(TableStyle([
@@ -235,13 +242,12 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     story.append(accent_line)
     story.append(Spacer(1, 8))
 
-    # Metadatos en dos columnas: izquierda (cotización) y derecha (cliente)
+    # Metadatos: Fecha a la derecha arriba de Cliente
     meta_left = [
-        [Paragraph("Fecha", style_meta_label), Paragraph(date_str, style_meta_value)],
         [Paragraph("Elaboro", style_meta_label), Paragraph(autor, style_meta_value)],
-        [Paragraph("Email", style_meta_label), Paragraph(author_email, style_meta_value)],
     ]
     meta_right = [
+        [Paragraph("Fecha", style_meta_label), Paragraph(date_str, style_meta_value)],
         [Paragraph("Cliente", style_meta_label), Paragraph(cliente, style_meta_value)],
         [Paragraph("", style_meta_label), Paragraph(cliente_nombre, style_meta_value)],
         [Paragraph("Telefono", style_meta_label), Paragraph(telefono, style_meta_value)],
@@ -334,8 +340,9 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
         ("LEFTPADDING", (0, 0), (-1, -1), 5),
         ("RIGHTPADDING", (0, 0), (-1, -1), 5),
-        ("ALIGN", (0, 0), (1, -1), "CENTER"),
-        ("ALIGN", (3, 0), (4, -1), "RIGHT"),
+        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
+        ("ALIGN", (0, 1), (1, -1), "CENTER"),
+        ("ALIGN", (3, 1), (4, -1), "RIGHT"),
         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, C_GRAY_LIGHT]),
     ]))
     story.append(items_table)
@@ -394,7 +401,16 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     terms_text = "  |  ".join(cond_items)
 
     author_email = f"{autor.lower().replace(' ', '.')}@ecc-sa.com.mx" if autor else ""
-    empresa_text = f"ECCSA Automation  |  RFC: CAZO670914BK8  |  Tel: 8183589075  |  {author_email}"
+    # Footer: términos + empresa + elaboro + email (todo unificado)
+    cond_items = [
+        f"T.E. Max. {str(max_delivery_days).zfill(2)}{te_suffix}",
+        f"Cond. Pago: {str(cond_pago_days).zfill(2)} dias",
+        "Precios en M.N.",
+        "Stock salvo previa venta",
+        "Vigencia: 15 dias",
+    ]
+    terms_text = "  |  ".join(cond_items)
+    empresa_text = f"ECCSA Automation  |  RFC: CAZO670914BK8  |  Tel: 8183589075  |  Elaboro: {autor}  |  {author_email}"
 
     folio = header.get("folio", 0)
     qr_buf = _generar_qr_image(folio) if folio else None
