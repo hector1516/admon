@@ -43,6 +43,9 @@ ECCSA_TEXT = colors.HexColor("#1E293B")
 
 class NumberedCanvas(canvas.Canvas):
     def __init__(self, *args, **kwargs):
+        self._qr_image = kwargs.pop("qr_image", None)
+        self._terms_text = kwargs.pop("terms_text", "")
+        self._empresa_info = kwargs.pop("empresa_info", "")
         super().__init__(*args, **kwargs)
         self._saved_page_states = []
 
@@ -60,18 +63,45 @@ class NumberedCanvas(canvas.Canvas):
 
     def draw_page_number(self, page_count):
         self.saveState()
+        # === FOOTER: términos + empresa + QR + página ===
         # Línea superior del footer
         self.setStrokeColor(ECCSA_BORDER)
         self.setLineWidth(0.5)
-        self.line(30, 22, 582, 22)
-        # Texto de dirección
+        self.line(20, 75, 592, 75)
+
+        # Términos y condiciones (izquierda)
         self.setFont("Helvetica", 7)
         self.setFillColor(ECCSA_GRAY)
-        address_text = "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx"
-        self.drawString(30, 12, address_text)
+        y = 68
+        if self._terms_text:
+            self.drawString(20, y, self._terms_text)
+            y -= 10
+
+        # Info de empresa
+        if self._empresa_info:
+            for line in self._empresa_info.split("\n"):
+                self.drawString(20, y, line)
+                y -= 9
+
+        # QR code (derecha)
+        if self._qr_image:
+            try:
+                from reportlab.lib.utils import ImageReader
+                qr_reader = ImageReader(self._qr_image)
+                self.drawImage(qr_reader, 532, 30, width=55, height=55)
+                self.setFont("Helvetica", 6)
+                self.drawCentredString(559.5, 24, "Verificar")
+            except Exception:
+                pass
+
+        # Línea inferior
+        self.line(20, 22, 592, 22)
+        # Dirección
+        self.setFont("Helvetica", 6.5)
+        self.drawString(20, 12, "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx")
         # Número de página
         page_text = f"Pagina {self._pageNumber} de {page_count}"
-        self.drawRightString(582, 12, page_text)
+        self.drawRightString(592, 12, page_text)
         self.restoreState()
 
 
@@ -169,7 +199,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         leftMargin=20,
         rightMargin=20,
         topMargin=15,
-        bottomMargin=30,
+        bottomMargin=85,
     )
 
     styles = getSampleStyleSheet()
@@ -381,8 +411,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     story.append(KeepTogether(totals_block))
     story.append(Spacer(1, 8))
 
-    # === TERMINOS Y CONDICIONES ===
-    story.append(Paragraph("Terminos y condiciones", style_section))
+    # === PREPARAR DATOS PARA EL FOOTER ===
     cond_pago_days = header.get("condiciones_pago", 30) or 30
     te_suffix = " Dia Laboral" if max_delivery_days == 1 else " Dias Laborales"
 
@@ -391,22 +420,28 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         f"Condiciones de Pago: {str(cond_pago_days).zfill(2)} dias",
         "Precios en Moneda Nacional",
         "Stock salvo previa venta",
-        "Vigencia: 15 dias naturales a partir de la fecha de emision",
+        "Vigencia: 15 dias naturales",
     ]
-    cond_text = "  |  ".join(cond_items)
-    story.append(Paragraph(cond_text, style_cond))
-    story.append(Spacer(1, 4))
+    terms_text = "  |  ".join(cond_items)
 
     author_email = f"{autor.lower().replace(' ', '.')}@ecc-sa.com.mx" if autor else ""
-    empresa_info = [
-        f"ECCSA Automation  |  RFC: CAZO670914BK8",
-        f"Tel: 8183589075  |  {author_email}  |  eccsa@ecc-sa.com.mx",
-        "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820",
-    ]
-    for info in empresa_info:
-        story.append(Paragraph(info, style_cond))
+    empresa_info = (
+        f"ECCSA Automation  |  RFC: CAZO670914BK8\n"
+        f"Tel: 8183589075  |  {author_email}  |  eccsa@ecc-sa.com.mx"
+    )
 
-    doc.build(story, canvasmaker=NumberedCanvas)
+    # QR image
+    folio = header.get("folio", 0)
+    qr_buf = _generar_qr_image(folio) if folio else None
+
+    # Build with custom canvas that includes footer
+    def canvas_maker(*args, **kwargs):
+        kwargs["qr_image"] = qr_buf
+        kwargs["terms_text"] = terms_text
+        kwargs["empresa_info"] = empresa_info
+        return NumberedCanvas(*args, **kwargs)
+
+    doc.build(story, canvasmaker=canvas_maker)
     pdf_bytes = buffer.getvalue()
     buffer.close()
     return pdf_bytes
