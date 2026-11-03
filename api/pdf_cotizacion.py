@@ -60,32 +60,35 @@ class NumberedCanvas(canvas.Canvas):
 
     def draw_page_number(self, page_count):
         self.saveState()
-        # === UN SOLO FOOTER UNIFICADO ===
-        # Línea divisoria única
+        # === FOOTER UNIFICADO ===
+        # Línea divisoria única (arriba)
         self.setStrokeColor(C_BORDER)
         self.setLineWidth(0.5)
-        self.line(20, 52, 592, 52)
+        self.line(20, 58, 592, 58)
 
-        # QR en esquina inferior derecha (arriba del texto del footer)
+        # Texto del footer (izquierda, arriba de la línea inferior)
+        self.setFont("Helvetica", 6.5)
+        self.setFillColor(C_GRAY)
+        self.drawString(20, 48, self._terms_text)
+        self.drawString(20, 38, self._empresa_text)
+
+        # Línea inferior
+        self.line(20, 28, 592, 28)
+        self.setFont("Helvetica", 6)
+        self.drawString(20, 18, "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx")
+        page_text = f"Pagina {self._pageNumber} de {page_count}"
+        self.drawRightString(540, 18, page_text)
+
+        # QR en esquina inferior derecha (debajo de la línea divisoria)
         if self._qr_image:
             try:
                 from reportlab.lib.utils import ImageReader
                 qr_reader = ImageReader(self._qr_image)
-                self.drawImage(qr_reader, 548, 18, width=40, height=40)
+                self.drawImage(qr_reader, 550, 2, width=40, height=40)
                 self.setFont("Helvetica", 5)
-                self.setFillColor(C_GRAY)
-                self.drawCentredString(568, 13, "Verificar")
+                self.drawCentredString(570, -3, "Verificar")
             except Exception:
                 pass
-
-        # Todo el texto del footer en una sola columna unificada
-        self.setFont("Helvetica", 6.5)
-        self.setFillColor(C_GRAY)
-        self.drawString(20, 44, self._terms_text)
-        self.drawString(20, 34, self._empresa_text)
-        self.drawString(20, 24, "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx")
-        page_text = f"Pagina {self._pageNumber} de {page_count}"
-        self.drawRightString(540, 12, page_text)
         self.restoreState()
 
 
@@ -182,7 +185,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         leftMargin=20,
         rightMargin=20,
         topMargin=15,
-        bottomMargin=60,
+        bottomMargin=65,
     )
 
     styles = getSampleStyleSheet()
@@ -204,6 +207,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     logo_container = []
     logo_container.extend(_logo_flowables())
     logo_container.append(Paragraph("Oscar Noe Castillo Zavala", style_logo_subtext))
+    logo_container.append(Paragraph("RFC: CAZO670914BK8", style_logo_subtext))
 
     cot_number = f"CM{str(header.get('folio')).zfill(5)}"
     date_val = header.get("fecha")
