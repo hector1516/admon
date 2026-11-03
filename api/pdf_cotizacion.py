@@ -1,6 +1,7 @@
-"""PDF de cotizacion de materiales — diseño original HUB.
+"""PDF de cotizacion de materiales — diseño sobrio y equilibrado.
 
-Colores originales, layout original, un solo QR en la zona de totales.
+Diseño limpio. Subtotal/IVA/Total en fila horizontal. QR en esquina inferior derecha.
+Terminos y datos de empresa en pie de pagina unificado.
 """
 
 import datetime
@@ -13,6 +14,7 @@ import qrcode
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 from reportlab.platypus import (
     Image as RLImage,
@@ -27,8 +29,20 @@ from reportlab.platypus import (
 from api.numbers_helper import numero_a_letras
 
 
+# === Colores sobrios ===
+C_DARK = colors.HexColor("#1a1a1a")
+C_TEXT = colors.HexColor("#333333")
+C_GRAY = colors.HexColor("#666666")
+C_GRAY_LIGHT = colors.HexColor("#f5f5f5")
+C_BORDER = colors.HexColor("#cccccc")
+C_ECCSA_BLUE = colors.HexColor("#1E40AF")
+
+
 class NumberedCanvas(canvas.Canvas):
     def __init__(self, *args, **kwargs):
+        self._qr_image = kwargs.pop("qr_image", None)
+        self._terms_text = kwargs.pop("terms_text", "")
+        self._empresa_text = kwargs.pop("empresa_text", "")
         super().__init__(*args, **kwargs)
         self._saved_page_states = []
 
@@ -46,12 +60,32 @@ class NumberedCanvas(canvas.Canvas):
 
     def draw_page_number(self, page_count):
         self.saveState()
+        # === UN SOLO FOOTER UNIFICADO ===
+        # Línea divisoria única
+        self.setStrokeColor(C_BORDER)
+        self.setLineWidth(0.5)
+        self.line(20, 52, 592, 52)
+
+        # QR en esquina inferior derecha (arriba del texto del footer)
+        if self._qr_image:
+            try:
+                from reportlab.lib.utils import ImageReader
+                qr_reader = ImageReader(self._qr_image)
+                self.drawImage(qr_reader, 548, 18, width=40, height=40)
+                self.setFont("Helvetica", 5)
+                self.setFillColor(C_GRAY)
+                self.drawCentredString(568, 13, "Verificar")
+            except Exception:
+                pass
+
+        # Todo el texto del footer en una sola columna unificada
         self.setFont("Helvetica", 6.5)
-        self.setFillColor(colors.HexColor("#475569"))
-        address_text = "Fray Luis de Leon 1713, Jardin Español, Monterrey, Nuevo Leon, Cp. 64820 | www.ecc-sa.com.mx"
-        self.drawString(30, 12, address_text)
+        self.setFillColor(C_GRAY)
+        self.drawString(20, 44, self._terms_text)
+        self.drawString(20, 34, self._empresa_text)
+        self.drawString(20, 24, "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx")
         page_text = f"Pagina {self._pageNumber} de {page_count}"
-        self.drawRightString(582, 12, page_text)
+        self.drawRightString(540, 12, page_text)
         self.restoreState()
 
 
@@ -67,12 +101,12 @@ def _logo_flowables():
                 im = PILImage.open(io.BytesIO(raw)).convert("RGB")
                 im.thumbnail((300, 300))
                 buf = io.BytesIO()
-                im.save(buf, format="JPEG", quality=50)
+                im.save(buf, format="JPEG", quality=70)
                 buf.seek(0)
                 data = buf
             except Exception:
                 data = io.BytesIO(raw)
-            return [RLImage(data, width=175, height=52), Spacer(1, 4)]
+            return [RLImage(data, width=130, height=39), Spacer(1, 2)]
         except Exception:
             continue
     return []
@@ -145,28 +179,31 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     doc = SimpleDocTemplate(
         buffer,
         pagesize=letter,
-        leftMargin=15,
-        rightMargin=15,
+        leftMargin=20,
+        rightMargin=20,
         topMargin=15,
-        bottomMargin=75,
+        bottomMargin=60,
     )
 
     styles = getSampleStyleSheet()
-    style_normal = ParagraphStyle("Norm", fontName="Helvetica", fontSize=8.5, leading=10, textColor=colors.black)
-    style_bold = ParagraphStyle("Bld", fontName="Helvetica-Bold", fontSize=8.5, leading=10, textColor=colors.black)
-    style_meta_label = ParagraphStyle("MLbl", fontName="Helvetica-Bold", fontSize=9, leading=11, alignment=2, textColor=colors.black)
-    style_meta_value = ParagraphStyle("MVal", fontName="Helvetica", fontSize=9, leading=11, alignment=2, textColor=colors.black)
-    style_item_desc = ParagraphStyle("ItemDesc", fontName="Helvetica", fontSize=8, leading=9.5, textColor=colors.black)
-    style_item_header = ParagraphStyle("ItemHdr", fontName="Helvetica-Bold", fontSize=8.5, leading=10, textColor=colors.black)
-    style_words = ParagraphStyle("Words", fontName="Helvetica-Bold", fontSize=8.5, leading=10, textColor=colors.black)
-    style_logo_subtext = ParagraphStyle("LogoSub", fontName="Helvetica-Bold", fontSize=6.5, leading=8, textColor=colors.HexColor("#334155"))
+    style_normal = ParagraphStyle("Norm", fontName="Helvetica", fontSize=8.5, leading=10.5, textColor=C_TEXT)
+    style_bold = ParagraphStyle("Bld", fontName="Helvetica-Bold", fontSize=8.5, leading=10.5, textColor=C_DARK)
+    style_meta_label = ParagraphStyle("MLbl", fontName="Helvetica-Bold", fontSize=8, leading=10, alignment=0, textColor=C_GRAY)
+    style_meta_value = ParagraphStyle("MVal", fontName="Helvetica", fontSize=8.5, leading=10, alignment=0, textColor=C_DARK)
+    style_item_desc = ParagraphStyle("ItemDesc", fontName="Helvetica", fontSize=8, leading=9.5, textColor=C_TEXT)
+    style_item_header = ParagraphStyle("ItemHdr", fontName="Helvetica-Bold", fontSize=8, leading=9.5, textColor=colors.white)
+    style_words = ParagraphStyle("Words", fontName="Helvetica", fontSize=8, leading=10, textColor=C_GRAY, alignment=1)
+    style_logo_subtext = ParagraphStyle("LogoSub", fontName="Helvetica", fontSize=7, leading=8.5, textColor=C_GRAY)
+    style_title = ParagraphStyle("Title", fontName="Helvetica-Bold", fontSize=22, leading=24, textColor=C_ECCSA_BLUE, alignment=0, spaceAfter=2)
+    style_subtitle = ParagraphStyle("Subtitle", fontName="Helvetica", fontSize=9, leading=10.5, textColor=C_GRAY, alignment=0, spaceAfter=6)
+    style_cond = ParagraphStyle("Cond", fontName="Helvetica", fontSize=7, leading=8.5, textColor=C_GRAY)
 
     story = []
 
-    # HEADER (logo izq + metadatos der)
+    # === HEADER ===
     logo_container = []
     logo_container.extend(_logo_flowables())
-    logo_container.append(Paragraph("Oscar Noe Castillo Zavala - CAZO670914BK8", style_logo_subtext))
+    logo_container.append(Paragraph("Oscar Noe Castillo Zavala  |  RFC: CAZO670914BK8", style_logo_subtext))
 
     cot_number = f"CM{str(header.get('folio')).zfill(5)}"
     date_val = header.get("fecha")
@@ -178,43 +215,74 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     autor = header.get("autor") or ""
     telefono = header.get("telefono") or "8183589075"
     author_email = f"{autor.lower().replace(' ', '.')}@ecc-sa.com.mx" if autor else ""
+    cliente = header.get("contacto") or ""
+    cliente_nombre = header.get("cliente_nombre") or ""
 
-    meta_data = [
-        [Paragraph(f"Cotizacion: {cot_number}", style_meta_label)],
-        [Paragraph(f"Fecha: {date_str}", style_meta_value)],
-        [Paragraph(f"Cliente: {header.get('contacto') or ''}", style_meta_value)],
-        [Paragraph(f"{header.get('cliente_nombre') or ''}", style_meta_value)],
-        [Paragraph(f"Elaboro: {autor}", style_meta_value)],
-        [Paragraph(f"Telefono: {telefono}", style_meta_value)],
-        [Paragraph(f"Email: {author_email}", style_meta_value)],
+    # Título grande en azul ECCSA
+    story.append(Paragraph("COTIZACION", style_title))
+    # Número de cotización grande en azul ECCSA
+    story.append(Paragraph(cot_number, ParagraphStyle(
+        "CotNum", fontName="Helvetica-Bold", fontSize=18, leading=20,
+        textColor=C_ECCSA_BLUE, alignment=0, spaceAfter=4)))
+    story.append(Paragraph("Cotizacion de materiales y servicios", style_subtitle))
+    # Línea de acento
+    accent_line = Table([[""]], colWidths=[560])
+    accent_line.setStyle(TableStyle([
+        ("LINEBELOW", (0, 0), (-1, -1), 1.5, C_ECCSA_BLUE),
+        ("TOPPADDING", (0, 0), (-1, -1), 0),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+    ]))
+    story.append(accent_line)
+    story.append(Spacer(1, 8))
+
+    # Metadatos en dos columnas: izquierda (cotización) y derecha (cliente)
+    meta_left = [
+        [Paragraph("Fecha", style_meta_label), Paragraph(date_str, style_meta_value)],
+        [Paragraph("Elaboro", style_meta_label), Paragraph(autor, style_meta_value)],
+        [Paragraph("Email", style_meta_label), Paragraph(author_email, style_meta_value)],
     ]
-    meta_table = Table(meta_data, colWidths=[380])
-    meta_table.setStyle(TableStyle([
+    meta_right = [
+        [Paragraph("Cliente", style_meta_label), Paragraph(cliente, style_meta_value)],
+        [Paragraph("", style_meta_label), Paragraph(cliente_nombre, style_meta_value)],
+        [Paragraph("Telefono", style_meta_label), Paragraph(telefono, style_meta_value)],
+    ]
+
+    meta_left_table = Table(meta_left, colWidths=[65, 200])
+    meta_left_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
         ("TOPPADDING", (0, 0), (-1, -1), 1),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
     ]))
 
-    header_data = [[logo_container, meta_table]]
-    header_table = Table(header_data, colWidths=[202, 380])
+    meta_right_table = Table(meta_right, colWidths=[65, 200])
+    meta_right_table.setStyle(TableStyle([
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
+        ("TOPPADDING", (0, 0), (-1, -1), 1),
+        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+    ]))
+
+    header_data = [[logo_container, meta_left_table, meta_right_table]]
+    header_table = Table(header_data, colWidths=[135, 215, 210])
     header_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
         ("TOPPADDING", (0, 0), (-1, -1), 0),
         ("RIGHTPADDING", (0, 0), (-1, -1), 0),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
     ]))
     story.append(header_table)
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 8))
 
-    # TABLA DE PARTIDAS
+    # === TABLA DE PARTIDAS ===
     items_data = [[
         Paragraph("Part.", style_item_header),
         Paragraph("Cant.", style_item_header),
         Paragraph("Descripcion", style_item_header),
-        Paragraph("Sub.", style_item_header),
+        Paragraph("P. Unit.", style_item_header),
         Paragraph("Total", style_item_header),
     ]]
 
@@ -241,13 +309,13 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         articulo = " ".join(str(item.get("articulo_generico") or "").split())
         if articulo:
             articulo = articulo.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
-            sat_extra = f" · {articulo}"
+            sat_extra = f"  {articulo}"
         if item.get("sat_prod_serv"):
-            sat_extra += f" · SAT: {item['sat_prod_serv']}"
+            sat_extra += f"  SAT: {item['sat_prod_serv']}"
             if item.get("sat_unidad"):
-                sat_extra += f" · Unidad: {item['sat_unidad']}"
-        desc_full = (f"{desc_clean}<br/><font color='#64748B'>"
-                     f"Tiempo entrega: {delivery_days}{diass_suffix}{sat_extra}</font>")
+                sat_extra += f"  Unidad: {item['sat_unidad']}"
+        desc_full = (f"{desc_clean}<br/><font size='7' color='#64748B'>"
+                     f"Entrega: {delivery_days}{diass_suffix}{sat_extra}</font>")
         items_data.append([
             Paragraph(partida_num, style_item_desc),
             Paragraph(cantidad_num, style_item_desc),
@@ -256,62 +324,63 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
             Paragraph(f"${total_item:,.2f}", style_item_desc),
         ])
 
-    items_table = Table(items_data, colWidths=[30, 30, 402, 60, 60], repeatRows=1)
+    items_table = Table(items_data, colWidths=[35, 35, 310, 90, 90], repeatRows=1)
     items_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#E2E8F0")),
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#F8FAFC")),
-        ("TOPPADDING", (0, 0), (-1, -1), 5),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+        ("GRID", (0, 0), (-1, -1), 0.3, C_BORDER),
+        ("BACKGROUND", (0, 0), (-1, 0), C_DARK),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
         ("LEFTPADDING", (0, 0), (-1, -1), 5),
         ("RIGHTPADDING", (0, 0), (-1, -1), 5),
         ("ALIGN", (0, 0), (1, -1), "CENTER"),
         ("ALIGN", (3, 0), (4, -1), "RIGHT"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f1f5f9")]),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, C_GRAY_LIGHT]),
     ]))
     story.append(items_table)
-    story.append(Spacer(1, 10))
+    story.append(Spacer(1, 8))
 
-    # TOTALES + MONTO EN LETRA
+    # === TOTALES EN FILA HORIZONTAL ===
     iva_general = subtotal_general * 0.16
     total_general = subtotal_general + iva_general
     total_letras = numero_a_letras(total_general).upper()
 
-    totals_rows = [
-        [Paragraph("Subtotal", style_bold), Paragraph(f"${subtotal_general:,.2f}", style_bold)],
-        [Paragraph("I.V.A. (16%)", style_bold), Paragraph(f"${iva_general:,.2f}", style_bold)],
-        [Paragraph("Total", style_bold), Paragraph(f"${total_general:,.2f}", style_bold)],
+    # Fila horizontal: Subtotal | IVA | Total
+    totals_row = [
+        Paragraph(f"Subtotal: ${subtotal_general:,.2f}", style_normal),
+        Paragraph(f"I.V.A. (16%): ${iva_general:,.2f}", style_normal),
+        Paragraph(f"Total: ${total_general:,.2f}", style_bold),
     ]
-    totals_table = Table(totals_rows, colWidths=[70, 70])
+    totals_table = Table([totals_row], colWidths=[186, 187, 187])
     totals_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-        ("TOPPADDING", (0, 0), (-1, -1), 3),
-        ("ALIGN", (0, 0), (0, -1), "LEFT"),
-        ("ALIGN", (1, 0), (1, -1), "RIGHT"),
-        ("LINEBELOW", (0, 0), (-1, -1), 0.5, colors.HexColor("#E2E8F0")),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("TOPPADDING", (0, 0), (-1, -1), 6),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+        ("BACKGROUND", (0, 0), (-1, -1), C_GRAY_LIGHT),
+        ("BOX", (0, 0), (-1, -1), 0.5, C_BORDER),
+        ("LINEAFTER", (0, 0), (1, -1), 0.5, C_BORDER),
     ]))
-    totals_wrapper = Table([[Spacer(1, 1), totals_table]], colWidths=[442, 140])
-    totals_wrapper.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-        ("TOPPADDING", (0, 0), (-1, -1), 0),
-    ]))
-    story.append(totals_wrapper)
+    story.append(totals_table)
     story.append(Spacer(1, 4))
 
-    words_table = Table([[Paragraph(total_letras, style_words)]], colWidths=[582])
+    # Monto en letra centrado debajo
+    words_table = Table([[Paragraph(total_letras, style_words)]], colWidths=[560])
     words_table.setStyle(TableStyle([
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("ALIGN", (0, 0), (-1, -1), "CENTER"),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), 4),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
     ]))
     story.append(words_table)
-    story.append(Spacer(1, 8))
 
-    # === PREPARAR DATOS PARA EL FOOTER (compacto) ===
+    # QR en esquina inferior derecha (sobre el footer, no en el cuerpo)
+    # Se pasa al canvas para que se dibuje en el pie de página
+
+    # === PREPARAR DATOS PARA EL FOOTER ===
     cond_pago_days = header.get("condiciones_pago", 30) or 30
     te_suffix = " Dia Laboral" if max_delivery_days == 1 else " Dias Laborales"
 
@@ -324,66 +393,17 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     ]
     terms_text = "  |  ".join(cond_items)
 
-    author_email = str(header.get("autor") or "").lower().replace(" ", ".") + "@ecc-sa.com.mx"
-    empresa_text = f"ECCSA Automation | RFC: CAZO670914BK8 | Tel: 8183589075 | {author_email}"
+    author_email = f"{autor.lower().replace(' ', '.')}@ecc-sa.com.mx" if autor else ""
+    empresa_text = f"ECCSA Automation  |  RFC: CAZO670914BK8  |  Tel: 8183589075  |  {author_email}"
 
-    # QR (un solo QR)
     folio = header.get("folio", 0)
     qr_buf = _generar_qr_image(folio) if folio else None
 
-    # NumberedCanvas con footer compacto
-    class canvas_maker(canvas.Canvas):
-        def __init__(self, *args, **kwargs):
-            self._qr_buf = qr_buf
-            self._terms_text = terms_text
-            self._empresa_text = empresa_text
-            super().__init__(*args, **kwargs)
-            self._saved_page_states = []
-
-        def showPage(self):
-            self._saved_page_states.append(dict(self.__dict__))
-            self._startPage()
-
-        def save(self):
-            num_pages = len(self._saved_page_states)
-            for state in self._saved_page_states:
-                self.__dict__.update(state)
-                self.draw_page_number(num_pages)
-                super().showPage()
-            super().save()
-
-        def draw_page_number(self, page_count):
-            self.saveState()
-            # === UN SOLO FOOTER UNIFICADO ===
-            # Línea superior del footer
-            self.setStrokeColor(colors.HexColor("#cccccc"))
-            self.setLineWidth(0.5)
-            self.line(20, 72, 592, 72)
-
-            # QR en esquina inferior derecha (arriba del texto)
-            if self._qr_buf:
-                try:
-                    from reportlab.lib.utils import ImageReader
-                    qr_reader = ImageReader(self._qr_buf)
-                    self.drawImage(qr_reader, 548, 30, width=44, height=44)
-                    self.setFont("Helvetica", 5)
-                    self.setFillColor(colors.HexColor("#666666"))
-                    self.drawCentredString(570, 24, "Verificar")
-                except Exception:
-                    pass
-
-            # Todo el texto en una sola columna (izquierda), unificado
-            self.setFont("Helvetica", 6.5)
-            self.setFillColor(colors.HexColor("#666666"))
-            self.drawString(20, 62, self._terms_text)
-            self.drawString(20, 52, self._empresa_text)
-            # Dirección + página en la misma línea inferior
-            self.line(20, 22, 592, 22)
-            self.setFont("Helvetica", 6)
-            self.drawString(20, 12, "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx")
-            page_text = f"Pagina {self._pageNumber} de {page_count}"
-            self.drawRightString(592, 12, page_text)
-            self.restoreState()
+    def canvas_maker(*args, **kwargs):
+        kwargs["qr_image"] = qr_buf
+        kwargs["terms_text"] = terms_text
+        kwargs["empresa_text"] = empresa_text
+        return NumberedCanvas(*args, **kwargs)
 
     doc.build(story, canvasmaker=canvas_maker)
     pdf_bytes = buffer.getvalue()
