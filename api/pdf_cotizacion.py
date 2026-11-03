@@ -83,7 +83,7 @@ class NumberedCanvas(canvas.Canvas):
                 qr_reader = ImageReader(self._qr_image)
                 self.drawImage(qr_reader, 550, 2, width=40, height=40)
                 self.setFont("Helvetica", 5)
-                self.drawCentredString(570, -3, "Verificar")
+                self.drawCentredString(570, 45, "Verificar")
             except Exception:
                 pass
         self.restoreState()
