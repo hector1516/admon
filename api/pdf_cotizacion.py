@@ -66,20 +66,17 @@ class NumberedCanvas(canvas.Canvas):
         self.setLineWidth(0.5)
         self.line(20, 58, 592, 58)
 
-        # Texto del footer (izquierda, arriba de la línea inferior)
+        # Texto del footer (izquierda)
         self.setFont("Helvetica", 6.5)
         self.setFillColor(C_GRAY)
         self.drawString(20, 48, self._terms_text)
         self.drawString(20, 38, self._empresa_text)
-
-        # Línea inferior
-        self.line(20, 28, 592, 28)
         self.setFont("Helvetica", 6)
-        self.drawString(20, 18, "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx")
+        self.drawString(20, 28, "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx")
         page_text = f"Pagina {self._pageNumber} de {page_count}"
-        self.drawRightString(540, 18, page_text)
+        self.drawRightString(540, 28, page_text)
 
-        # QR en esquina inferior derecha (debajo de la línea divisoria)
+        # QR en esquina inferior derecha (debajo de la línea divisoria, en la esquina)
         if self._qr_image:
             try:
                 from reportlab.lib.utils import ImageReader
@@ -189,15 +186,16 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     )
 
     styles = getSampleStyleSheet()
-    style_normal = ParagraphStyle("Norm", fontName="Helvetica", fontSize=8.5, leading=10.5, textColor=C_TEXT)
-    style_bold = ParagraphStyle("Bld", fontName="Helvetica-Bold", fontSize=8.5, leading=10.5, textColor=C_DARK)
-    style_meta_label = ParagraphStyle("MLbl", fontName="Helvetica-Bold", fontSize=8, leading=10, alignment=0, textColor=C_GRAY)
-    style_meta_value = ParagraphStyle("MVal", fontName="Helvetica", fontSize=8.5, leading=10, alignment=0, textColor=C_DARK)
-    style_item_desc = ParagraphStyle("ItemDesc", fontName="Helvetica", fontSize=8, leading=9.5, textColor=C_TEXT)
-    style_item_header = ParagraphStyle("ItemHdr", fontName="Helvetica-Bold", fontSize=8, leading=9.5, textColor=colors.white)
+    style_normal = ParagraphStyle("Norm", fontName="Helvetica", fontSize=8.5, leading=10.5, textColor=C_TEXT, alignment=1)
+    style_bold = ParagraphStyle("Bld", fontName="Helvetica-Bold", fontSize=8.5, leading=10.5, textColor=C_DARK, alignment=1)
+    style_meta_label = ParagraphStyle("MLbl", fontName="Helvetica-Bold", fontSize=8, leading=10, alignment=2, textColor=C_GRAY)
+    style_meta_value = ParagraphStyle("MVal", fontName="Helvetica", fontSize=8.5, leading=10, alignment=2, textColor=C_DARK)
+    style_item_desc = ParagraphStyle("ItemDesc", fontName="Helvetica", fontSize=8, leading=9.5, textColor=C_TEXT, alignment=0)
+    style_item_desc_center = ParagraphStyle("ItemDescC", fontName="Helvetica", fontSize=8, leading=9.5, textColor=C_TEXT, alignment=1)
+    style_item_header = ParagraphStyle("ItemHdr", fontName="Helvetica-Bold", fontSize=8, leading=9.5, textColor=colors.white, alignment=1)
     style_words = ParagraphStyle("Words", fontName="Helvetica", fontSize=8, leading=10, textColor=C_GRAY, alignment=1)
     style_logo_subtext = ParagraphStyle("LogoSub", fontName="Helvetica", fontSize=7, leading=8.5, textColor=C_GRAY)
-    style_title = ParagraphStyle("Title", fontName="Helvetica-Bold", fontSize=11, leading=13, textColor=C_GRAY, alignment=0, spaceAfter=2)
+    style_title = ParagraphStyle("Title", fontName="Helvetica-Bold", fontSize=11, leading=13, textColor=C_GRAY, alignment=2, spaceAfter=2)
     style_cotnum = ParagraphStyle("CotNum", fontName="Helvetica-Bold", fontSize=20, leading=22, textColor=C_ECCSA_BLUE, alignment=2, spaceAfter=4)
     style_cond = ParagraphStyle("Cond", fontName="Helvetica", fontSize=7, leading=8.5, textColor=C_GRAY)
 
@@ -309,11 +307,11 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         desc_full = (f"{desc_clean}<br/><font size='7' color='#64748B'>"
                      f"Entrega: {delivery_days}{diass_suffix}{sat_extra}</font>")
         items_data.append([
-            Paragraph(partida_num, style_item_desc),
-            Paragraph(cantidad_num, style_item_desc),
+            Paragraph(partida_num, style_item_desc_center),
+            Paragraph(cantidad_num, style_item_desc_center),
             Paragraph(desc_full, style_item_desc),
-            Paragraph(f"${unit_price_item:,.2f}", style_item_desc),
-            Paragraph(f"${total_item:,.2f}", style_item_desc),
+            Paragraph(f"${unit_price_item:,.2f}", style_item_desc_center),
+            Paragraph(f"${total_item:,.2f}", style_item_desc_center),
         ])
 
     items_table = Table(items_data, colWidths=[35, 35, 310, 90, 90], repeatRows=1)
