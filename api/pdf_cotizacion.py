@@ -333,7 +333,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     story.append(Spacer(1, 8))
 
     # Empujar totales hacia el final de la página (justo arriba del footer, como footer pero no footer)
-    story.append(Spacer(1, 420))
+    story.append(Spacer(1, 488))
 
     # === TOTALES EN FILA HORIZONTAL ===
     iva_general = subtotal_general * 0.16
