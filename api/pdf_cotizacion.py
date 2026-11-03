@@ -203,7 +203,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     # === HEADER ===
     logo_container = []
     logo_container.extend(_logo_flowables())
-    logo_container.append(Paragraph("Oscar Noe Castillo Zavala  |  RFC: CAZO670914BK8", style_logo_subtext))
+    logo_container.append(Paragraph("Oscar Noe Castillo Zavala", style_logo_subtext))
 
     cot_number = f"CM{str(header.get('folio')).zfill(5)}"
     date_val = header.get("fecha")
@@ -218,37 +218,30 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     cliente = header.get("contacto") or ""
     cliente_nombre = header.get("cliente_nombre") or ""
 
-    # Título pequeño + CM00... grande en azul ECCSA a la derecha
+    # Título pequeño "COTIZACION" arriba de CM00... grande en azul ECCSA, alineado a la derecha
     header_title_data = [[
         Paragraph("COTIZACION", style_title),
+    ], [
         Paragraph(cot_number, style_cotnum),
     ]]
-    header_title_table = Table(header_title_data, colWidths=[280, 280])
+    header_title_table = Table(header_title_data, colWidths=[560])
     header_title_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
+        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
         ("TOPPADDING", (0, 0), (-1, -1), 0),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
         ("RIGHTPADDING", (0, 0), (-1, -1), 0),
     ]))
     story.append(header_title_table)
-    # Línea de acento
-    accent_line = Table([[""]], colWidths=[560])
-    accent_line.setStyle(TableStyle([
-        ("LINEBELOW", (0, 0), (-1, -1), 1.5, C_ECCSA_BLUE),
-        ("TOPPADDING", (0, 0), (-1, -1), 0),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-    ]))
-    story.append(accent_line)
     story.append(Spacer(1, 8))
 
-    # Metadatos: Fecha a la derecha arriba de Cliente (sin Elaboro ni Telefono)
+    # Metadatos: Fecha y Cliente alineados a la derecha
     meta_right = [
         [Paragraph("Fecha", style_meta_label), Paragraph(date_str, style_meta_value)],
         [Paragraph("Cliente", style_meta_label), Paragraph(cliente, style_meta_value)],
         [Paragraph("", style_meta_label), Paragraph(cliente_nombre, style_meta_value)],
     ]
-
     meta_right_table = Table(meta_right, colWidths=[65, 200])
     meta_right_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
@@ -256,6 +249,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         ("TOPPADDING", (0, 0), (-1, -1), 1),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
         ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+        ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
     ]))
 
     header_data = [[logo_container, meta_right_table]]
@@ -329,11 +323,14 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         ("RIGHTPADDING", (0, 0), (-1, -1), 5),
         ("ALIGN", (0, 0), (-1, 0), "CENTER"),
         ("ALIGN", (0, 1), (1, -1), "CENTER"),
-        ("ALIGN", (3, 1), (4, -1), "RIGHT"),
+        ("ALIGN", (3, 1), (4, -1), "CENTER"),
         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, C_GRAY_LIGHT]),
     ]))
     story.append(items_table)
     story.append(Spacer(1, 8))
+
+    # Empujar totales hacia el final de la página (justo arriba del footer)
+    story.append(Spacer(1, 200))
 
     # === TOTALES EN FILA HORIZONTAL ===
     iva_general = subtotal_general * 0.16
