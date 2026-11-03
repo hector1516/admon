@@ -242,25 +242,12 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     story.append(accent_line)
     story.append(Spacer(1, 8))
 
-    # Metadatos: Fecha a la derecha arriba de Cliente
-    meta_left = [
-        [Paragraph("Elaboro", style_meta_label), Paragraph(autor, style_meta_value)],
-    ]
+    # Metadatos: Fecha a la derecha arriba de Cliente (sin Elaboro ni Telefono)
     meta_right = [
         [Paragraph("Fecha", style_meta_label), Paragraph(date_str, style_meta_value)],
         [Paragraph("Cliente", style_meta_label), Paragraph(cliente, style_meta_value)],
         [Paragraph("", style_meta_label), Paragraph(cliente_nombre, style_meta_value)],
-        [Paragraph("Telefono", style_meta_label), Paragraph(telefono, style_meta_value)],
     ]
-
-    meta_left_table = Table(meta_left, colWidths=[65, 200])
-    meta_left_table.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
-        ("TOPPADDING", (0, 0), (-1, -1), 1),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-    ]))
 
     meta_right_table = Table(meta_right, colWidths=[65, 200])
     meta_right_table.setStyle(TableStyle([
@@ -271,8 +258,8 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         ("RIGHTPADDING", (0, 0), (-1, -1), 0),
     ]))
 
-    header_data = [[logo_container, meta_left_table, meta_right_table]]
-    header_table = Table(header_data, colWidths=[135, 215, 210])
+    header_data = [[logo_container, meta_right_table]]
+    header_table = Table(header_data, colWidths=[135, 385])
     header_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
@@ -410,7 +397,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         "Vigencia: 15 dias",
     ]
     terms_text = "  |  ".join(cond_items)
-    empresa_text = f"ECCSA Automation  |  RFC: CAZO670914BK8  |  Tel: 8183589075  |  Elaboro: {autor}  |  {author_email}"
+    empresa_text = f"Elaboro: {autor}  |  {author_email}  |  Tel: {telefono}  |  ECCSA Automation  |  RFC: CAZO670914BK8"
 
     folio = header.get("folio", 0)
     qr_buf = _generar_qr_image(folio) if folio else None
