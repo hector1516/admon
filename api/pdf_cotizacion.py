@@ -1,7 +1,8 @@
-"""PDF de cotizacion de materiales — diseño sobrio y equilibrado.
+"""PDF de cotizacion de materiales — diseño Apple HIG, jerarquía sobria.
 
-Diseño limpio. Subtotal/IVA/Total en fila horizontal. QR en esquina inferior derecha.
-Terminos y datos de empresa en pie de pagina unificado.
+Folio grande azul ECCSA como firma visual. Tabla con precios alineados a la
+derecha (formato contable). Totales sin caja gris — jerarquía por peso, no por
+relleno. QR en esquina inferior derecha. Footer legible en gris #4B5563.
 """
 
 import datetime
@@ -29,13 +30,13 @@ from reportlab.platypus import (
 from api.numbers_helper import numero_a_letras
 
 
-# === Colores sobrios ===
-C_DARK = colors.HexColor("#1a1a1a")
-C_TEXT = colors.HexColor("#333333")
-C_GRAY = colors.HexColor("#666666")
-C_GRAY_LIGHT = colors.HexColor("#f5f5f5")
-C_BORDER = colors.HexColor("#cccccc")
-C_ECCSA_BLUE = colors.HexColor("#1E40AF")
+# === Colores — Apple HIG / ECCSA ===
+C_DARK = colors.HexColor("#1A1A1A")        # texto primario (15.9:1 sobre blanco)
+C_TEXT = colors.HexColor("#333333")        # cuerpo tabla
+C_GRAY = colors.HexColor("#4B5563")        # texto secundario (8.0:1, legible a 7.5pt)
+C_GRAY_LIGHT = colors.HexColor("#F9FAFB")  # zebra tenue
+C_BORDER = colors.HexColor("#E5E7EB")      # bordes cálidos
+C_ECCSA_BLUE = colors.HexColor("#1E40AF")  # acento ECCSA, folio, header (8.6:1 con blanco)
 
 
 class NumberedCanvas(canvas.Canvas):
@@ -60,29 +61,27 @@ class NumberedCanvas(canvas.Canvas):
 
     def draw_page_number(self, page_count):
         self.saveState()
-        # === FOOTER UNIFICADO ===
-        # Línea divisoria única (arriba)
+        # === FOOTER UNIFICADO — HIG legible (7.5pt mínimo, #4B5563 8.0:1) ===
         self.setStrokeColor(C_BORDER)
         self.setLineWidth(0.5)
         self.line(20, 58, 592, 58)
 
-        # Texto del footer (izquierda)
-        self.setFont("Helvetica", 6.5)
+        self.setFont("Helvetica", 7.5)
         self.setFillColor(C_GRAY)
         self.drawString(20, 48, self._terms_text)
         self.drawString(20, 38, self._empresa_text)
-        self.setFont("Helvetica", 6)
+        self.setFont("Helvetica", 7)
         self.drawString(20, 28, "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx")
         page_text = f"Pagina {self._pageNumber} de {page_count}"
         self.drawRightString(500, 28, page_text)
 
-        # QR en esquina inferior derecha (debajo de la línea divisoria, en la esquina)
+        # QR en esquina inferior derecha
         if self._qr_image:
             try:
                 from reportlab.lib.utils import ImageReader
                 qr_reader = ImageReader(self._qr_image)
                 self.drawImage(qr_reader, 550, 2, width=40, height=40)
-                self.setFont("Helvetica", 5)
+                self.setFont("Helvetica", 6)
                 self.drawCentredString(570, 45, "Verificar")
             except Exception:
                 pass
@@ -186,18 +185,20 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     )
 
     styles = getSampleStyleSheet()
-    style_normal = ParagraphStyle("Norm", fontName="Helvetica", fontSize=8.5, leading=10.5, textColor=C_TEXT, alignment=1)
-    style_bold = ParagraphStyle("Bld", fontName="Helvetica-Bold", fontSize=8.5, leading=10.5, textColor=C_DARK, alignment=1)
-    style_meta_label = ParagraphStyle("MLbl", fontName="Helvetica-Bold", fontSize=8, leading=10, alignment=2, textColor=C_GRAY)
-    style_meta_value = ParagraphStyle("MVal", fontName="Helvetica", fontSize=8.5, leading=10, alignment=2, textColor=C_DARK)
-    style_item_desc = ParagraphStyle("ItemDesc", fontName="Helvetica", fontSize=8, leading=9.5, textColor=C_TEXT, alignment=0)
-    style_item_desc_center = ParagraphStyle("ItemDescC", fontName="Helvetica", fontSize=8, leading=9.5, textColor=C_TEXT, alignment=1)
-    style_item_header = ParagraphStyle("ItemHdr", fontName="Helvetica-Bold", fontSize=8, leading=9.5, textColor=colors.white, alignment=1)
-    style_words = ParagraphStyle("Words", fontName="Helvetica", fontSize=8, leading=10, textColor=C_GRAY, alignment=1)
-    style_logo_subtext = ParagraphStyle("LogoSub", fontName="Helvetica", fontSize=7, leading=8.5, textColor=C_GRAY)
-    style_title = ParagraphStyle("Title", fontName="Helvetica-Bold", fontSize=11, leading=13, textColor=C_GRAY, alignment=2, spaceAfter=2)
-    style_cotnum = ParagraphStyle("CotNum", fontName="Helvetica-Bold", fontSize=20, leading=22, textColor=C_ECCSA_BLUE, alignment=2, spaceAfter=4)
-    style_cond = ParagraphStyle("Cond", fontName="Helvetica", fontSize=7, leading=8.5, textColor=C_GRAY)
+    # HIG: jerarquía por peso y tamaño, no por fondo
+    style_normal = ParagraphStyle("Norm", fontName="Helvetica", fontSize=9, leading=11, textColor=C_TEXT, alignment=1)
+    style_bold = ParagraphStyle("Bld", fontName="Helvetica-Bold", fontSize=9, leading=11, textColor=C_DARK, alignment=1)
+    style_meta_value = ParagraphStyle("MVal", fontName="Helvetica", fontSize=8.5, leading=10.5, alignment=2, textColor=C_DARK)
+    style_item_desc = ParagraphStyle("ItemDesc", fontName="Helvetica", fontSize=9, leading=10.5, textColor=C_TEXT, alignment=0)
+    style_item_num = ParagraphStyle("ItemNum", fontName="Helvetica", fontSize=9, leading=10.5, textColor=C_TEXT, alignment=1)
+    style_item_money = ParagraphStyle("ItemMoney", fontName="Helvetica", fontSize=9, leading=10.5, textColor=C_DARK, alignment=2)
+    style_item_header = ParagraphStyle("ItemHdr", fontName="Helvetica-Bold", fontSize=8.5, leading=10, textColor=colors.white, alignment=1)
+    style_item_header_right = ParagraphStyle("ItemHdrR", fontName="Helvetica-Bold", fontSize=8.5, leading=10, textColor=colors.white, alignment=2)
+    style_words = ParagraphStyle("Words", fontName="Helvetica", fontSize=8.5, leading=10.5, textColor=C_GRAY, alignment=1)
+    style_logo_subtext = ParagraphStyle("LogoSub", fontName="Helvetica", fontSize=7.5, leading=9, textColor=C_GRAY)
+    style_title = ParagraphStyle("Title", fontName="Helvetica-Bold", fontSize=9, leading=11, textColor=C_GRAY, alignment=2, spaceAfter=2)
+    style_cotnum = ParagraphStyle("CotNum", fontName="Helvetica-Bold", fontSize=22, leading=24, textColor=C_ECCSA_BLUE, alignment=2, spaceAfter=4)
+    style_cond = ParagraphStyle("Cond", fontName="Helvetica", fontSize=7.5, leading=9, textColor=C_GRAY)
 
     story = []
 
@@ -238,20 +239,21 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     story.append(header_title_table)
     story.append(Spacer(1, 8))
 
-    # Metadatos: Fecha y Cliente alineados a la derecha
+    # Metadatos: fecha + cliente alineados a la derecha, sin etiquetas
     meta_right = [
-        [Paragraph("", style_meta_label), Paragraph(date_str, style_meta_value)],
-        [Paragraph("", style_meta_label), Paragraph(cliente, style_meta_value)],
-        [Paragraph("", style_meta_label), Paragraph(cliente_nombre, style_meta_value)],
+        [Paragraph(date_str, style_meta_value)],
+        [Paragraph(cliente, style_meta_value)],
+        [Paragraph(cliente_nombre, style_meta_value)],
     ]
-    meta_right_table = Table(meta_right, colWidths=[65, 200])
+    meta_right_table = Table(meta_right, colWidths=[265])
     meta_right_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
         ("TOPPADDING", (0, 0), (-1, -1), 1),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+        ("LEFTPADDING", (0, 0), (-1, -1), 8),
         ("RIGHTPADDING", (0, 0), (-1, -1), 0),
         ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
+        ("LINEBEFORE", (0, 0), (0, -1), 0.5, C_BORDER),
     ]))
 
     header_data = [[logo_container, meta_right_table]]
@@ -263,17 +265,18 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         ("RIGHTPADDING", (0, 0), (-1, -1), 0),
         ("LEFTPADDING", (0, 0), (-1, -1), 0),
         ("ALIGN", (1, 0), (1, 0), "RIGHT"),
+        ("LINEBELOW", (0, 0), (-1, 0), 1, C_BORDER),
     ]))
     story.append(header_table)
-    story.append(Spacer(1, 8))
+    story.append(Spacer(1, 10))
 
     # === TABLA DE PARTIDAS ===
     items_data = [[
         Paragraph("Part.", style_item_header),
         Paragraph("Cant.", style_item_header),
         Paragraph("Descripcion", style_item_header),
-        Paragraph("P. Unit.", style_item_header),
-        Paragraph("Total", style_item_header),
+        Paragraph("P. Unit.", style_item_header_right),
+        Paragraph("Total", style_item_header_right),
     ]]
 
     subtotal_general = 0.0
@@ -304,29 +307,29 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
             sat_extra += f"  SAT: {item['sat_prod_serv']}"
             if item.get("sat_unidad"):
                 sat_extra += f"  Unidad: {item['sat_unidad']}"
-        desc_full = (f"{desc_clean}<br/><font size='7' color='#64748B'>"
+        desc_full = (f"{desc_clean}<br/><font size='7.5' color='#4B5563'>"
                      f"Entrega: {delivery_days}{diass_suffix}{sat_extra}</font>")
         items_data.append([
-            Paragraph(partida_num, style_item_desc_center),
-            Paragraph(cantidad_num, style_item_desc_center),
+            Paragraph(partida_num, style_item_num),
+            Paragraph(cantidad_num, style_item_num),
             Paragraph(desc_full, style_item_desc),
-            Paragraph(f"${unit_price_item:,.2f}", style_item_desc_center),
-            Paragraph(f"${total_item:,.2f}", style_item_desc_center),
+            Paragraph(f"${unit_price_item:,.2f}", style_item_money),
+            Paragraph(f"${total_item:,.2f}", style_item_money),
         ])
 
     items_table = Table(items_data, colWidths=[35, 35, 322, 90, 90], repeatRows=1)
     items_table.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("GRID", (0, 0), (-1, -1), 0.3, C_BORDER),
-        ("BACKGROUND", (0, 0), (-1, 0), C_DARK),
+        ("BACKGROUND", (0, 0), (-1, 0), C_ECCSA_BLUE),
         ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("TOPPADDING", (0, 0), (-1, -1), 4),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
         ("LEFTPADDING", (0, 0), (-1, -1), 5),
         ("RIGHTPADDING", (0, 0), (-1, -1), 5),
-        ("ALIGN", (0, 0), (-1, 0), "CENTER"),
-        ("ALIGN", (0, 1), (1, -1), "CENTER"),
-        ("ALIGN", (3, 1), (4, -1), "CENTER"),
+        ("ALIGN", (0, 0), (1, -1), "CENTER"),
+        ("ALIGN", (2, 0), (2, -1), "LEFT"),
+        ("ALIGN", (3, 0), (4, -1), "RIGHT"),
         ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, C_GRAY_LIGHT]),
     ]))
     story.append(items_table)
@@ -359,9 +362,9 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
         ("LEFTPADDING", (0, 0), (-1, -1), 8),
         ("RIGHTPADDING", (0, 0), (-1, -1), 8),
-        ("BACKGROUND", (0, 0), (-1, -1), C_GRAY_LIGHT),
-        ("BOX", (0, 0), (-1, -1), 0.5, C_BORDER),
-        ("LINEAFTER", (0, 0), (1, -1), 0.5, C_BORDER),
+        # Jerarquía por peso, no por fondo: total con 1.5pt azul ECCSA abajo
+        ("LINEBELOW", (2, 0), (2, 0), 1.5, C_ECCSA_BLUE),
+        ("LINEBELOW", (0, 0), (1, 0), 0.5, C_BORDER),
     ]))
     story.append(totals_table)
     story.append(Spacer(1, 4))
