@@ -96,7 +96,7 @@ def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
         # Los vales se leen del más reciente al más viejo: el primero que
         # contiene el folio es el que se queda, como el TOP 1 por Fecha.
         cursor.execute(
-            "SELECT XmlFolio, Fecha, Monto, XmlLitros, XmlConcepto, XmlContent "
+            "SELECT XmlFolio, Fecha, Monto, XmlLitros, XmlConcepto, XmlContent, IdSolicitudVale, IdUsuario "
             "FROM HUB_OxxoGasVales ORDER BY Fecha DESC"
         )
         vales = cursor.fetchall()
@@ -110,6 +110,13 @@ def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
             if xv and xv not in por_folio:
                 por_folio[xv] = v
 
+        # Índice por IdSolicitudVale para match directo (Option B)
+        por_solicitud = {}
+        for v in vales:
+            sid = v.get("IdSolicitudVale")
+            if sid is not None and sid not in por_solicitud:
+                por_solicitud[sid] = v
+
         # Índice por usuario para matching por fecha
         vales_por_usuario = {}
         for v in vales:
@@ -121,14 +128,21 @@ def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
         resultado = []
         for t in tickets:
             folio = (t["FolioTicket"] or "").strip()
-            v = por_folio.get(folio) if folio else None
-            # Búsqueda LIKE en XML
+            v = None
+            # 1. Match directo por IdSolicitudVale (más preciso)
+            sid = t.get("IdSolicitudVale")
+            if sid is not None and sid in por_solicitud:
+                v = por_solicitud[sid]
+            # 2. Atajo por folio exacto
+            if v is None:
+                v = por_folio.get(folio) if folio else None
+            # 3. Búsqueda LIKE en XML
             if v is None and folio:
                 for cand in vales:
                     if folio in str(cand["XmlContent"] or ""):
                         v = cand
                         break
-            # Matching por usuario + fecha (±3 días) si no se encontró por folio
+            # 4. Matching por usuario + fecha (±3 días) si no se encontró
             if v is None:
                 uid = t.get("IdUsuario")
                 fecha_ticket = t.get("FechaRegistro")
