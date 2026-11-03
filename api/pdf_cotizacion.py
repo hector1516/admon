@@ -74,7 +74,7 @@ class NumberedCanvas(canvas.Canvas):
         self.setFont("Helvetica", 6)
         self.drawString(20, 28, "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx")
         page_text = f"Pagina {self._pageNumber} de {page_count}"
-        self.drawRightString(540, 28, page_text)
+        self.drawRightString(500, 28, page_text)
 
         # QR en esquina inferior derecha (debajo de la línea divisoria, en la esquina)
         if self._qr_image:
@@ -226,7 +226,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     ], [
         Paragraph(cot_number, style_cotnum),
     ]]
-    header_title_table = Table(header_title_data, colWidths=[560])
+    header_title_table = Table(header_title_data, colWidths=[572])
     header_title_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
         ("ALIGN", (0, 0), (-1, -1), "RIGHT"),
@@ -255,7 +255,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     ]))
 
     header_data = [[logo_container, meta_right_table]]
-    header_table = Table(header_data, colWidths=[135, 385])
+    header_table = Table(header_data, colWidths=[135, 437])
     header_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
@@ -314,7 +314,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
             Paragraph(f"${total_item:,.2f}", style_item_desc_center),
         ])
 
-    items_table = Table(items_data, colWidths=[35, 35, 310, 90, 90], repeatRows=1)
+    items_table = Table(items_data, colWidths=[35, 35, 322, 90, 90], repeatRows=1)
     items_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "TOP"),
         ("GRID", (0, 0), (-1, -1), 0.3, C_BORDER),
@@ -346,7 +346,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         Paragraph(f"I.V.A. (16%): ${iva_general:,.2f}", style_normal),
         Paragraph(f"Total: ${total_general:,.2f}", style_bold),
     ]
-    totals_table = Table([totals_row], colWidths=[186, 187, 187])
+    totals_table = Table([totals_row], colWidths=[190, 191, 191])
     totals_table.setStyle(TableStyle([
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
@@ -362,7 +362,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     story.append(Spacer(1, 4))
 
     # Monto en letra centrado debajo
-    words_table = Table([[Paragraph(total_letras, style_words)]], colWidths=[560])
+    words_table = Table([[Paragraph(total_letras, style_words)]], colWidths=[572])
     words_table.setStyle(TableStyle([
         ("ALIGN", (0, 0), (-1, -1), "CENTER"),
         ("BOTTOMPADDING", (0, 0), (-1, -1), 4),

@@ -47,7 +47,7 @@
 		}
 		folio = parseInt(clave, 10);
 		const token = localStorage.getItem('admon_token') || '';
-		pdfUrl = `/api/cotizaciones/${folio}/pdf?token=${encodeURIComponent(token)}`;
+		pdfUrl = `/api/cotizaciones/${folio}/pdf?token=${encodeURIComponent(token)}&t=${Date.now()}`;
 		// Pre-fetch del blob para que share() no necesite await fetch()
 		// (Safari invalida el gesture token si hay await antes de share)
 		try {
