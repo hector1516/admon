@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from api.routers.passkeys import legends_subtotal_cotizacion, legends_registrar_metrica
+from api import sat_helper
 
 router = APIRouter()
 
