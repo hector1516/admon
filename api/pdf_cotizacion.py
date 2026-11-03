@@ -311,74 +311,83 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     story.append(words_table)
     story.append(Spacer(1, 8))
 
-    # QR (un solo QR, en la zona de totales)
-    folio = header.get("folio", 0)
-    qr_buf = _generar_qr_image(folio) if folio else None
-    if qr_buf:
-        qr_img = RLImage(qr_buf, width=65, height=65)
-        qr_label = Paragraph("Escanea para verificar<br/>esta cotizacion", ParagraphStyle(
-            "QRLabel", fontName="Helvetica", fontSize=7, leading=8,
-            textColor=colors.HexColor("#64748b"), alignment=1))
-        qr_table = Table([[qr_img], [qr_label]], colWidths=[65])
-        qr_table.setStyle(TableStyle([
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("TOPPADDING", (0, 0), (-1, -1), 2),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 2),
-        ]))
-        qr_wrapper = Table([[Spacer(1, 1), qr_table]], colWidths=[517, 65])
-        qr_wrapper.setStyle(TableStyle([
-            ("VALIGN", (0, 0), (-1, -1), "TOP"),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-            ("LEFTPADDING", (0, 0), (-1, -1), 0),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-            ("TOPPADDING", (0, 0), (-1, -1), 0),
-        ]))
-        story.append(qr_wrapper)
-        story.append(Spacer(1, 8))
-
-    # TERMINOS Y CONDICIONES
+    # === PREPARAR DATOS PARA EL FOOTER (compacto) ===
     cond_pago_days = header.get("condiciones_pago", 30) or 30
     te_suffix = " Dia Laboral" if max_delivery_days == 1 else " Dias Laborales"
 
-    cond_col1_data = [
-        [Paragraph(f"T.E. Max. {str(max_delivery_days).zfill(2)}{te_suffix}", style_bold)],
-        [Paragraph(f"Condiciones de Pago: {str(cond_pago_days).zfill(2)} dias", style_normal)],
-        [Paragraph("Precios en Moneda Nacional", style_normal)],
-        [Paragraph("Stock salvo previa venta", style_normal)],
+    cond_items = [
+        f"T.E. Max. {str(max_delivery_days).zfill(2)}{te_suffix}",
+        f"Cond. Pago: {str(cond_pago_days).zfill(2)} dias",
+        "Precios en M.N.",
+        "Stock salvo previa venta",
+        "Vigencia: 15 dias",
     ]
-    cond_col1_table = Table(cond_col1_data, colWidths=[200])
-    cond_col1_table.setStyle(TableStyle([
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
-        ("TOPPADDING", (0, 0), (-1, -1), 1),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-    ]))
+    terms_text = "  |  ".join(cond_items)
 
     author_email = str(header.get("autor") or "").lower().replace(" ", ".") + "@ecc-sa.com.mx"
-    cond_col2_data = [
-        [Paragraph("ECCSA Automation, RFC: CAZO670914BK8", style_bold)],
-        [Paragraph(f"Telefono: 8183589075, eccsa@ecc-sa.com.mx {author_email}", style_normal)],
-        [Paragraph("Fray Luis de Leon 1713, Jardin Espanol, Monterrey, Nuevo Leon, Cp. 64820", style_normal)],
-        [Paragraph("La cotizacion tiene una vigencia de 15 dias naturales a partir de su fecha de emision", style_normal)],
-    ]
-    cond_col2_table = Table(cond_col2_data, colWidths=[382])
-    cond_col2_table.setStyle(TableStyle([
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 1),
-        ("TOPPADDING", (0, 0), (-1, -1), 1),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-    ]))
+    empresa_text = f"ECCSA Automation | RFC: CAZO670914BK8 | Tel: 8183589075 | {author_email}"
 
-    cond_table = Table([[cond_col1_table, cond_col2_table]], colWidths=[200, 382])
-    cond_table.setStyle(TableStyle([
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-        ("TOPPADDING", (0, 0), (-1, -1), 0),
-        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-    ]))
-    story.append(KeepTogether([cond_table]))
+    # QR (un solo QR)
+    folio = header.get("folio", 0)
+    qr_buf = _generar_qr_image(folio) if folio else None
 
-    doc.build(story, canvasmaker=NumberedCanvas)
+    # NumberedCanvas con footer compacto
+    class canvas_maker(canvas.Canvas):
+        def __init__(self, *args, **kwargs):
+            self._qr_buf = qr_buf
+            self._terms_text = terms_text
+            self._empresa_text = empresa_text
+            super().__init__(*args, **kwargs)
+            self._saved_page_states = []
+
+        def showPage(self):
+            self._saved_page_states.append(dict(self.__dict__))
+            self._startPage()
+
+        def save(self):
+            num_pages = len(self._saved_page_states)
+            for state in self._saved_page_states:
+                self.__dict__.update(state)
+                self.draw_page_number(num_pages)
+                super().showPage()
+            super().save()
+
+        def draw_page_number(self, page_count):
+            self.saveState()
+            # Línea superior del footer
+            self.setStrokeColor(colors.HexColor("#cccccc"))
+            self.setLineWidth(0.5)
+            self.line(20, 62, 592, 62)
+
+            # Términos (línea 1)
+            self.setFont("Helvetica", 7)
+            self.setFillColor(colors.HexColor("#666666"))
+            self.drawString(20, 54, self._terms_text)
+
+            # Empresa (línea 2)
+            self.drawString(20, 44, self._empresa_text)
+
+            # QR (derecha)
+            if self._qr_buf:
+                try:
+                    from reportlab.lib.utils import ImageReader
+                    qr_reader = ImageReader(self._qr_buf)
+                    self.drawImage(qr_reader, 540, 28, width=48, height=48)
+                    self.setFont("Helvetica", 5.5)
+                    self.drawCentredString(564, 22, "Verificar")
+                except Exception:
+                    pass
+
+            # Línea inferior
+            self.line(20, 18, 592, 18)
+            # Dirección + página
+            self.setFont("Helvetica", 6.5)
+            self.drawString(20, 9, "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx")
+            page_text = f"Pagina {self._pageNumber} de {page_count}"
+            self.drawRightString(592, 9, page_text)
+            self.restoreState()
+
+    doc.build(story, canvasmaker=canvas_maker)
     pdf_bytes = buffer.getvalue()
     buffer.close()
     return pdf_bytes
