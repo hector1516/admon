@@ -402,6 +402,7 @@
 			<button class="btn btn-secondary btn-block" on:click={onClonar} disabled={busy}>🐑 Clonar</button>
 		</div>
 		<button class="btn btn-secondary btn-block" style="margin-bottom: 0.5rem;" on:click={() => navigate(`/cotizaciones/${clave}/estatus`)} disabled={busy}>🚦 Cambiar estatus</button>
+		<button class="btn btn-secondary btn-block" style="margin-bottom: 0.5rem;" on:click={abrirHistorial} disabled={busy}>Historial de cambios</button>
 		<button class="btn btn-danger btn-block" on:click={onBorrar} disabled={bloqueado || busy}>🚨 Borrar cotización</button>
 		{#if bloqueado}
 			<p class="hint" style="margin-top: 0.5rem;">🔒 Bloqueada (lista para facturar / facturada).</p>
