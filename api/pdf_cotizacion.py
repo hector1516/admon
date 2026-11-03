@@ -240,8 +240,8 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
 
     # Metadatos: Fecha y Cliente alineados a la derecha
     meta_right = [
-        [Paragraph("Fecha", style_meta_label), Paragraph(date_str, style_meta_value)],
-        [Paragraph("Cliente", style_meta_label), Paragraph(cliente, style_meta_value)],
+        [Paragraph("", style_meta_label), Paragraph(date_str, style_meta_value)],
+        [Paragraph("", style_meta_label), Paragraph(cliente, style_meta_value)],
         [Paragraph("", style_meta_label), Paragraph(cliente_nombre, style_meta_value)],
     ]
     meta_right_table = Table(meta_right, colWidths=[65, 200])
@@ -332,8 +332,8 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     story.append(items_table)
     story.append(Spacer(1, 8))
 
-    # Empujar totales hacia el final de la página (justo arriba del footer)
-    story.append(Spacer(1, 350))
+    # Empujar totales hacia el final de la página (justo arriba del footer, como footer pero no footer)
+    story.append(Spacer(1, 420))
 
     # === TOTALES EN FILA HORIZONTAL ===
     iva_general = subtotal_general * 0.16
