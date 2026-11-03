@@ -148,7 +148,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
         leftMargin=15,
         rightMargin=15,
         topMargin=15,
-        bottomMargin=65,
+        bottomMargin=75,
     )
 
     styles = getSampleStyleSheet()
@@ -354,34 +354,35 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
 
         def draw_page_number(self, page_count):
             self.saveState()
-            # Línea superior del footer (única separación)
+            # === UN SOLO FOOTER UNIFICADO ===
+            # Línea superior del footer
             self.setStrokeColor(colors.HexColor("#cccccc"))
             self.setLineWidth(0.5)
-            self.line(20, 58, 592, 58)
+            self.line(20, 72, 592, 72)
 
-            # Términos + empresa en una sola línea compacta (izquierda)
-            self.setFont("Helvetica", 6.5)
-            self.setFillColor(colors.HexColor("#666666"))
-            self.drawString(20, 48, self._terms_text)
-            self.drawString(20, 38, self._empresa_text)
-
-            # QR (derecha, integrado)
+            # QR en esquina inferior derecha (arriba del texto)
             if self._qr_buf:
                 try:
                     from reportlab.lib.utils import ImageReader
                     qr_reader = ImageReader(self._qr_buf)
-                    self.drawImage(qr_reader, 545, 30, width=42, height=42)
+                    self.drawImage(qr_reader, 548, 30, width=44, height=44)
                     self.setFont("Helvetica", 5)
-                    self.drawCentredString(566, 24, "Verificar")
+                    self.setFillColor(colors.HexColor("#666666"))
+                    self.drawCentredString(570, 24, "Verificar")
                 except Exception:
                     pass
 
-            # Dirección + página (misma línea inferior)
-            self.line(20, 18, 592, 18)
+            # Todo el texto en una sola columna (izquierda), unificado
+            self.setFont("Helvetica", 6.5)
+            self.setFillColor(colors.HexColor("#666666"))
+            self.drawString(20, 62, self._terms_text)
+            self.drawString(20, 52, self._empresa_text)
+            # Dirección + página en la misma línea inferior
+            self.line(20, 22, 592, 22)
             self.setFont("Helvetica", 6)
-            self.drawString(20, 9, "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx")
+            self.drawString(20, 12, "Fray Luis de Leon 1713, Jardin Espanol, Monterrey, N.L., Cp. 64820  |  www.ecc-sa.com.mx")
             page_text = f"Pagina {self._pageNumber} de {page_count}"
-            self.drawRightString(592, 9, page_text)
+            self.drawRightString(592, 12, page_text)
             self.restoreState()
 
     doc.build(story, canvasmaker=canvas_maker)
