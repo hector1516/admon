@@ -274,7 +274,6 @@
 			error = e.message || 'No se pudo generar el PDF.';
 		}
 	}
-// build marker
 </script>
 
 <div class="page">
@@ -499,5 +498,6 @@
 	.historial-fecha { font-size: 0.7rem; color: #64748b; }
 	.historial-accion { font-size: 0.85rem; color: #e2e8f0; }
 </style>
-/ /   t r i g g e r  
+/ /   t r i g g e r 
+ 
  
