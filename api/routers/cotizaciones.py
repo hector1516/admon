@@ -537,6 +537,27 @@ async def cotizacion_verificar(token: str, request: Request):
     })
 
 
+@router.get("/api/cotizaciones/{folio:int}/pdf/existe")
+async def cotizacion_pdf_existe(folio: int, request: Request):
+    """Verifica si el PDF de la cotización ya está guardado en el share SMB."""
+    _user = _user_from_header_or_query(request)
+    _require_cotiz(_user)
+    try:
+        import pdf_storage
+        from datetime import datetime
+        # Obtener la fecha de la cotización
+        conn = get_connection()
+        cursor = conn.cursor(as_dict=True)
+        cursor.execute("SELECT Fecha FROM HUB_CotizacionesMateriales WHERE Folio = %s", (folio,))
+        row = cursor.fetchone()
+        conn.close()
+        fecha = row["Fecha"] if row else None
+        existe = pdf_storage.pdf_exists("materiales", str(folio), fecha)
+        return {"folio": folio, "existe_en_smb": existe}
+    except Exception as e:
+        return {"folio": folio, "existe_en_smb": False, "error": str(e)}
+
+
 @router.get("/api/cotizaciones/{folio:int}/pdf")
 async def cotizacion_pdf(folio: int, request: Request):
     _user = _user_from_header_or_query(request)

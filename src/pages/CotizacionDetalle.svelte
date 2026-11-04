@@ -16,6 +16,8 @@
 	let mostrandoHistorial = $state(false);
 	let historial = $state([]);
 	let cargandoHistorial = $state(false);
+	let pdfEnSmb = $state(null); // null = sin verificar, true/false = resultado
+	let guardandoPdf = $state(false);
 
 	// --- Remisiones (port del HUB) ---
 	let rems = $state([]);
@@ -71,8 +73,17 @@
 				} catch {
 					rems = [];
 				}
+				// Verificar si el PDF ya está guardado en el share SMB
+				try {
+					const res = await fetch(`/api/cotizaciones/${h.folio}/pdf/existe`, { headers: auth.authHeader() });
+					const data = await res.json().catch(() => ({}));
+					pdfEnSmb = data?.existe_en_smb === true;
+				} catch {
+					pdfEnSmb = null;
+				}
 			} else {
 				rems = [];
+				pdfEnSmb = null;
 			}
 		} catch (e) {
 			console.error('Error cargando detalle:', e);
@@ -93,6 +104,31 @@
 		}
 		await cargar();
 	});
+
+	async function onGuardarPdfShare() {
+		if (!h || h.folio == null) {
+			error = 'Primero sincroniza esta cotización para generar el PDF.';
+			return;
+		}
+		guardandoPdf = true;
+		error = '';
+		msg = '';
+		try {
+			// Generar el PDF (esto también lo guarda en el share SMB automáticamente)
+			const res = await fetch(`/api/cotizaciones/${h.folio}/pdf`, { headers: auth.authHeader() });
+			if (!res.ok) throw new Error('No se pudo generar el PDF.');
+			await res.blob();
+			// Re-verificar si ya está en el share
+			const chk = await fetch(`/api/cotizaciones/${h.folio}/pdf/existe`, { headers: auth.authHeader() });
+			const data = await chk.json().catch(() => ({}));
+			pdfEnSmb = data?.existe_en_smb === true;
+			msg = pdfEnSmb ? '✅ PDF guardado en \\Fileserver\\hub\\Cotizaciones_Materiales' : '⚠️ PDF generado pero no se pudo guardar en el share.';
+		} catch (e) {
+			error = e.message || 'No se pudo generar el PDF.';
+		} finally {
+			guardandoPdf = false;
+		}
+	}
 
 	async function onClonar() {
 		if (!h || h.folio == null) {
@@ -242,10 +278,10 @@
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/cotizaciones_materiales')} title="Volver">⬅️</button>
-		<h1>📋 {h ? folioFmt(h.folio ?? h.idLocal) : '…'}</h1>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/cotizaciones_materiales')} title="Volver">Volver</button>
+		<h1>Detalle</h1>
 		{#if pendiente}
-			<span class="badge badge-warning">⏳ pendiente</span>
+			<span class="badge badge-warning">pendiente</span>
 		{/if}
 	</div>
 
@@ -269,6 +305,15 @@
 			<p style="margin: 0.4rem 0 0; font-size: 1.2rem; font-weight: 800; color: var(--color-primary-light);">
 				Total: {fmtMXN(tots.total)}
 			</p>
+			{#if pdfEnSmb !== null}
+				<p style="margin: 0.3rem 0 0; font-size: 0.78rem;">
+					{#if pdfEnSmb}
+						<span style="color: #4ade80;">✅ PDF guardado en \\Fileserver\hub\Cotizaciones_Materiales</span>
+					{:else}
+						<span style="color: #fbbf24;">⏳ PDF pendiente de guardar en el share</span>
+					{/if}
+				</p>
+			{/if}
 		</div>
 
 		<div class="card" style="margin-bottom: 0.75rem;">
@@ -394,6 +439,12 @@
 			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/enviar`)} disabled={busy}>📧 Enviar</button>
 		</div>
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
+			<button class="btn btn-block" on:click={onGuardarPdfShare} disabled={guardandoPdf || busy || bloqueado}
+				style={pdfEnSmb === true ? 'background: #16a34a; color: #fff;' : pdfEnSmb === false ? 'background: #d97706; color: #fff;' : ''}>
+				{guardandoPdf ? 'Guardando...' : 'Guardar PDF en share'}
+			</button>
+		</div>
+		<div class="grid-2" style="margin-bottom: 0.5rem;">
 			<button class="btn btn-primary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/partidas`)} disabled={bloqueado || busy}>📝 Partidas</button>
 			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/editar`)} disabled={bloqueado || busy}>✏️ Modificar</button>
 		</div>
@@ -435,7 +486,6 @@
 			</div>
 		</div>
 	{/if}
-
 </div>
 
 <style>
@@ -456,3 +506,7 @@
 	.historial-fecha { font-size: 0.7rem; color: #64748b; }
 	.historial-accion { font-size: 0.85rem; color: #e2e8f0; }
 </style>
+/ /   t r i g g e r 
+ 
+ / /   t r i g g e r   C I  
+ 

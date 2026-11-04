@@ -22,7 +22,8 @@ COPY package*.json ./
 RUN npm ci --no-audit --no-fund
 
 COPY . .
-RUN npm run build
+ARG CACHEBUST=2
+RUN echo "cachebust=$CACHEBUST" && npm run build
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Etapa 2 — runtime. Backend FastAPI. No lleva Node: la imagen final no carga
@@ -36,6 +37,7 @@ WORKDIR /app
 # sirve para el HEALTHCHECK.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
+    smbclient \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

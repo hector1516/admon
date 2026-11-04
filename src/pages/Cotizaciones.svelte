@@ -140,6 +140,9 @@
 							{#if c.folio == null || !c.synced}
 								<span class="badge badge-warning" style="font-size: 0.6rem;">⏳ pendiente</span>
 							{/if}
+							{#if c.pdf_en_smb}
+								<span style="font-size: 0.6rem; font-weight: 700; border-radius: 999px; padding: 0.15rem 0.5rem; background: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3);">PDF</span>
+							{/if}
 						</div>
 						<div class="cliente">{c.cliente || c.id_cliente || 'N/A'}</div>
 						<div class="meta">{c.contacto || '—'} · {c.fecha || ''}</div>

@@ -10,7 +10,7 @@ import BusquedaGlobal from '$lib/components/BusquedaGlobal.svelte';
 	import { syncPull, syncPush, pendingCount, syncing, refreshPending } from '$lib/sync.js';
 	import { prefetchOffline } from '$lib/offlinePrefetch.js';
 	import { APP_VERSION, SHELL_VERSION } from '$lib/shell.js';
-	import './responsive.css';
+		import './responsive.css';
 	import Login from './pages/Login.svelte';
 	import Dashboard from './pages/Dashboard.svelte';
 import Panel from './pages/Panel.svelte';
@@ -125,6 +125,7 @@ import CotizacionComparar from './pages/CotizacionComparar.svelte';
 		await syncPush();
 		refreshPending();
 	}
+
 
 	function shellFetch(url) {
 		const token = auth.getToken();
