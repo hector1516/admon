@@ -76,6 +76,7 @@ def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
         cursor.execute(f"""
             SELECT TOP 300
                 T.Id, T.FolioTicket, T.FechaRegistro, T.Estacion,
+                T.IdSolicitudVale,
                 COALESCE(NULLIF(LTRIM(RTRIM(T.Descripcion)), ''), S.Descripcion) AS Descripcion,
                 CASE WHEN T.ImagenTicket IS NOT NULL THEN 1 ELSE 0 END AS TieneFoto,
                 COALESCE(C.Cliente, SC.Cliente) AS Cliente,
