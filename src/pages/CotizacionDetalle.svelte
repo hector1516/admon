@@ -277,6 +277,14 @@
 </script>
 
 <div class="page">
+	<div class="header">
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/cotizaciones_materiales')} title="Volver">Volver</button>
+		<h1>Detalle</h1>
+		{#if pendiente}
+			<span class="badge badge-warning">pendiente</span>
+		{/if}
+	</div>
+
 	{#if loading}
 		<div class="empty">Cargando…</div>
 	{:else if error && !h}
@@ -451,7 +459,6 @@
 			<p class="hint" style="margin-top: 0.5rem;">🔒 Bloqueada (lista para facturar / facturada).</p>
 		{/if}
 	{/if}
-	</div>
 	{#if mostrandoHistorial}
 		<div class="modal-overlay" on:click={() => mostrandoHistorial = false}>
 			<div class="modal" on:click|stopPropagation>
@@ -479,6 +486,7 @@
 			</div>
 		</div>
 	{/if}
+</div>
 
 <style>
 	.card-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
