@@ -439,7 +439,6 @@
 			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/enviar`)} disabled={busy}>📧 Enviar</button>
 		</div>
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
-		<div class="grid-2" style="margin-bottom: 0.5rem;">
 			<button class="btn btn-secondary btn-block" on:click={onGuardarPdfShare} disabled={guardandoPdf || busy || bloqueado}>
 				{guardandoPdf ? 'Guardando...' : 'Guardar PDF en share'}
 			</button>
