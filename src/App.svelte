@@ -10,8 +10,7 @@ import BusquedaGlobal from '$lib/components/BusquedaGlobal.svelte';
 	import { syncPull, syncPush, pendingCount, syncing, refreshPending } from '$lib/sync.js';
 	import { prefetchOffline } from '$lib/offlinePrefetch.js';
 	import { APP_VERSION, SHELL_VERSION } from '$lib/shell.js';
-	import { abrirChangelog } from '$lib/changelog.js';
-	import './responsive.css';
+		import './responsive.css';
 	import Login from './pages/Login.svelte';
 	import Dashboard from './pages/Dashboard.svelte';
 import Panel from './pages/Panel.svelte';
@@ -127,35 +126,6 @@ import CotizacionComparar from './pages/CotizacionComparar.svelte';
 		refreshPending();
 	}
 
-	function tituloPagina(p) {
-		if (p === '/dashboard' || p === '/') return 'Dashboard';
-		if (p === '/cotizaciones_materiales' || p === '/cotizaciones') return 'Cotizaciones';
-		if (p.startsWith('/cotizaciones/') && p.endsWith('/editar')) return 'Modificar cotización';
-		if (p.startsWith('/cotizaciones/') && p.endsWith('/partidas')) return 'Partidas';
-		if (p.startsWith('/cotizaciones/') && p.endsWith('/pdf')) return 'PDF de cotización';
-		if (p.startsWith('/cotizaciones/') && p.endsWith('/enviar')) return 'Enviar cotización';
-		if (p.startsWith('/cotizaciones/') && p.endsWith('/estatus')) return 'Estatus';
-		if (p.startsWith('/cotizaciones/') && p.endsWith('/nota')) return 'Nota';
-		if (p.startsWith('/cotizaciones/')) return 'Detalle de cotización';
-		if (p === '/cotizaciones/nueva') return 'Nueva cotización';
-		if (p === '/cotizaciones/comparar') return 'Comparar cotizaciones';
-		if (p === '/clientes') return 'Clientes';
-		if (p.startsWith('/clientes/')) return 'Detalle de cliente';
-		if (p === '/usuarios') return 'Usuarios';
-		if (p.startsWith('/usuarios/')) return 'Detalle de usuario';
-		if (p === '/registro_reportes') return 'Reportes de servicio';
-		if (p.startsWith('/registro_reportes/')) return 'Detalle de reporte';
-		if (p === '/kilometros') return 'Kilómetros';
-		if (p.startsWith('/kilometros/')) return 'Kilómetros por vehículo';
-		if (p === '/tickets_oxxogas') return 'Tickets OxxoGas';
-		if (p.startsWith('/tickets_oxxogas/')) return 'Detalle de ticket';
-		if (p === '/config') return 'Configuración';
-		if (p === '/legends') return 'Legends';
-		if (p === '/ia') return 'ECCSA IA';
-		if (p === '/panel') return 'Panel';
-		if (p === '/notas') return 'Notas';
-		return '';
-	}
 
 	function shellFetch(url) {
 		const token = auth.getToken();
@@ -184,12 +154,6 @@ import CotizacionComparar from './pages/CotizacionComparar.svelte';
 			shellVersion={SHELL_VERSION}
 			fetcher={shellFetch}
 			onsync={shellSync}
-			titulo={tituloPagina($path)}
-			showBack={$path !== '/dashboard' && $path !== '/' && $path !== '/login'}
-			onBack={() => navigate('/dashboard')}
-			onConfig={() => navigate('/config')}
-			onLogout={() => { auth.logout(); navigate('/login', { replace: true }); }}
-			onChangelog={abrirChangelog}
 		/>
 
 		<!-- Popup de novedades (del shell). Va UNA vez acá, en el App, para
