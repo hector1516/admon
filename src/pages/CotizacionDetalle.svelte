@@ -16,6 +16,7 @@
 	let mostrandoHistorial = $state(false);
 	let historial = $state([]);
 	let cargandoHistorial = $state(false);
+	let pdfEnSmb = $state(null); // null = sin verificar, true/false = resultado
 
 	// --- Remisiones (port del HUB) ---
 	let rems = $state([]);
@@ -71,8 +72,17 @@
 				} catch {
 					rems = [];
 				}
+				// Verificar si el PDF ya está guardado en el share SMB
+				try {
+					const res = await fetch(`/api/cotizaciones/${h.folio}/pdf/existe`, { headers: auth.authHeader() });
+					const data = await res.json().catch(() => ({}));
+					pdfEnSmb = data?.existe_en_smb === true;
+				} catch {
+					pdfEnSmb = null;
+				}
 			} else {
 				rems = [];
+				pdfEnSmb = null;
 			}
 		} catch (e) {
 			console.error('Error cargando detalle:', e);
@@ -269,6 +279,15 @@
 			<p style="margin: 0.4rem 0 0; font-size: 1.2rem; font-weight: 800; color: var(--color-primary-light);">
 				Total: {fmtMXN(tots.total)}
 			</p>
+			{#if pdfEnSmb !== null}
+				<p style="margin: 0.3rem 0 0; font-size: 0.78rem;">
+					{#if pdfEnSmb}
+						<span style="color: #4ade80;">✅ PDF guardado en \\Fileserver\hub\Cotizaciones_Materiales</span>
+					{:else}
+						<span style="color: #fbbf24;">⏳ PDF pendiente de guardar en el share</span>
+					{/if}
+				</p>
+			{/if}
 		</div>
 
 		<div class="card" style="margin-bottom: 0.75rem;">
