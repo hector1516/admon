@@ -6,18 +6,14 @@
 	import { online, onlinePing } from '$lib/stores/online.js';
 	import SyncHeader from '$lib/components/SyncHeader.svelte';
 	import Changelog from '$lib/components/Changelog.svelte';
-import BusquedaGlobal from '$lib/components/BusquedaGlobal.svelte';
 	import { syncPull, syncPush, pendingCount, syncing, refreshPending } from '$lib/sync.js';
 	import { prefetchOffline } from '$lib/offlinePrefetch.js';
 	import { APP_VERSION, SHELL_VERSION } from '$lib/shell.js';
-		import './responsive.css';
 	import Login from './pages/Login.svelte';
 	import Dashboard from './pages/Dashboard.svelte';
-import Panel from './pages/Panel.svelte';
 	import Cotizaciones from './pages/Cotizaciones.svelte';
 	import CotizacionDetalle from './pages/CotizacionDetalle.svelte';
 	import CotizacionNueva from './pages/CotizacionNueva.svelte';
-import CotizacionComparar from './pages/CotizacionComparar.svelte';
 	import CotizacionEditar from './pages/CotizacionEditar.svelte';
 	import CotizacionNota from './pages/CotizacionNota.svelte';
 	import PartidasAdmin from './pages/PartidasAdmin.svelte';
@@ -126,7 +122,6 @@ import CotizacionComparar from './pages/CotizacionComparar.svelte';
 		refreshPending();
 	}
 
-
 	function shellFetch(url) {
 		const token = auth.getToken();
 		return fetch(url, { headers: token ? { Authorization: `Bearer ${token}` } : {} });
@@ -136,7 +131,6 @@ import CotizacionComparar from './pages/CotizacionComparar.svelte';
 
 {#if !splashDone}
 	<div class="splash">
-		<img src="/oficina-eccsa.png" alt="Oficina ECCSA" style="max-width:300px;max-height:200px;object-fit:contain;margin-bottom:1rem;opacity:0.8;" />
 		<img class="splash-logo-img" src="/admon_logo.png" alt="Admon ECCSA" />
 		<div class="splash-title">Admon</div>
 		<div class="splash-msg">{splashMsg}</div>
@@ -186,8 +180,6 @@ import CotizacionComparar from './pages/CotizacionComparar.svelte';
 				<CotizacionEnviar clave={$path.split('/')[2]} />
 			{:else if $path.startsWith('/cotizaciones/') && $path.endsWith('/estatus')}
 				<CotizacionEstatus clave={$path.split('/')[2]} />
-			{:else if $path === '/cotizaciones/comparar'}
-				<CotizacionComparar />
 			{:else if $path.startsWith('/cotizaciones/')}
 				<CotizacionDetalle clave={$path.split('/')[2]} />
 {:else if $path === '/admin'}
@@ -242,7 +234,6 @@ import CotizacionComparar from './pages/CotizacionComparar.svelte';
 			<Dashboard />
 		{/if}
 		<div class="version-badge">Admon v{APP_VERSION}</div>
-		<BusquedaGlobal />
 	</div>
 {:else}
 	<div class="splash">
