@@ -439,18 +439,10 @@
 			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/enviar`)} disabled={busy}>📧 Enviar</button>
 		</div>
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
-			<button class="btn btn-secondary btn-block" on:click={onGuardarPdfShare} disabled={guardandoPdf || busy || bloqueado}>
+			<button class="btn btn-block" on:click={onGuardarPdfShare} disabled={guardandoPdf || busy || bloqueado}
+				style={pdfEnSmb === true ? 'background: #16a34a; color: #fff;' : pdfEnSmb === false ? 'background: #d97706; color: #fff;' : ''}>
 				{guardandoPdf ? 'Guardando...' : 'Guardar PDF en share'}
 			</button>
-			{#if pdfEnSmb !== null}
-				<div class="pdf-status" class:guardado={pdfEnSmb} class:pendiente={!pdfEnSmb}>
-					{#if pdfEnSmb}
-						<span style="color: #4ade80;">PDF guardado en share SMB</span>
-					{:else}
-						<span style="color: #fbbf24;">PDF pendiente de guardar</span>
-					{/if}
-				</div>
-			{/if}
 		</div>
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
 			<button class="btn btn-primary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/partidas`)} disabled={bloqueado || busy}>📝 Partidas</button>
