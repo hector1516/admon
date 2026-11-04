@@ -423,7 +423,7 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     # Guardar en el share SMB (Cotizaciones Materiales/{año}/{mes}/{folio}.pdf)
     # No bloquea la generación del PDF: si falla, solo se loguea.
     try:
-        import pdf_storage
+        from api import pdf_storage
         folio = header.get("folio", 0)
         fecha = header.get("fecha")
         if folio and fecha:

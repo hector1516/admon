@@ -87,8 +87,18 @@ def _smb_run(commands):
 def _build_smb_dir(modulo, fecha):
     """Construye la ruta de directorio en el share."""
     nombre_modulo = MODULOS.get(modulo, modulo)
+    if isinstance(fecha, str):
+        try:
+            fecha = datetime.datetime.strptime(fecha[:10], "%Y-%m-%d").date()
+        except ValueError:
+            try:
+                fecha = datetime.datetime.strptime(fecha[:10], "%d/%m/%Y").date()
+            except ValueError:
+                fecha = datetime.date.today()
     if isinstance(fecha, datetime.datetime):
         fecha = fecha.date()
+    if not isinstance(fecha, datetime.date):
+        fecha = datetime.date.today()
     year = fecha.year
     mes_folder = MESES.get(fecha.month, f"{fecha.month:02d} Mes")
     return f"{nombre_modulo}/{year}/{mes_folder}"
@@ -166,6 +176,17 @@ def save_pdf(modulo, folio, pdf_bytes, fecha):
         return ''
     if not fecha:
         fecha = datetime.date.today()
+    # Normalizar fecha a date
+    if isinstance(fecha, str):
+        try:
+            fecha = datetime.datetime.strptime(fecha[:10], "%Y-%m-%d").date()
+        except ValueError:
+            try:
+                fecha = datetime.datetime.strptime(fecha[:10], "%d/%m/%Y").date()
+            except ValueError:
+                fecha = datetime.date.today()
+    if isinstance(fecha, datetime.datetime):
+        fecha = fecha.date()
     cfg = _get_smb_config()
     if not cfg.get('full_share'):
         return ''
