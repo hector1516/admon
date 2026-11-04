@@ -17,6 +17,7 @@
 	let historial = $state([]);
 	let cargandoHistorial = $state(false);
 	let pdfEnSmb = $state(null); // null = sin verificar, true/false = resultado
+	let guardandoPdf = $state(false);
 
 	// --- Remisiones (port del HUB) ---
 	let rems = $state([]);
@@ -103,6 +104,31 @@
 		}
 		await cargar();
 	});
+
+	async function onGuardarPdfShare() {
+		if (!h || h.folio == null) {
+			error = 'Primero sincroniza esta cotización para generar el PDF.';
+			return;
+		}
+		guardandoPdf = true;
+		error = '';
+		msg = '';
+		try {
+			// Generar el PDF (esto también lo guarda en el share SMB automáticamente)
+			const res = await fetch(`/api/cotizaciones/${h.folio}/pdf`, { headers: auth.authHeader() });
+			if (!res.ok) throw new Error('No se pudo generar el PDF.');
+			await res.blob();
+			// Re-verificar si ya está en el share
+			const chk = await fetch(`/api/cotizaciones/${h.folio}/pdf/existe`, { headers: auth.authHeader() });
+			const data = await chk.json().catch(() => ({}));
+			pdfEnSmb = data?.existe_en_smb === true;
+			msg = pdfEnSmb ? '✅ PDF guardado en \\Fileserver\\hub\\Cotizaciones_Materiales' : '⚠️ PDF generado pero no se pudo guardar en el share.';
+		} catch (e) {
+			error = e.message || 'No se pudo generar el PDF.';
+		} finally {
+			guardandoPdf = false;
+		}
+	}
 
 	async function onClonar() {
 		if (!h || h.folio == null) {
@@ -411,6 +437,21 @@
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
 			<button class="btn btn-primary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/pdf`)} disabled={busy}>👁️ Previsualizar PDF</button>
 			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/enviar`)} disabled={busy}>📧 Enviar</button>
+		</div>
+		<div class="grid-2" style="margin-bottom: 0.5rem;">
+		<div class="grid-2" style="margin-bottom: 0.5rem;">
+			<button class="btn btn-secondary btn-block" on:click={onGuardarPdfShare} disabled={guardandoPdf || busy || bloqueado}>
+				{guardandoPdf ? 'Guardando...' : 'Guardar PDF en share'}
+			</button>
+			{#if pdfEnSmb !== null}
+				<div class="pdf-status" class:guardado={pdfEnSmb} class:pendiente={!pdfEnSmb}>
+					{#if pdfEnSmb}
+						<span style="color: #4ade80;">PDF guardado en share SMB</span>
+					{:else}
+						<span style="color: #fbbf24;">PDF pendiente de guardar</span>
+					{/if}
+				</div>
+			{/if}
 		</div>
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
 			<button class="btn btn-primary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/partidas`)} disabled={bloqueado || busy}>📝 Partidas</button>
