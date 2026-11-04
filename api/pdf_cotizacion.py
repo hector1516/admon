@@ -419,4 +419,18 @@ def build_cotizacion_pdf(header: dict, partidas: list) -> bytes:
     doc.build(story, canvasmaker=canvas_maker)
     pdf_bytes = buffer.getvalue()
     buffer.close()
+
+    # Guardar en el share SMB (Cotizaciones Materiales/{año}/{mes}/{folio}.pdf)
+    # No bloquea la generación del PDF: si falla, solo se loguea.
+    try:
+        import pdf_storage
+        folio = header.get("folio", 0)
+        fecha = header.get("fecha")
+        if folio and fecha:
+            ruta = pdf_storage.save_pdf("materiales", str(folio), pdf_bytes, fecha)
+            if ruta:
+                print(f"[pdf_cotizacion] PDF guardado en SMB: {ruta}")
+    except Exception as e:
+        print(f"[pdf_cotizacion] No se pudo guardar en SMB: {e}")
+
     return pdf_bytes
