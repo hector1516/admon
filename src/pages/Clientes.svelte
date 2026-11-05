@@ -6,6 +6,9 @@
 	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
 
 	let lista = $state([]);
+	let totalClientes = $state(0);
+	let paginaActual = $state(1);
+	let porPagina = $state(100);
 	let loading = $state(true);
 	let error = $state('');
 	let msg = $state('');
@@ -47,7 +50,9 @@
 		loading = true;
 		error = '';
 		try {
-			lista = await clientes();
+			const res = await clientes({ limit: porPagina, offset: (paginaActual - 1) * porPagina, q: busqueda });
+			lista = Array.isArray(res) ? res : (res.items || []);
+			totalClientes = Array.isArray(res) ? res.length : (res.total || 0);
 		} catch (e) {
 			error = e.message === 'Sesión expirada' ? e.message : 'No se pudo cargar. Revisa tu conexión.';
 		} finally {
@@ -177,7 +182,7 @@
 	</div>
 
 	<div class="field">
-		<input class="input" placeholder="🔍 Buscar por ID o razón social…" bind:value={busqueda} />
+		<input class="input" placeholder="🔍 Buscar por ID o razón social…" bind:value={busqueda} on:input={() => { paginaActual = 1; cargar(); }} />
 	</div>
 
 	<OfflineNotice />
@@ -227,7 +232,13 @@
 		<div class="msg ok">{msg}</div>
 	{/if}
 
-	<p style="color: var(--color-text-muted); font-size: 0.8rem;">Mostrando {filtrados.length} de {lista.length} clientes.</p>
+	<p style="color: var(--color-text-muted); font-size: 0.8rem;">Mostrando {filtrados.length} de {totalClientes} clientes (página {paginaActual} de {Math.max(1, Math.ceil(totalClientes / porPagina))}).</p>
+	{#if totalClientes > porPagina}
+		<div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
+			<button class="btn btn-secondary" disabled={paginaActual <= 1} on:click={() => { paginaActual--; cargar(); }}>← Anterior</button>
+			<button class="btn btn-secondary" disabled={paginaActual >= Math.ceil(totalClientes / porPagina)} on:click={() => { paginaActual++; cargar(); }}>Siguiente →</button>
+		</div>
+	{/if}
 
 	{#if loading}
 		<div class="empty">Cargando…</div>

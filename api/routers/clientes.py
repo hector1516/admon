@@ -1,5 +1,5 @@
 """api/routers/clientes.py — endpoints de clientes (Fase 2 del refactor)."""
-from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi import APIRouter, HTTPException, Depends, Request, Query
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
@@ -51,19 +51,39 @@ def _require_cotiz(*a, **kw):
     return getattr(_m, "_require_cotiz")(*a, **kw)
 
 @router.get("/api/clientes")
-async def clientes_list(current_user: dict = Depends(get_current_user)):
+async def clientes_list(
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    q: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        # OJO: `_CLIENTES_UNICOS` es una tabla derivada y SQL Server exige un
-        # alias (el `C`). Sin él la consulta truena con "Incorrect syntax near
-        # the keyword 'ORDER'" y este endpoint devolvía 500 siempre.
-        cursor.execute("SELECT IdCliente, Cliente, Dias AS CondicionesPagoDias FROM "
-                       + _CLIENTES_UNICOS + " C ORDER BY IdCliente ASC")
+        where = ""
+        params = []
+        if q.strip():
+            like = "%" + q.strip() + "%"
+            where = " WHERE (C.IdCliente LIKE %s OR C.Cliente LIKE %s)"
+            params = [like, like]
+
+        # Total (sin paginar)
+        cursor.execute("SELECT COUNT(*) FROM " + _CLIENTES_UNICOS + " C" + where, tuple(params))
+        total = int(cursor.fetchone()[0] or 0)
+
+        # Página
+        cursor.execute(
+            "SELECT IdCliente, Cliente, Dias AS CondicionesPagoDias FROM "
+            + _CLIENTES_UNICOS + " C" + where +
+            " ORDER BY IdCliente ASC OFFSET %d ROWS FETCH NEXT %d ROWS ONLY"
+            % (offset, limit),
+            tuple(params),
+        )
         rows = cursor.fetchall()
         conn.close()
-        return [{"id_cliente": r[0], "nombre": r[1], "dias_pago": r[2]} for r in rows]
+        items = [{"id_cliente": r[0], "nombre": r[1], "dias_pago": r[2]} for r in rows]
+        return {"items": items, "total": total, "limit": limit, "offset": offset}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 

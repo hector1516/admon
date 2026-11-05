@@ -427,10 +427,14 @@ export async function partidaDelete(folioKey, partidaNum) {
 
 // ---- Clientes ----
 
-export async function clientes() {
+export async function clientes({ limit = 100, offset = 0, q = '' } = {}) {
+	let total = 0;
 	if (isOnline()) {
 		try {
-			const rows = await req('GET', '/api/clientes');
+			const params = new URLSearchParams({ limit, offset, q });
+			const res = await req('GET', '/api/clientes?' + params.toString());
+			const rows = Array.isArray(res) ? res : (res.items || []);
+			total = Array.isArray(res) ? rows.length : (res.total || 0);
 			await db.clientes.bulkPut(rows.map((c) => ({ id_cliente: c.id_cliente, nombre: c.nombre, dias_pago: c.dias_pago })));
 		} catch (e) {
 			if (!isNetworkError(e)) throw e;
@@ -438,12 +442,17 @@ export async function clientes() {
 	}
 	let local = await db.clientes.toArray();
 	if (local.length === 0) {
-		// Primera visita sin red (Dexie vacío): usa la caché genérica que
-		// alimenta el prefetch offline de arranque (offlineCache).
 		const cached = await cacheGet('/api/clientes');
 		if (Array.isArray(cached)) return cached;
 	}
-	return local;
+	// Si hay búsqueda, filtrar local
+	if (q) {
+		const ql = q.toLowerCase();
+		local = local.filter((c) => (c.nombre || '').toLowerCase().includes(ql) || (c.id_cliente || '').toLowerCase().includes(ql));
+	}
+	// Paginar local (offline o fallback)
+	const paged = local.slice(offset, offset + limit);
+	return { items: paged, total: total || local.length, limit, offset };
 }
 
 export async function clienteNombre(idCliente) {
