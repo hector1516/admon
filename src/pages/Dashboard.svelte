@@ -3,26 +3,27 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import ActionsBar from '$lib/components/ActionsBar.svelte';
+	import { Bot, ChartBar, Package, ClipboardList, Wrench, Contact, Fuel, Route, Trophy } from 'lucide-svelte';
 
 	// Menú de módulos estilo home de Field: icon/title/desc/path/perm.
 	// Solo módulos funcionales; cada tarjeta requiere su permiso activo.
 	// ECCSA IA va PRIMERO y sin permiso: en el HUB Jarvis está disponible para
 	// todos los usuarios logueados (el backend no exige ningún Acceso).
 	const modules = [
-		{ icon: '🤖', title: 'ECCSA IA', desc: 'Asistente inteligente', path: '/ia' },
+		{ Icon: Bot, color: '#3B82F6', title: 'ECCSA IA', desc: 'Asistente inteligente', path: '/ia' },
 		// Botón "Dashboard": abre la página de pestañas (Notas y las que se
 		// vayan agregando) — ver src/pages/Panel.svelte.
-		{ icon: '📊', title: 'Dashboard', desc: 'Pantalla de la TV y más', path: '/panel' },
-		{ icon: '📦', title: 'Cotizaciones Materiales', desc: 'Crear y gestionar', path: '/cotizaciones_materiales', perm: 'acceso_cotizaciones' },
-		{ icon: '📋', title: 'Registro de Reportes', desc: 'Visualización global admin', path: '/registro_reportes', perm: 'acceso_registro_reportes' },
-		{ icon: '🛠️', title: 'Administración', desc: 'Asistencia y usuarios', path: '/admin', perm: 'acceso_usuarios' },
-		{ icon: '📇', title: 'Clientes', desc: 'Catálogo general', path: '/clientes', perm: 'acceso_cotizaciones' },
-		{ icon: '⛽', title: 'Tickets de OxxoGas', desc: 'Tickets y facturas', path: '/tickets_oxxogas', perm: 'acceso_vales_oxxogas' },
-		{ icon: '🛣️', title: 'Kilómetros', desc: 'Consumo semanal y captura', path: '/kilometros', perm: 'acceso_registro_kilometros' },
+		{ Icon: ChartBar, color: '#8B5CF6', title: 'Dashboard', desc: 'Pantalla de la TV y más', path: '/panel' },
+		{ Icon: Package, color: '#F97316', title: 'Cotizaciones Materiales', desc: 'Crear y gestionar', path: '/cotizaciones_materiales', perm: 'acceso_cotizaciones' },
+		{ Icon: ClipboardList, color: '#10B981', title: 'Registro de Reportes', desc: 'Visualización global admin', path: '/registro_reportes', perm: 'acceso_registro_reportes' },
+		{ Icon: Wrench, color: '#64748B', title: 'Administración', desc: 'Asistencia y usuarios', path: '/admin', perm: 'acceso_usuarios' },
+		{ Icon: Contact, color: '#EC4899', title: 'Clientes', desc: 'Catálogo general', path: '/clientes', perm: 'acceso_cotizaciones' },
+		{ Icon: Fuel, color: '#F59E0B', title: 'Tickets de OxxoGas', desc: 'Tickets y facturas', path: '/tickets_oxxogas', perm: 'acceso_vales_oxxogas' },
+		{ Icon: Route, color: '#06B6D4', title: 'Kilómetros', desc: 'Consumo semanal y captura', path: '/kilometros', perm: 'acceso_registro_kilometros' },
 		// Legends: visible para todos los usuarios logueados (en Field la gatea el
 		// permiso de kilómetros; aquí los datos son de la empresa y el ranking lo
 		// calcula el worker de workersadmon para las dos apps).
-		{ icon: '🏆', title: 'ECCSA Legends', desc: 'Ranking y puntos', path: '/legends' }
+		{ Icon: Trophy, color: '#F59E0B', title: 'ECCSA Legends', desc: 'Ranking y puntos', path: '/legends' }
 	];
 
 	let user = $state(null);
@@ -72,7 +73,7 @@
 		{#each modules as mod}
 			{#if visible(mod)}
 				<button class="module-card" on:click={() => go(mod)}>
-					<span class="module-icon">{mod.icon}</span>
+					<span class="module-icon" style="color: {mod.color}"><svelte:component this={mod.Icon} size={36} /></span>
 					<span class="module-title">{mod.title}</span>
 					<span class="module-desc">{mod.desc}</span>
 				</button>
