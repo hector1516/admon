@@ -1,5 +1,5 @@
 """api/routers/tickets.py — endpoints de tickets (Fase 4)."""
-from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi import APIRouter, HTTPException, Depends, Request, Query
 from fastapi.responses import Response
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
@@ -43,7 +43,11 @@ def _require_vales_oxxogas(current_user: dict):
         raise HTTPException(status_code=403, detail="No access")
 
 @router.get("/api/tickets-oxxogas")
-def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
+def tickets_oxxogas_list(
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    current_user: dict = Depends(get_current_user),
+):
     """Índice de tickets de OxxoGas con la relación factura ↔ vale.
 
     POR QUÉ YA NO SE USA EL `OUTER APPLY` CON `LIKE`:
@@ -73,8 +77,13 @@ def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
         # los trae (el formulario de Field ya no los captura), del VALE enlazado
         # por IdSolicitudVale. Se usa COALESCE y el clientes único (alias) para
         # no multiplicar filas con los IdCliente duplicados.
+        # Total (sin paginar)
+        cursor.execute("SELECT COUNT(*) AS n FROM HUB_OxxoGasTickets T")
+        total = int(cursor.fetchone()["n"] or 0)
+
+        # Página de tickets
         cursor.execute(f"""
-            SELECT TOP 300
+            SELECT
                 T.Id, T.FolioTicket, T.FechaRegistro, T.Estacion,
                 T.IdSolicitudVale,
                 COALESCE(NULLIF(LTRIM(RTRIM(T.Descripcion)), ''), S.Descripcion) AS Descripcion,
@@ -91,6 +100,7 @@ def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
                   AND S.IdSolicitante = T.IdUsuario
             LEFT JOIN {_CLIENTES_UNICOS} SC ON SC.IdCliente = S.IdCliente
             ORDER BY T.FechaRegistro DESC
+            OFFSET {offset} ROWS FETCH NEXT {limit} ROWS ONLY
         """)
         tickets = cursor.fetchall()
 
@@ -184,7 +194,7 @@ def tickets_oxxogas_list(current_user: dict = Depends(get_current_user)):
                 "litros": float(v["XmlLitros"]) if v and v["XmlLitros"] is not None else None,
                 "concepto": v["XmlConcepto"] if v else None,
             })
-        return resultado
+        return {"items": resultado, "total": total, "limit": limit, "offset": offset}
     except Exception as e:
         if conn:
             try:

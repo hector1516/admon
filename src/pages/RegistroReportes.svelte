@@ -170,7 +170,8 @@
 			if (tab === 'papelera') params.set('eliminados', 'true');
 			// Lista con caché offline: red primero; sin red sirve la última
 			// lista cacheada por el prefetch (mismo path/llave `?`).
-			lista = (await api.get(`/reportes?${params}`)) || [];
+			const res = await api.get(`/reportes?${params}`);
+lista = Array.isArray(res) ? res : (res.items || []);
 			// Si se refrescó mientras había selección de Excel, descarta los ids
 			// que ya no existan en la lista (evita 404 en la exportación).
 			if (seleccion.length) {

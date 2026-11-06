@@ -126,13 +126,21 @@ async def get_me(current_user: dict = Depends(get_current_user)):
     return UserInfo(**current_user)
 
 
-@router.get("/api/users", response_model=List[UserInfo])
-async def get_users(current_user: dict = Depends(get_current_user)):
+@router.get("/api/users")
+async def get_users(
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    current_user: dict = Depends(get_current_user),
+):
     """Get all users - admin only"""
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT Id, Nombre, Email, AccesoInventario, AccesoNominas, AccesoCotizaciones, AccesoProveedores, AccesoOC, AccesoCalculo, AccesoTelegram, AccesoUsuarios, ISNULL(Puesto, '') FROM HUB_Users")
+        # Total
+        cursor.execute("SELECT COUNT(*) FROM HUB_Users")
+        total = int(cursor.fetchone()[0] or 0)
+        # Página
+        cursor.execute("SELECT Id, Nombre, Email, AccesoInventario, AccesoNominas, AccesoCotizaciones, AccesoProveedores, AccesoOC, AccesoCalculo, AccesoTelegram, AccesoUsuarios, ISNULL(Puesto, '') FROM HUB_Users ORDER BY Nombre OFFSET %d ROWS FETCH NEXT %d ROWS ONLY" % (offset, limit))
         rows = cursor.fetchall()
         # MAC del celular por usuario (para el badge 📡 de la lista);
         # solo activas: es lo que el escáner mide para entradas/salidas.
@@ -159,7 +167,7 @@ async def get_users(current_user: dict = Depends(get_current_user)):
                 puesto=row[11] or "",
                 tiene_foto=row[0] in con_foto,
             ))
-        return result
+        return {"items": result, "total": total, "limit": limit, "offset": offset}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 

@@ -1,5 +1,5 @@
 """api/routers/reportes.py — endpoints de reportes (Fase 4)."""
-from fastapi import APIRouter, HTTPException, Depends, Request
+from fastapi import APIRouter, HTTPException, Depends, Request, Query
 from fastapi.responses import Response
 from api.pdf_reporte import build_service_report_pdf
 from fastapi.security import OAuth2PasswordBearer
@@ -40,7 +40,13 @@ def _require_reporte(current_user: dict):
         raise HTTPException(status_code=403, detail="Requiere permiso de Reportes de Servicio")
 
 @router.get("/api/reportes")
-async def api_list_reportes(tecnico: str = "", eliminados: bool = False, current_user: dict = Depends(get_current_user)):
+async def api_list_reportes(
+    tecnico: str = "",
+    eliminados: bool = False,
+    limit: int = Query(100, ge=1, le=500),
+    offset: int = Query(0, ge=0),
+    current_user: dict = Depends(get_current_user),
+):
     """Lista reportes (top 500). Filtra por técnico si se pasa. eliminados=true muestra papelera."""
     _require_reporte(current_user)
     try:
@@ -48,6 +54,23 @@ async def api_list_reportes(tecnico: str = "", eliminados: bool = False, current
         cursor = conn.cursor()
         where_eliminado = "AND Eliminado = 1" if eliminados else "AND (Eliminado = 0 OR Eliminado IS NULL)"
         
+        # Total count
+        if tecnico:
+            cursor.execute(f"""
+                SELECT COUNT(*) FROM ReportesServicio
+                WHERE (Tecnico = %s
+                   OR IdReporte IN (SELECT IdReporte FROM ReportesServicioTecnicos
+                                    INNER JOIN HUB_Users u ON u.Id = ReportesServicioTecnicos.IdUsuario
+                                    WHERE u.Nombre = %s))
+                   {where_eliminado}
+            """, (tecnico.strip(), tecnico.strip()))
+        else:
+            cursor.execute(f"""
+                SELECT COUNT(*) FROM ReportesServicio
+                WHERE 1=1 {where_eliminado}
+            """)
+        total = int(cursor.fetchone()[0] or 0)
+
         if tecnico:
             cursor.execute(f"""
                 SELECT IdReporte, Folio, Cliente, Contacto, CorreoContacto, Fecha, Tecnico,
@@ -60,19 +83,22 @@ async def api_list_reportes(tecnico: str = "", eliminados: bool = False, current
                                     WHERE u.Nombre = %s))
                    {where_eliminado}
                 ORDER BY Fecha DESC, IdReporte DESC
+                OFFSET {offset} ROWS FETCH NEXT {limit} ROWS ONLY
             """, (tecnico.strip(), tecnico.strip()))
         else:
             cursor.execute(f"""
-                SELECT TOP 500 IdReporte, Folio, Cliente, Contacto, CorreoContacto, Fecha, Tecnico,
+                SELECT IdReporte, Folio, Cliente, Contacto, CorreoContacto, Fecha, Tecnico,
                        DescripcionServicio, Estatus, Notas, MaquinaLinea, FechaHoraInicio, FechaHoraFin,
                        TiempoTraslado, TiempoComida, FirmaConformidad, Cotizacion, Eliminado, FechaEliminado
                 FROM ReportesServicio
                 WHERE 1=1 {where_eliminado}
                 ORDER BY Fecha DESC, IdReporte DESC
+                OFFSET {offset} ROWS FETCH NEXT {limit} ROWS ONLY
             """)
         rows = cursor.fetchall()
         conn.close()
-        return [dict(zip([c[0] for c in cursor.description], r)) for r in rows]
+        items = [dict(zip([c[0] for c in cursor.description], r)) for r in rows]
+        return {"items": items, "total": total, "limit": limit, "offset": offset}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 

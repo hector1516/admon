@@ -67,7 +67,8 @@
 		try {
 			// GET con caché offline: red primero, si no hay red sirve los
 			// últimos usuarios cacheados por el prefetch.
-			usuarios = (await api.get('/users')) || [];
+			const res = await api.get('/users');
+usuarios = Array.isArray(res) ? res : (res.items || []);
 		} catch (e) {
 			if (e.message === 'Sesión expirada') {
 				error = e.message;

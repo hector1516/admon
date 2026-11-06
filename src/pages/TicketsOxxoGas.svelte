@@ -80,7 +80,7 @@
 				api.get('/tickets-oxxogas'),
 				api.get('/tickets-oxxogas/saldo').catch(() => null)
 			]);
-			tickets = lista;
+			tickets = Array.isArray(lista) ? lista : (lista.items || []);
 			if (s && typeof s.saldo === 'number') {
 				saldo = s.saldo;
 				saldoFecha = s.fecha || 'Nunca';
