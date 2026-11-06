@@ -110,7 +110,8 @@
 		}
 		if (isAdmin) {
 			try {
-				avUsers = (await api.get('/users')) || [];
+				const res = await api.get('/users');
+avUsers = Array.isArray(res) ? res : (res.items || []);
 			} catch {}
 		}
 	});

@@ -167,7 +167,8 @@
 			return;
 		}
 		try {
-			const lista = await api.get('/tickets-oxxogas');
+			const res = await api.get('/tickets-oxxogas');
+			const lista = Array.isArray(res) ? res : (res.items || []);
 			t = (lista || []).find((x) => String(x.id) === String(id)) || null;
 			if (!t) error = 'No se encontró el ticket.';
 		} catch (e) {
