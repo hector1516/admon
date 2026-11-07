@@ -22,8 +22,8 @@ COPY package*.json ./
 RUN npm ci --no-audit --no-fund
 
 COPY . .
-ARG CACHEBUST=3
-RUN echo "cachebust=$CACHEBUST" && npm run build
+ARG CACHEBUST=4
+RUN echo "cachebust=$CACHEBUST" && npm run build && ls -la dist/assets/
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Etapa 2 — runtime. Backend FastAPI. No lleva Node: la imagen final no carga
