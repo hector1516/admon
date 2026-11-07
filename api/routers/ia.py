@@ -132,7 +132,7 @@ async def ia_get_mensajes(id_conversacion: int, current_user: dict = Depends(get
 async def ia_send_mensaje(id_conversacion: int, body: IaMensajeCreate, current_user: dict = Depends(get_current_user)):
     """
     CLON EXACTO del HUB views/edwin_jarvis.py process_jarvis_query
-    3 Tools: execute_query, send_quote_pdf, send_service_reports
+    4 Tools: execute_query, send_quote_pdf, send_service_reports, send_email
     System instruction con schema completo + admin/non-admin filtering
     """
     _require_ia(current_user)
@@ -317,11 +317,31 @@ async def ia_send_mensaje(id_conversacion: int, body: IaMensajeCreate, current_u
             except Exception as ex:
                 return f"Error al buscar correos: {str(ex)}"
 
+        def send_email(destinatario: str, asunto: str, cuerpo: str) -> str:
+            """Envía un correo electrónico nuevo al destinatario indicado."""
+            try:
+                from api.main import send_email_with_multiple_pdfs
+                success, msg_err = send_email_with_multiple_pdfs(
+                    to_email=destinatario.strip(),
+                    subject=asunto.strip(),
+                    body=cuerpo.strip(),
+                    attachments=[],
+                    sender_name="ECCSA IA",
+                    sender_email="robot@ecc-sa.com.mx"
+                )
+                if success:
+                    return f"Correo enviado exitosamente a {destinatario}."
+                else:
+                    return f"Error SMTP al enviar el correo: {msg_err}"
+            except Exception as ex:
+                return f"Error al enviar correo: {str(ex)}"
+
         tools_dict = {
             "execute_query": execute_query,
             "send_quote_pdf": send_quote_pdf,
             "send_service_reports": send_service_reports,
-            "search_emails": search_emails
+            "search_emails": search_emails,
+            "send_email": send_email
         }
 
         # 6. System instruction CLON EXACTO del HUB
@@ -364,7 +384,8 @@ HABILIDADES DE BUSQUEDA DE MODULOS:
 
 HABILIDADES DE ENVÍO DE DOCUMENTOS:
 - Si el usuario te pide que le envíes una cotización, llama a la herramienta `send_quote_pdf` pasándole el folio. Puede enviar a otro correo o usuario si te lo especifica en el argumento `recipient_email`.
-- Si te pide que le envíes reportes de servicio por correo, llama a la herramienta `send_service_reports` pasándole la lista de folios. Puede enviar a otro correo o usuario si te lo especifica en el argumento `recipient_email`.
+- Si te pide que le envíes reportes de servicio por correo, llama a la herramienta `send_service_reports` pasándole la lista de folios. Puede enviar a
+- Si te pide enviar un correo electrónico nuevo, llama a la herramienta `send_email` pasándole el destinatario, el asunto y el cuerpo del mensaje. otro correo o usuario si te lo especifica en el argumento `recipient_email`.
 
 CONTESTAR PREGUNTAS GENERALES:
 - Puedes contestar libremente sobre cualquier otro tema (SAT, cotizaciones, explicaciones técnicas, cálculos matemáticos, redacción de correos profesionales, etc.) usando tu propio conocimiento general. Si te preguntan por códigos del SAT para partidas de cotización, haz una consulta a las partidas de la cotización pedida, analiza los productos, sugiere las claves del SAT más convenientes y explica el porqué.
@@ -380,7 +401,7 @@ Sé claro, directo, estructurado y presenta los datos de forma elegante en tabla
         model = genai.GenerativeModel(
             model_name=model_name,
             system_instruction=system_instruction,
-            tools=[execute_query, send_quote_pdf, send_service_reports, search_emails]
+            tools=[execute_query, send_quote_pdf, send_service_reports, search_emails, send_email]
         )
         
         chat = model.start_chat(history=historial[:-1] if len(historial) > 1 else [])
