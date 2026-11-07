@@ -138,7 +138,13 @@
 		}
 	}
 
-	function formatearFecha(fecha) {
+	function compartirWhatsApp(texto) {
+		const clean = (texto || '').replace(/<[^>]*>/g, '').replace(/\*\*/g, '').trim();
+		const url = 'https://wa.me/?text=' + encodeURIComponent(clean.slice(0, 500));
+		window.open(url, '_blank');
+	}
+
+function formatearFecha(fecha) {
 		if (!fecha) return '';
 		const d = new Date(fecha);
 		const hoy = new Date();
@@ -233,6 +239,11 @@
 							<div class="msg-content md">{@html renderMd(m.Contenido)}</div>
 						{:else}
 							<div class="msg-content">{m.Contenido}</div>
+						{/if}
+						{#if esIA}
+							<button class="btn-wa-share" on:click={() => compartirWhatsApp(m.Contenido)} title="Compartir por WhatsApp">
+								📱 WhatsApp
+							</button>
 						{/if}
 						<div class="msg-time">{formatearFecha(m.FechaRegistro)}</div>
 					</div>
@@ -409,6 +420,8 @@
 	.msg-content.md :global(pre code) { background: transparent; padding: 0; }
 
 	.msg-time { font-size: 0.62rem; opacity: 0.55; text-align: right; margin-top: 0.25rem; }
+	.btn-wa-share { margin-top: 0.4rem; padding: 0.3rem 0.7rem; font-size: 0.7rem; border-radius: 8px; border: 1px solid rgba(37,211,102,0.3); background: rgba(37,211,102,0.1); color: #25D366; cursor: pointer; font-family: inherit; font-weight: 600; transition: all 0.15s; display: inline-block; }
+	.btn-wa-share:hover { background: rgba(37,211,102,0.2); }
 	.message.user .msg-time { color: rgba(255, 255, 255, 0.8); }
 
 	.msg-typing { display: flex; gap: 4px; padding: 0.2rem 0.1rem; }

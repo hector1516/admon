@@ -321,10 +321,11 @@ async def ia_send_mensaje(id_conversacion: int, body: IaMensajeCreate, current_u
             """Envía un correo electrónico nuevo al destinatario indicado."""
             try:
                 from api.main import send_email_with_multiple_pdfs
+                body_con_firma = cuerpo.strip() + f"\n\n---\nEnviado por: {user_name}\nECCSA IA"
                 success, msg_err = send_email_with_multiple_pdfs(
                     to_email=destinatario.strip(),
                     subject=asunto.strip(),
-                    body=cuerpo.strip(),
+                    body=body_con_firma,
                     attachments=[],
                     sender_name="ECCSA IA",
                     sender_email="robot@ecc-sa.com.mx"
