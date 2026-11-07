@@ -1,9 +1,12 @@
 """api/routers/automoviles.py — gestión de automóviles y asignación a usuarios."""
 from fastapi import APIRouter, HTTPException, Depends, Request, Query
+from fastapi.security import OAuth2PasswordBearer
 from typing import Optional
 from api.routers.clientes import _require_cotiz
 
 router = APIRouter()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
 
 def get_connection():
@@ -11,8 +14,14 @@ def get_connection():
     return _m.get_connection()
 
 
+def get_current_user(token: str = Depends(oauth2_scheme)):
+    from api import main as _m
+    return _m.get_current_user(token)
+
+
 @router.get("/api/automoviles")
-async def automoviles_list(current_user: dict = Depends(_require_cotiz)):
+async def automoviles_list(current_user: dict = Depends(get_current_user)):
+    _require_cotiz(current_user)
     try:
         conn = get_connection()
         cursor = conn.cursor(as_dict=True)
@@ -44,8 +53,8 @@ async def automoviles_list(current_user: dict = Depends(_require_cotiz)):
 
 
 @router.get("/api/automoviles/usuarios")
-async def automoviles_usuarios(current_user: dict = Depends(_require_cotiz)):
-    """Lista de usuarios activos para asignación."""
+async def automoviles_usuarios(current_user: dict = Depends(get_current_user)):
+    _require_cotiz(current_user)
     try:
         conn = get_connection()
         cursor = conn.cursor(as_dict=True)
@@ -63,8 +72,9 @@ async def automoviles_create(
     placas: str = Query(...),
     poliza_seguro: Optional[str] = Query(None),
     ultimo_servicio_kms: int = Query(0),
-    current_user: dict = Depends(_require_cotiz),
+    current_user: dict = Depends(get_current_user),
 ):
+    _require_cotiz(current_user)
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -86,8 +96,9 @@ async def automoviles_update(
     placas: Optional[str] = Query(None),
     poliza_seguro: Optional[str] = Query(None),
     ultimo_servicio_kms: Optional[int] = Query(None),
-    current_user: dict = Depends(_require_cotiz),
+    current_user: dict = Depends(get_current_user),
 ):
+    _require_cotiz(current_user)
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -121,14 +132,13 @@ async def automoviles_update(
 async def automoviles_asignar(
     auto_id: int,
     user_id: int,
-    current_user: dict = Depends(_require_cotiz),
+    current_user: dict = Depends(get_current_user),
 ):
+    _require_cotiz(current_user)
     try:
         conn = get_connection()
         cursor = conn.cursor()
-        # Desasignar cualquier auto previo del usuario
         cursor.execute("UPDATE HUB_Automoviles SET IdUsuarioAsignado = NULL WHERE IdUsuarioAsignado = %s", (user_id,))
-        # Asignar el nuevo
         cursor.execute("UPDATE HUB_Automoviles SET IdUsuarioAsignado = %s WHERE Id = %s", (user_id, auto_id))
         conn.commit()
         conn.close()
@@ -140,8 +150,9 @@ async def automoviles_asignar(
 @router.put("/api/automoviles/{auto_id}/desasignar")
 async def automoviles_desasignar(
     auto_id: int,
-    current_user: dict = Depends(_require_cotiz),
+    current_user: dict = Depends(get_current_user),
 ):
+    _require_cotiz(current_user)
     try:
         conn = get_connection()
         cursor = conn.cursor()
