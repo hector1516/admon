@@ -18,6 +18,13 @@
 	let uploadMsg = $state('');
 	let detalle = $state(null);
 	let detalleLoading = $state(false);
+	let showFormServicio = $state(false);
+	let showFormReparacion = $state(false);
+	let showFormKm = $state(false);
+	let formServicio = $state({ fecha: '', kilometros: 0, notas: '' });
+	let formReparacion = $state({ fecha: '', costo: 0, taller: '', descripcion: '' });
+	let formKm = $state({ kilometros: 0 });
+	let formBusy = $state(false);
 
 	async function cargar() {
 		loading = true;
@@ -88,6 +95,54 @@
 			msg = e.message || 'Error al cargar detalle.';
 		} finally {
 			detalleLoading = false;
+		}
+	}
+
+	async function guardarServicio() {
+		if (!detalle) return;
+		formBusy = true;
+		try {
+			await api.post(`/automoviles/${detalle.id}/servicios?fecha=${formServicio.fecha}&kilometros=${formServicio.kilometros}&notas=${encodeURIComponent(formServicio.notas)}`);
+			msg = 'Servicio registrado.';
+			showFormServicio = false;
+			formServicio = { fecha: '', kilometros: 0, notas: '' };
+			await verDetalle(detalle.id);
+		} catch (e) {
+			msg = e.message || 'Error.';
+		} finally {
+			formBusy = false;
+		}
+	}
+
+	async function guardarReparacion() {
+		if (!detalle) return;
+		formBusy = true;
+		try {
+			await api.post(`/automoviles/${detalle.id}/reparaciones?fecha=${formReparacion.fecha}&costo=${formReparacion.costo}&taller=${encodeURIComponent(formReparacion.taller)}&descripcion=${encodeURIComponent(formReparacion.descripcion)}`);
+			msg = 'Reparación registrada.';
+			showFormReparacion = false;
+			formReparacion = { fecha: '', costo: 0, taller: '', descripcion: '' };
+			await verDetalle(detalle.id);
+		} catch (e) {
+			msg = e.message || 'Error.';
+		} finally {
+			formBusy = false;
+		}
+	}
+
+	async function guardarKm() {
+		if (!detalle) return;
+		formBusy = true;
+		try {
+			await api.post(`/automoviles/${detalle.id}/kilometros?kilometros=${formKm.kilometros}`);
+			msg = 'Kilómetros registrados.';
+			showFormKm = false;
+			formKm = { kilometros: 0 };
+			await verDetalle(detalle.id);
+		} catch (e) {
+			msg = e.message || 'Error.';
+		} finally {
+			formBusy = false;
 		}
 	}
 
@@ -254,6 +309,69 @@
 							<span style="font-size: 0.75rem; color: var(--color-text-muted); margin-left: 0.5rem;">{k.fecha}</span>
 						</div>
 					{/each}
+				{/if}
+
+				<!-- Botones para agregar registros -->
+				<div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+					<button class="btn btn-sm btn-secondary" on:click={() => { showFormServicio = !showFormServicio; showFormReparacion = false; showFormKm = false; }}>🔧 + Servicio</button>
+					<button class="btn btn-sm btn-secondary" on:click={() => { showFormReparacion = !showFormReparacion; showFormServicio = false; showFormKm = false; }}>🔨 + Reparación</button>
+					<button class="btn btn-sm btn-secondary" on:click={() => { showFormKm = !showFormKm; showFormServicio = false; showFormReparacion = false; }}>📏 + Km</button>
+				</div>
+
+				{#if showFormServicio}
+					<div style="margin-top: 0.75rem; padding: 0.75rem; background: var(--color-surface-2); border-radius: 8px;">
+						<div class="field">
+							<label>Fecha</label>
+							<input class="input" type="date" bind:value={formServicio.fecha} />
+						</div>
+						<div class="field">
+							<label>Kilómetros</label>
+							<input class="input" type="number" bind:value={formServicio.kilometros} />
+						</div>
+						<div class="field">
+							<label>Notas</label>
+							<textarea class="input" bind:value={formServicio.notas} rows="2" placeholder="Descripción del servicio..."></textarea>
+						</div>
+						<button class="btn btn-primary btn-sm" on:click={guardarServicio} disabled={formBusy}>
+							{formBusy ? 'Guardando…' : 'Guardar servicio'}
+						</button>
+					</div>
+				{/if}
+
+				{#if showFormReparacion}
+					<div style="margin-top: 0.75rem; padding: 0.75rem; background: var(--color-surface-2); border-radius: 8px;">
+						<div class="field">
+							<label>Fecha</label>
+							<input class="input" type="date" bind:value={formReparacion.fecha} />
+						</div>
+						<div class="field">
+							<label>Costo</label>
+							<input class="input" type="number" bind:value={formReparacion.costo} />
+						</div>
+						<div class="field">
+							<label>Taller</label>
+							<input class="input" bind:value={formReparacion.taller} placeholder="Nombre del taller" />
+						</div>
+						<div class="field">
+							<label>Descripción</label>
+							<textarea class="input" bind:value={formReparacion.descripcion} rows="2" placeholder="Descripción de la reparación..."></textarea>
+						</div>
+						<button class="btn btn-primary btn-sm" on:click={guardarReparacion} disabled={formBusy}>
+							{formBusy ? 'Guardando…' : 'Guardar reparación'}
+						</button>
+					</div>
+				{/if}
+
+				{#if showFormKm}
+					<div style="margin-top: 0.75rem; padding: 0.75rem; background: var(--color-surface-2); border-radius: 8px;">
+						<div class="field">
+							<label>Kilómetros</label>
+							<input class="input" type="number" bind:value={formKm.kilometros} />
+						</div>
+						<button class="btn btn-primary btn-sm" on:click={guardarKm} disabled={formBusy}>
+							{formBusy ? 'Guardando…' : 'Guardar km'}
+						</button>
+					</div>
 				{/if}
 			{/if}
 		</div>

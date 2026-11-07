@@ -57,6 +57,79 @@ async def automoviles_list(current_user: dict = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 
+# --- Servicios ---
+@router.post("/api/automoviles/{auto_id}/servicios")
+async def automoviles_agregar_servicio(
+    auto_id: int,
+    fecha: str = Query(...),
+    kilometros: int = Query(...),
+    notas: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ServiciosAutomovil (IdAutomovil, Fecha, Kilometros, Notas) VALUES (%s, %s, %s, %s)",
+            (auto_id, fecha, kilometros, notas),
+        )
+        # Actualizar UltimoServicioKms
+        cursor.execute("UPDATE HUB_Automoviles SET UltimoServicioKms = %s WHERE Id = %s", (kilometros, auto_id))
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Servicio registrado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Reparaciones ---
+@router.post("/api/automoviles/{auto_id}/reparaciones")
+async def automoviles_agregar_reparacion(
+    auto_id: int,
+    fecha: str = Query(...),
+    costo: float = Query(0),
+    taller: str = Query(""),
+    descripcion: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ReparacionesAutomovil (IdAutomovil, Fecha, Costo, Taller, Descripcion) VALUES (%s, %s, %s, %s, %s)",
+            (auto_id, fecha, costo, taller, descripcion),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Reparación registrada"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Registros de kilómetros ---
+@router.post("/api/automoviles/{auto_id}/kilometros")
+async def automoviles_agregar_kilometros(
+    auto_id: int,
+    kilometros: int = Query(...),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_RegistroKilometros (IdAutomovil, Kilometros, FechaHora, IdUsuario) VALUES (%s, %s, GETDATE(), %s)",
+            (auto_id, kilometros, current_user.get("id")),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Kilómetros registrados"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
 @router.get("/api/automoviles/usuarios")
 async def automoviles_usuarios(current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
@@ -67,6 +140,79 @@ async def automoviles_usuarios(current_user: dict = Depends(get_current_user)):
         rows = cursor.fetchall()
         conn.close()
         return [{"id": r["Id"], "nombre": r["Nombre"] or "", "email": r["Email"] or ""} for r in rows]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Servicios ---
+@router.post("/api/automoviles/{auto_id}/servicios")
+async def automoviles_agregar_servicio(
+    auto_id: int,
+    fecha: str = Query(...),
+    kilometros: int = Query(...),
+    notas: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ServiciosAutomovil (IdAutomovil, Fecha, Kilometros, Notas) VALUES (%s, %s, %s, %s)",
+            (auto_id, fecha, kilometros, notas),
+        )
+        # Actualizar UltimoServicioKms
+        cursor.execute("UPDATE HUB_Automoviles SET UltimoServicioKms = %s WHERE Id = %s", (kilometros, auto_id))
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Servicio registrado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Reparaciones ---
+@router.post("/api/automoviles/{auto_id}/reparaciones")
+async def automoviles_agregar_reparacion(
+    auto_id: int,
+    fecha: str = Query(...),
+    costo: float = Query(0),
+    taller: str = Query(""),
+    descripcion: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ReparacionesAutomovil (IdAutomovil, Fecha, Costo, Taller, Descripcion) VALUES (%s, %s, %s, %s, %s)",
+            (auto_id, fecha, costo, taller, descripcion),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Reparación registrada"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Registros de kilómetros ---
+@router.post("/api/automoviles/{auto_id}/kilometros")
+async def automoviles_agregar_kilometros(
+    auto_id: int,
+    kilometros: int = Query(...),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_RegistroKilometros (IdAutomovil, Kilometros, FechaHora, IdUsuario) VALUES (%s, %s, GETDATE(), %s)",
+            (auto_id, kilometros, current_user.get("id")),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Kilómetros registrados"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
@@ -90,6 +236,79 @@ async def automoviles_create(
         conn.commit()
         conn.close()
         return {"ok": True, "message": "Automóvil agregado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Servicios ---
+@router.post("/api/automoviles/{auto_id}/servicios")
+async def automoviles_agregar_servicio(
+    auto_id: int,
+    fecha: str = Query(...),
+    kilometros: int = Query(...),
+    notas: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ServiciosAutomovil (IdAutomovil, Fecha, Kilometros, Notas) VALUES (%s, %s, %s, %s)",
+            (auto_id, fecha, kilometros, notas),
+        )
+        # Actualizar UltimoServicioKms
+        cursor.execute("UPDATE HUB_Automoviles SET UltimoServicioKms = %s WHERE Id = %s", (kilometros, auto_id))
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Servicio registrado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Reparaciones ---
+@router.post("/api/automoviles/{auto_id}/reparaciones")
+async def automoviles_agregar_reparacion(
+    auto_id: int,
+    fecha: str = Query(...),
+    costo: float = Query(0),
+    taller: str = Query(""),
+    descripcion: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ReparacionesAutomovil (IdAutomovil, Fecha, Costo, Taller, Descripcion) VALUES (%s, %s, %s, %s, %s)",
+            (auto_id, fecha, costo, taller, descripcion),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Reparación registrada"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Registros de kilómetros ---
+@router.post("/api/automoviles/{auto_id}/kilometros")
+async def automoviles_agregar_kilometros(
+    auto_id: int,
+    kilometros: int = Query(...),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_RegistroKilometros (IdAutomovil, Kilometros, FechaHora, IdUsuario) VALUES (%s, %s, GETDATE(), %s)",
+            (auto_id, kilometros, current_user.get("id")),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Kilómetros registrados"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
@@ -133,6 +352,79 @@ async def automoviles_update(
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 
+# --- Servicios ---
+@router.post("/api/automoviles/{auto_id}/servicios")
+async def automoviles_agregar_servicio(
+    auto_id: int,
+    fecha: str = Query(...),
+    kilometros: int = Query(...),
+    notas: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ServiciosAutomovil (IdAutomovil, Fecha, Kilometros, Notas) VALUES (%s, %s, %s, %s)",
+            (auto_id, fecha, kilometros, notas),
+        )
+        # Actualizar UltimoServicioKms
+        cursor.execute("UPDATE HUB_Automoviles SET UltimoServicioKms = %s WHERE Id = %s", (kilometros, auto_id))
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Servicio registrado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Reparaciones ---
+@router.post("/api/automoviles/{auto_id}/reparaciones")
+async def automoviles_agregar_reparacion(
+    auto_id: int,
+    fecha: str = Query(...),
+    costo: float = Query(0),
+    taller: str = Query(""),
+    descripcion: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ReparacionesAutomovil (IdAutomovil, Fecha, Costo, Taller, Descripcion) VALUES (%s, %s, %s, %s, %s)",
+            (auto_id, fecha, costo, taller, descripcion),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Reparación registrada"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Registros de kilómetros ---
+@router.post("/api/automoviles/{auto_id}/kilometros")
+async def automoviles_agregar_kilometros(
+    auto_id: int,
+    kilometros: int = Query(...),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_RegistroKilometros (IdAutomovil, Kilometros, FechaHora, IdUsuario) VALUES (%s, %s, GETDATE(), %s)",
+            (auto_id, kilometros, current_user.get("id")),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Kilómetros registrados"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
 @router.put("/api/automoviles/{auto_id}/asignar/{user_id}")
 async def automoviles_asignar(
     auto_id: int,
@@ -152,6 +444,79 @@ async def automoviles_asignar(
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 
+# --- Servicios ---
+@router.post("/api/automoviles/{auto_id}/servicios")
+async def automoviles_agregar_servicio(
+    auto_id: int,
+    fecha: str = Query(...),
+    kilometros: int = Query(...),
+    notas: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ServiciosAutomovil (IdAutomovil, Fecha, Kilometros, Notas) VALUES (%s, %s, %s, %s)",
+            (auto_id, fecha, kilometros, notas),
+        )
+        # Actualizar UltimoServicioKms
+        cursor.execute("UPDATE HUB_Automoviles SET UltimoServicioKms = %s WHERE Id = %s", (kilometros, auto_id))
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Servicio registrado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Reparaciones ---
+@router.post("/api/automoviles/{auto_id}/reparaciones")
+async def automoviles_agregar_reparacion(
+    auto_id: int,
+    fecha: str = Query(...),
+    costo: float = Query(0),
+    taller: str = Query(""),
+    descripcion: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ReparacionesAutomovil (IdAutomovil, Fecha, Costo, Taller, Descripcion) VALUES (%s, %s, %s, %s, %s)",
+            (auto_id, fecha, costo, taller, descripcion),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Reparación registrada"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Registros de kilómetros ---
+@router.post("/api/automoviles/{auto_id}/kilometros")
+async def automoviles_agregar_kilometros(
+    auto_id: int,
+    kilometros: int = Query(...),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_RegistroKilometros (IdAutomovil, Kilometros, FechaHora, IdUsuario) VALUES (%s, %s, GETDATE(), %s)",
+            (auto_id, kilometros, current_user.get("id")),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Kilómetros registrados"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
 @router.put("/api/automoviles/{auto_id}/desasignar")
 async def automoviles_desasignar(
     auto_id: int,
@@ -165,6 +530,79 @@ async def automoviles_desasignar(
         conn.commit()
         conn.close()
         return {"ok": True, "message": "Automóvil desasignado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Servicios ---
+@router.post("/api/automoviles/{auto_id}/servicios")
+async def automoviles_agregar_servicio(
+    auto_id: int,
+    fecha: str = Query(...),
+    kilometros: int = Query(...),
+    notas: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ServiciosAutomovil (IdAutomovil, Fecha, Kilometros, Notas) VALUES (%s, %s, %s, %s)",
+            (auto_id, fecha, kilometros, notas),
+        )
+        # Actualizar UltimoServicioKms
+        cursor.execute("UPDATE HUB_Automoviles SET UltimoServicioKms = %s WHERE Id = %s", (kilometros, auto_id))
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Servicio registrado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Reparaciones ---
+@router.post("/api/automoviles/{auto_id}/reparaciones")
+async def automoviles_agregar_reparacion(
+    auto_id: int,
+    fecha: str = Query(...),
+    costo: float = Query(0),
+    taller: str = Query(""),
+    descripcion: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ReparacionesAutomovil (IdAutomovil, Fecha, Costo, Taller, Descripcion) VALUES (%s, %s, %s, %s, %s)",
+            (auto_id, fecha, costo, taller, descripcion),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Reparación registrada"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Registros de kilómetros ---
+@router.post("/api/automoviles/{auto_id}/kilometros")
+async def automoviles_agregar_kilometros(
+    auto_id: int,
+    kilometros: int = Query(...),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_RegistroKilometros (IdAutomovil, Kilometros, FechaHora, IdUsuario) VALUES (%s, %s, GETDATE(), %s)",
+            (auto_id, kilometros, current_user.get("id")),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Kilómetros registrados"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
@@ -243,6 +681,79 @@ async def automoviles_detalle(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
+
+# --- Servicios ---
+@router.post("/api/automoviles/{auto_id}/servicios")
+async def automoviles_agregar_servicio(
+    auto_id: int,
+    fecha: str = Query(...),
+    kilometros: int = Query(...),
+    notas: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ServiciosAutomovil (IdAutomovil, Fecha, Kilometros, Notas) VALUES (%s, %s, %s, %s)",
+            (auto_id, fecha, kilometros, notas),
+        )
+        # Actualizar UltimoServicioKms
+        cursor.execute("UPDATE HUB_Automoviles SET UltimoServicioKms = %s WHERE Id = %s", (kilometros, auto_id))
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Servicio registrado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Reparaciones ---
+@router.post("/api/automoviles/{auto_id}/reparaciones")
+async def automoviles_agregar_reparacion(
+    auto_id: int,
+    fecha: str = Query(...),
+    costo: float = Query(0),
+    taller: str = Query(""),
+    descripcion: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ReparacionesAutomovil (IdAutomovil, Fecha, Costo, Taller, Descripcion) VALUES (%s, %s, %s, %s, %s)",
+            (auto_id, fecha, costo, taller, descripcion),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Reparación registrada"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Registros de kilómetros ---
+@router.post("/api/automoviles/{auto_id}/kilometros")
+async def automoviles_agregar_kilometros(
+    auto_id: int,
+    kilometros: int = Query(...),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_RegistroKilometros (IdAutomovil, Kilometros, FechaHora, IdUsuario) VALUES (%s, %s, GETDATE(), %s)",
+            (auto_id, kilometros, current_user.get("id")),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Kilómetros registrados"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
 @router.post("/api/automoviles/{auto_id}/imagen")
 async def automoviles_subir_imagen(
     auto_id: int,
@@ -312,6 +823,79 @@ async def automoviles_subir_imagen(
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
 
+# --- Servicios ---
+@router.post("/api/automoviles/{auto_id}/servicios")
+async def automoviles_agregar_servicio(
+    auto_id: int,
+    fecha: str = Query(...),
+    kilometros: int = Query(...),
+    notas: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ServiciosAutomovil (IdAutomovil, Fecha, Kilometros, Notas) VALUES (%s, %s, %s, %s)",
+            (auto_id, fecha, kilometros, notas),
+        )
+        # Actualizar UltimoServicioKms
+        cursor.execute("UPDATE HUB_Automoviles SET UltimoServicioKms = %s WHERE Id = %s", (kilometros, auto_id))
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Servicio registrado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Reparaciones ---
+@router.post("/api/automoviles/{auto_id}/reparaciones")
+async def automoviles_agregar_reparacion(
+    auto_id: int,
+    fecha: str = Query(...),
+    costo: float = Query(0),
+    taller: str = Query(""),
+    descripcion: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ReparacionesAutomovil (IdAutomovil, Fecha, Costo, Taller, Descripcion) VALUES (%s, %s, %s, %s, %s)",
+            (auto_id, fecha, costo, taller, descripcion),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Reparación registrada"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Registros de kilómetros ---
+@router.post("/api/automoviles/{auto_id}/kilometros")
+async def automoviles_agregar_kilometros(
+    auto_id: int,
+    kilometros: int = Query(...),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_RegistroKilometros (IdAutomovil, Kilometros, FechaHora, IdUsuario) VALUES (%s, %s, GETDATE(), %s)",
+            (auto_id, kilometros, current_user.get("id")),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Kilómetros registrados"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
 @router.delete("/api/automoviles/{auto_id}/imagen")
 async def automoviles_eliminar_imagen(
     auto_id: int,
@@ -334,5 +918,78 @@ async def automoviles_eliminar_imagen(
         conn.commit()
         conn.close()
         return {"ok": True, "message": "Imagen eliminada"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Servicios ---
+@router.post("/api/automoviles/{auto_id}/servicios")
+async def automoviles_agregar_servicio(
+    auto_id: int,
+    fecha: str = Query(...),
+    kilometros: int = Query(...),
+    notas: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ServiciosAutomovil (IdAutomovil, Fecha, Kilometros, Notas) VALUES (%s, %s, %s, %s)",
+            (auto_id, fecha, kilometros, notas),
+        )
+        # Actualizar UltimoServicioKms
+        cursor.execute("UPDATE HUB_Automoviles SET UltimoServicioKms = %s WHERE Id = %s", (kilometros, auto_id))
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Servicio registrado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Reparaciones ---
+@router.post("/api/automoviles/{auto_id}/reparaciones")
+async def automoviles_agregar_reparacion(
+    auto_id: int,
+    fecha: str = Query(...),
+    costo: float = Query(0),
+    taller: str = Query(""),
+    descripcion: str = Query(""),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_ReparacionesAutomovil (IdAutomovil, Fecha, Costo, Taller, Descripcion) VALUES (%s, %s, %s, %s, %s)",
+            (auto_id, fecha, costo, taller, descripcion),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Reparación registrada"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+# --- Registros de kilómetros ---
+@router.post("/api/automoviles/{auto_id}/kilometros")
+async def automoviles_agregar_kilometros(
+    auto_id: int,
+    kilometros: int = Query(...),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO HUB_RegistroKilometros (IdAutomovil, Kilometros, FechaHora, IdUsuario) VALUES (%s, %s, GETDATE(), %s)",
+            (auto_id, kilometros, current_user.get("id")),
+        )
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Kilómetros registrados"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
