@@ -168,6 +168,81 @@ async def automoviles_desasignar(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
 
+
+@router.get("/api/automoviles/{auto_id}")
+async def automoviles_detalle(
+    auto_id: int,
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(as_dict=True)
+
+        # Datos básicos del auto
+        cursor.execute("""
+            SELECT a.Id, a.MarcaModelo, a.Placas, a.PolizaSeguro,
+                   a.IdUsuarioAsignado, a.UltimoServicioKms,
+                   u.Nombre AS UsuarioAsignado, u.Email AS EmailAsignado,
+                   i.NombreArchivo AS ImagenArchivo
+            FROM HUB_Automoviles a
+            LEFT JOIN HUB_Users u ON u.Id = a.IdUsuarioAsignado
+            LEFT JOIN HUB_AutomovilImagen i ON i.IdAutomovil = a.Id
+            WHERE a.Id = %s
+        """, (auto_id,))
+        auto = cursor.fetchone()
+        if not auto:
+            conn.close()
+            raise HTTPException(status_code=404, detail="Automóvil no encontrado")
+
+        # Servicios
+        cursor.execute("""
+            SELECT Fecha, Kilometros, Notas
+            FROM HUB_ServiciosAutomovil
+            WHERE IdAutomovil = %s
+            ORDER BY Fecha DESC
+        """, (auto_id,))
+        servicios = [{"fecha": str(r["Fecha"]), "kilometros": r["Kilometros"], "notas": r["Notas"] or ""} for r in cursor.fetchall()]
+
+        # Reparaciones
+        cursor.execute("""
+            SELECT Fecha, Costo, Taller, Descripcion
+            FROM HUB_ReparacionesAutomovil
+            WHERE IdAutomovil = %s
+            ORDER BY Fecha DESC
+        """, (auto_id,))
+        reparaciones = [{"fecha": str(r["Fecha"]), "costo": float(r["Costo"]) if r["Costo"] else 0, "taller": r["Taller"] or "", "descripcion": r["Descripcion"] or ""} for r in cursor.fetchall()]
+
+        # Registros de kilómetros (últimos 20)
+        cursor.execute("""
+            SELECT TOP 20 Kilometros, FechaHora, IdUsuario
+            FROM HUB_RegistroKilometros
+            WHERE IdAutomovil = %s
+            ORDER BY FechaHora DESC
+        """, (auto_id,))
+        kms = [{"kilometros": r["Kilometros"], "fecha": str(r["FechaHora"]), "id_usuario": r["IdUsuario"]} for r in cursor.fetchall()]
+
+        conn.close()
+
+        return {
+            "id": auto["Id"],
+            "marca_modelo": auto["MarcaModelo"] or "",
+            "placas": auto["Placas"] or "",
+            "poliza_seguro": auto["PolizaSeguro"] or "",
+            "id_usuario_asignado": auto["IdUsuarioAsignado"],
+            "usuario_asignado": auto["UsuarioAsignado"] or "",
+            "email_asignado": auto["EmailAsignado"] or "",
+            "ultimo_servicio_kms": auto["UltimoServicioKms"] or 0,
+            "imagen": ("/autos/" + auto["ImagenArchivo"]) if auto.get("ImagenArchivo") else None,
+            "servicios": servicios,
+            "reparaciones": reparaciones,
+            "kilometros": kms,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
 @router.post("/api/automoviles/{auto_id}/imagen")
 async def automoviles_subir_imagen(
     auto_id: int,
