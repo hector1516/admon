@@ -384,7 +384,7 @@
 				{:else}
 					<div class="list">
 						{#each rems as r (r.id)}
-							<div class="list-card" style="cursor: default; display: block;">
+							<div class="card" style="cursor: default; margin-bottom: 0.5rem;">
 								<div style="display: flex; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
 									<div style="min-width: 0;">
 										<div style="font-weight: 700; font-size: 0.9rem;">{r.folio}</div>
