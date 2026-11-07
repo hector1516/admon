@@ -22,7 +22,7 @@ COPY package*.json ./
 RUN npm ci --no-audit --no-fund
 
 COPY . .
-ARG CACHEBUST=2
+ARG CACHEBUST=3
 RUN echo "cachebust=$CACHEBUST" && npm run build
 
 # ─────────────────────────────────────────────────────────────────────────────
