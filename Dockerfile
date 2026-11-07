@@ -23,7 +23,7 @@ RUN npm ci --no-audit --no-fund
 
 COPY . .
 ARG CACHEBUST=4
-RUN echo "cachebust=$CACHEBUST" && npm run build && ls -la dist/assets/
+RUN echo "cachebust=$CACHEBUST" && npm run build && echo "=== DIST CONTENTS ===" && find dist -type f | head -20
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Etapa 2 — runtime. Backend FastAPI. No lleva Node: la imagen final no carga
@@ -46,7 +46,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY api/ ./api/
 COPY tz_mx.py ./tz_mx.py
 # Frontend compilado por la etapa de arriba (npm run build) -> lo sirve FastAPI en "/"
-COPY --from=build /app/dist ./dist/
+COPY --from=build /app/dist/ ./dist/
 # Versión del shell común (ECCSA-Shell): la lee GET /api/shell/state para el
 # banner. Es un archivo generado por tools/sync_shell.py en la app.
 COPY ECCSA_SHELL_VERSION ./ECCSA_SHELL_VERSION
