@@ -159,7 +159,7 @@ def _login_row_by_id(user_id: int):
         "SELECT Id, Nombre, Email, Password, Activo, AccesoInventario, AccesoNominas, "
         "AccesoCotizaciones, AccesoProveedores, AccesoOC, AccesoCalculo, AccesoTelegram, "
         "AccesoUsuarios, AccesoReportes, AccesoRegistroReportes, AccesoIA, Nickname, "
-        "AccesoValesOxxoGas, AccesoRegistroKilometros "
+        "AccesoValesOxxoGas, AccesoRegistroKilometros, AccesoAutomoviles "
         "FROM HUB_Users WHERE Id = %s",
         (user_id,),
     )
