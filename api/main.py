@@ -63,7 +63,7 @@ def execute_readonly_sql(sql_query: str):
         return [{"Error": str(e)}]
 
 
-def send_email_with_multiple_pdfs(to_email: str, subject: str, body: str, attachments: list, sender_name: str = "ECCSA", sender_email: str = "sistemas@ecc-sa.com.mx"):
+def send_email_with_multiple_pdfs(to_email: str, subject: str, body: str, attachments: list, sender_name: str = "ECCSA", sender_email: str = "robot@ecc-sa.com.mx"):
     """Envía email con múltiples adjuntos PDF. Retorna (success, error_msg)."""
     try:
         import smtplib
@@ -71,9 +71,9 @@ def send_email_with_multiple_pdfs(to_email: str, subject: str, body: str, attach
         from email.mime.application import MIMEApplication
         from email.mime.text import MIMEText
 
-        smtp_host = os.getenv("HUB_SMTP_SERVER", "smtp.office365.com")
+        smtp_host = os.getenv("HUB_SMTP_SERVER", "smtpout.secureserver.net")
         smtp_port = int(os.getenv("HUB_SMTP_PORT", "587"))
-        smtp_user = os.getenv("HUB_SMTP_USER", "sistemas@ecc-sa.com.mx")
+        smtp_user = os.getenv("HUB_SMTP_USER", "robot@ecc-sa.com.mx")
         smtp_pass = os.getenv("HUB_SMTP_PASSWORD", "")
         if not smtp_pass:
             raise RuntimeError("HUB_SMTP_PASSWORD no definida — no se puede enviar correo")
