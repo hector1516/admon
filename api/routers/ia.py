@@ -203,6 +203,7 @@ async def ia_send_mensaje(id_conversacion: int, body: IaMensajeCreate, current_u
                                 sql_query += f" WHERE IdUsuario = {user_id}"
                             elif "HUB_USERS" in sql_upper:
                                 sql_query += f" WHERE Id = {user_id}"
+            from api.main import execute_readonly_sql
             res = execute_readonly_sql(sql_query)
             try:
                 import json
@@ -214,6 +215,7 @@ async def ia_send_mensaje(id_conversacion: int, body: IaMensajeCreate, current_u
             """Genera el PDF de la cotización indicada y la envía por correo electrónico."""
             target_email = (recipient_email or user_email).strip()
             try:
+                from api.main import execute_readonly_sql
                 q_rows = execute_readonly_sql(f"SELECT * FROM IndiceMateriales WHERE Folio = '{folio.strip()}'")
                 if not q_rows or "Error" in q_rows[0] or len(q_rows) == 0:
                     return f"No se encontró ninguna cotización con folio {folio} en la base de datos."
@@ -254,6 +256,7 @@ async def ia_send_mensaje(id_conversacion: int, body: IaMensajeCreate, current_u
                 attachments = []
                 for f in folios:
                     f_clean = f.strip()
+                    from api.main import execute_readonly_sql
                     rep_rows = execute_readonly_sql(f"SELECT * FROM HUB_RegistroReportes WHERE Folio = '{f_clean}'")
                     if not rep_rows or "Error" in rep_rows[0]:
                         continue
