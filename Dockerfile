@@ -47,7 +47,8 @@ COPY api/ ./api/
 COPY tz_mx.py ./tz_mx.py
 # Frontend compilado por la etapa de arriba (npm run build) -> lo sirve FastAPI en "/"
 COPY --from=build /app/dist /tmp/dist-build
-RUN mkdir -p /app/dist/assets && cp /tmp/dist-build/index.html /app/dist/ && cp /tmp/dist-build/sw.js /app/dist/ && cp /tmp/dist-build/manifest.webmanifest /app/dist/ && cp /tmp/dist-build/assets/* /app/dist/assets/ && echo "=== COPIED ===" && ls -la /app/dist/assets/
+RUN echo "=== BUILD DIST ===" && find /tmp/dist-build -type f | head -20
+RUN mkdir -p /app/dist/assets && cp /tmp/dist-build/index.html /app/dist/ && cp /tmp/dist-build/sw.js /app/dist/ && cp /tmp/dist-build/manifest.webmanifest /app/dist/ && cp /tmp/dist-build/assets/index-*.js /app/dist/assets/ && cp /tmp/dist-build/assets/index-*.css /app/dist/assets/ && echo "=== COPIED ===" && ls -la /app/dist/assets/
 # Versión del shell común (ECCSA-Shell): la lee GET /api/shell/state para el
 # banner. Es un archivo generado por tools/sync_shell.py en la app.
 COPY ECCSA_SHELL_VERSION ./ECCSA_SHELL_VERSION
