@@ -2,6 +2,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Request
 from fastapi.responses import Response
 from api.pdf_cotizacion import build_cotizacion_pdf, generar_token_qr, verificar_token_qr
+from api.pdf_remision import build_remision_pdf
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
