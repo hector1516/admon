@@ -3,7 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import ActionsBar from '$lib/components/ActionsBar.svelte';
-	import { Bot, ChartBar, Package, ClipboardList, Wrench, Contact, Fuel, Route, Trophy } from 'lucide-svelte';
+	import { Bot, ChartBar, Package, ClipboardList, Wrench, Contact, Fuel, Route, Trophy, Car } from 'lucide-svelte';
 
 	// Menú de módulos estilo home de Field: icon/title/desc/path/perm.
 	// Solo módulos funcionales; cada tarjeta requiere su permiso activo.
@@ -18,6 +18,7 @@
 		{ Icon: ClipboardList, color: '#10B981', title: 'Registro de Reportes', desc: 'Visualización global admin', path: '/registro_reportes', perm: 'acceso_registro_reportes' },
 		{ Icon: Wrench, color: '#64748B', title: 'Administración', desc: 'Asistencia y usuarios', path: '/admin', perm: 'acceso_usuarios' },
 		{ Icon: Contact, color: '#EC4899', title: 'Clientes', desc: 'Catálogo general', path: '/clientes', perm: 'acceso_cotizaciones' },
+		{ Icon: Car, color: '#06B6D4', title: 'Automóviles', desc: 'Asignación de vehículos', path: '/automoviles', perm: 'acceso_automoviles' },
 		{ Icon: Fuel, color: '#F59E0B', title: 'Tickets de OxxoGas', desc: 'Tickets y facturas', path: '/tickets_oxxogas', perm: 'acceso_vales_oxxogas' },
 		{ Icon: Route, color: '#06B6D4', title: 'Kilómetros', desc: 'Consumo semanal y captura', path: '/kilometros', perm: 'acceso_registro_kilometros' },
 		// Legends: visible para todos los usuarios logueados (en Field la gatea el

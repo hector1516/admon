@@ -23,6 +23,7 @@
 	import UsuarioDetalle from './pages/UsuarioDetalle.svelte';
 	import Admin from './pages/Admin.svelte';
 	import Clientes from './pages/Clientes.svelte';
+import Automoviles from './pages/Automoviles.svelte';
 	import ClienteDetalle from './pages/ClienteDetalle.svelte';
 	import RegistroReportes from './pages/RegistroReportes.svelte';
 	import RegistroReporteDetalle from './pages/RegistroReporteDetalle.svelte';
@@ -199,6 +200,8 @@
 				<EccsaIa />
 {:else if $path === '/clientes'}
 				<Clientes />
+			{:else if $path === '/automoviles'}
+				<Automoviles />
 			{:else if $path.startsWith('/clientes/')}
 				<ClienteDetalle id={$path.split('/')[2]} />
 			{:else if $path === '/registro_reportes'}
