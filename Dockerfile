@@ -30,7 +30,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY api/ ./api/
 COPY tz_mx.py ./tz_mx.py
-COPY --from=build /app/dist/ ./dist/
+COPY --from=build /app/dist /app/dist-copy
+RUN mkdir -p /app/dist && cp -r /app/dist-copy/* /app/dist/ && echo "=== COPIED ===" && ls -la /app/dist/assets/
 # Force rebuild marker: 2026-11-07-v2
 COPY ECCSA_SHELL_VERSION ./ECCSA_SHELL_VERSION
 COPY eccsa_logo.png ./eccsa_logo.png
