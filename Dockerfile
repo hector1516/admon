@@ -22,7 +22,7 @@ COPY package*.json ./
 RUN npm ci --no-audit --no-fund
 
 COPY . .
-ARG CACHEBUST=4
+ARG CACHEBUST=5
 RUN echo "cachebust=$CACHEBUST" && npm run build && echo "=== DIST CONTENTS ===" && find dist -type f | head -20
 
 # ─────────────────────────────────────────────────────────────────────────────
