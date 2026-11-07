@@ -1,7 +1,7 @@
 """api/routers/automoviles.py — gestión de automóviles y asignación a usuarios."""
 from fastapi import APIRouter, HTTPException, Depends, Request, Query
 from typing import Optional
-from api.routers.passkeys import _require_cotiz
+from api.routers.clientes import _require_cotiz
 
 router = APIRouter()
 
