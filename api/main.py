@@ -149,7 +149,7 @@ def _user_from_token(token: str):
         email = parts[0]
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT Id, Nombre, Email, AccesoInventario, AccesoNominas, AccesoCotizaciones, AccesoProveedores, AccesoOC, AccesoCalculo, AccesoTelegram, AccesoUsuarios, AccesoReportes, AccesoRegistroReportes, AccesoIA, Nickname, AccesoValesOxxoGas, AccesoRegistroKilometros FROM HUB_Users WHERE LTRIM(RTRIM(Email)) = %s", (email.strip().lower(),))
+        cursor.execute("SELECT Id, Nombre, Email, AccesoInventario, AccesoNominas, AccesoCotizaciones, AccesoProveedores, AccesoOC, AccesoCalculo, AccesoTelegram, AccesoUsuarios, AccesoReportes, AccesoRegistroReportes, AccesoIA, Nickname, AccesoValesOxxoGas, AccesoRegistroKilometros, AccesoAutomoviles FROM HUB_Users WHERE LTRIM(RTRIM(Email)) = %s", (email.strip().lower(),))
         row = cursor.fetchone()
         conn.close()
         if row:
@@ -172,6 +172,7 @@ def _user_from_token(token: str):
                 "acceso_vales_oxxogas": row[15] == 1 if len(row) > 15 else False,
                 # Módulo Kilómetros (consumo semanal + captura). row[16] = AccesoRegistroKilometros
                 "acceso_registro_kilometros": row[16] == 1 if len(row) > 16 else False,
+        "acceso_automoviles": row[17] == 1 if len(row) > 17 else False,
             }
         return None
     except Exception as e:
@@ -306,6 +307,8 @@ def _build_login_response(email: str, row) -> dict:
         "acceso_vales_oxxogas": b(17),
         # Módulo Kilómetros (consumo semanal + captura)
         "acceso_registro_kilometros": b(18),
+        # Módulo Automóviles (asignación de vehículos)
+        "acceso_automoviles": b(19),
         # Para la pantalla de sugerencia de passkey (label = nickname si existe)
         "nickname": (row[16] or "").strip() if len(row) > 16 and row[16] else "",
     }
@@ -321,7 +324,7 @@ async def api_login(body: LoginRequest):
             raise HTTPException(status_code=400, detail="Email domain not authorized")
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT Id, Nombre, Email, Password, Activo, AccesoInventario, AccesoNominas, AccesoCotizaciones, AccesoProveedores, AccesoOC, AccesoCalculo, AccesoTelegram, AccesoUsuarios, AccesoReportes, AccesoRegistroReportes, AccesoIA, Nickname, AccesoValesOxxoGas, AccesoRegistroKilometros FROM HUB_Users WHERE LTRIM(RTRIM(Email)) = %s", (body.email.strip().lower(),))
+        cursor.execute("SELECT Id, Nombre, Email, Password, Activo, AccesoInventario, AccesoNominas, AccesoCotizaciones, AccesoProveedores, AccesoOC, AccesoCalculo, AccesoTelegram, AccesoUsuarios, AccesoReportes, AccesoRegistroReportes, AccesoIA, Nickname, AccesoValesOxxoGas, AccesoRegistroKilometros, AccesoAutomoviles FROM HUB_Users WHERE LTRIM(RTRIM(Email)) = %s", (body.email.strip().lower(),))
         row = cursor.fetchone()
         conn.close()
         if row and row[4] and row[3] == body.password:
