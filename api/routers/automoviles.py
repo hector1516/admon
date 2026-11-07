@@ -6,7 +6,7 @@ from api.routers.clientes import _require_cotiz
 
 router = APIRouter()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
 
 def get_connection():
