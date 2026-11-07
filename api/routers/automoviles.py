@@ -30,7 +30,8 @@ async def automoviles_list(current_user: dict = Depends(get_current_user)):
             SELECT a.Id, a.MarcaModelo, a.Placas, a.PolizaSeguro,
                    a.IdUsuarioAsignado, a.UltimoServicioKms,
                    u.Nombre AS UsuarioAsignado, u.Email AS EmailAsignado,
-                   i.NombreArchivo AS ImagenArchivo
+                   i.NombreArchivo AS ImagenArchivo,
+                   i.CreatedAt AS ImagenFecha
             FROM HUB_Automoviles a
             LEFT JOIN HUB_Users u ON u.Id = a.IdUsuarioAsignado
             LEFT JOIN HUB_AutomovilImagen i ON i.IdAutomovil = a.Id
@@ -48,7 +49,7 @@ async def automoviles_list(current_user: dict = Depends(get_current_user)):
                 "usuario_asignado": r["UsuarioAsignado"] or "",
                 "email_asignado": r["EmailAsignado"] or "",
                 "ultimo_servicio_kms": r["UltimoServicioKms"] or 0,
-                "imagen": ("/autos/" + r["ImagenArchivo"]) if r.get("ImagenArchivo") else None,
+                "imagen": ("/autos/" + r["ImagenArchivo"] + "?v=" + str(int(r["ImagenFecha"].timestamp()))) if r.get("ImagenArchivo") and r.get("ImagenFecha") else (("/autos/" + r["ImagenArchivo"]) if r.get("ImagenArchivo") else None),
             }
             for r in rows
         ]
