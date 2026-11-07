@@ -1,7 +1,8 @@
 """api/routers/automoviles.py — gestión de automóviles y asignación a usuarios."""
-from fastapi import APIRouter, HTTPException, Depends, Request, Query
+from fastapi import APIRouter, HTTPException, Depends, Request, Query, UploadFile, File
 from fastapi.security import OAuth2PasswordBearer
 from typing import Optional
+import os, shutil
 from api.routers.clientes import _require_cotiz
 
 router = APIRouter()
@@ -28,26 +29,15 @@ async def automoviles_list(current_user: dict = Depends(get_current_user)):
         cursor.execute("""
             SELECT a.Id, a.MarcaModelo, a.Placas, a.PolizaSeguro,
                    a.IdUsuarioAsignado, a.UltimoServicioKms,
-                   u.Nombre AS UsuarioAsignado, u.Email AS EmailAsignado
+                   u.Nombre AS UsuarioAsignado, u.Email AS EmailAsignado,
+                   i.NombreArchivo AS ImagenArchivo
             FROM HUB_Automoviles a
             LEFT JOIN HUB_Users u ON u.Id = a.IdUsuarioAsignado
+            LEFT JOIN HUB_AutomovilImagen i ON i.IdAutomovil = a.Id
             ORDER BY a.Id ASC
         """)
         rows = cursor.fetchall()
         conn.close()
-        # Mapeo de nombre de auto a archivo de imagen
-        def _imagen_auto(marca_modelo):
-            if not marca_modelo:
-                return None
-            # Normalizar: lowercase, reemplazar espacios por guiones
-            slug = marca_modelo.lower().strip().replace(" ", "-").replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
-            path = f"/autos/{slug}.png"
-            import os
-            full = os.path.join("public", "autos", slug + ".png")
-            if os.path.exists(full):
-                return path
-            return None
-
         return [
             {
                 "id": r["Id"],
@@ -58,7 +48,7 @@ async def automoviles_list(current_user: dict = Depends(get_current_user)):
                 "usuario_asignado": r["UsuarioAsignado"] or "",
                 "email_asignado": r["EmailAsignado"] or "",
                 "ultimo_servicio_kms": r["UltimoServicioKms"] or 0,
-                "imagen": _imagen_auto(r["MarcaModelo"]),
+                "imagen": ("/autos/" + r["ImagenArchivo"]) if r.get("ImagenArchivo") else None,
             }
             for r in rows
         ]
@@ -174,5 +164,99 @@ async def automoviles_desasignar(
         conn.commit()
         conn.close()
         return {"ok": True, "message": "Automóvil desasignado"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+@router.post("/api/automoviles/{auto_id}/imagen")
+async def automoviles_subir_imagen(
+    auto_id: int,
+    file: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(as_dict=True)
+        cursor.execute("SELECT Id, MarcaModelo FROM HUB_Automoviles WHERE Id = %s", (auto_id,))
+        auto = cursor.fetchone()
+        if not auto:
+            conn.close()
+            raise HTTPException(status_code=404, detail="Automovil no encontrado")
+
+        ext = os.path.splitext(file.filename or "img.png")[1].lower() or ".png"
+        if ext not in (".png", ".jpg", ".jpeg", ".webp"):
+            ext = ".png"
+        filename = f"auto_{auto_id}{ext}"
+        dest_dir = os.path.join("public", "autos")
+        os.makedirs(dest_dir, exist_ok=True)
+        dest_path = os.path.join(dest_dir, filename)
+
+        # Eliminar imagen anterior si existe
+        cursor.execute("SELECT NombreArchivo FROM HUB_AutomovilImagen WHERE IdAutomovil = %s", (auto_id,))
+        old = cursor.fetchone()
+        if old and old.get("NombreArchivo"):
+            old_path = os.path.join(dest_dir, old["NombreArchivo"])
+            try:
+                if os.path.exists(old_path):
+                    os.remove(old_path)
+            except Exception:
+                pass
+            cursor.execute("DELETE FROM HUB_AutomovilImagen WHERE IdAutomovil = %s", (auto_id,))
+
+        # Guardar nuevo archivo
+        with open(dest_path, "wb") as f:
+            shutil.copyfileobj(file.file, f)
+
+        # Convertir a PNG con fondo transparente si no es PNG
+        if ext != ".png":
+            from PIL import Image
+            img = Image.open(dest_path).convert("RGBA")
+            pixels = img.load()
+            w, h = img.size
+            for x in range(w):
+                for y in range(h):
+                    r, g, b, a = pixels[x, y]
+                    if r > 225 and g > 225 and b > 225:
+                        pixels[x, y] = (r, g, b, 0)
+            png_name = f"auto_{auto_id}.png"
+            png_path = os.path.join(dest_dir, png_name)
+            img.save(png_path, "PNG")
+            os.remove(dest_path)
+            filename = png_name
+
+        # Registrar en BD
+        cursor.execute("INSERT INTO HUB_AutomovilImagen (IdAutomovil, NombreArchivo) VALUES (%s, %s)", (auto_id, filename))
+        conn.commit()
+        conn.close()
+
+        return {"ok": True, "imagen": f"/autos/{filename}", "message": "Imagen subida correctamente"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+
+
+@router.delete("/api/automoviles/{auto_id}/imagen")
+async def automoviles_eliminar_imagen(
+    auto_id: int,
+    current_user: dict = Depends(get_current_user),
+):
+    _require_cotiz(current_user)
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(as_dict=True)
+        cursor.execute("SELECT NombreArchivo FROM HUB_AutomovilImagen WHERE IdAutomovil = %s", (auto_id,))
+        row = cursor.fetchone()
+        if row and row.get("NombreArchivo"):
+            path = os.path.join("public", "autos", row["NombreArchivo"])
+            try:
+                if os.path.exists(path):
+                    os.remove(path)
+            except Exception:
+                pass
+        cursor.execute("DELETE FROM HUB_AutomovilImagen WHERE IdAutomovil = %s", (auto_id,))
+        conn.commit()
+        conn.close()
+        return {"ok": True, "message": "Imagen eliminada"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {str(e)}")

@@ -13,6 +13,9 @@
 	let editId = $state(null);
 	let form = $state({ marca_modelo: '', placas: '', poliza_seguro: '', ultimo_servicio_kms: 0, id_usuario_asignado: null });
 	let busy = $state(false);
+	let uploadFile = $state(null);
+	let uploadBusy = $state(false);
+	let uploadMsg = $state('');
 
 	async function cargar() {
 		loading = true;
@@ -88,6 +91,33 @@
 		}
 	}
 
+	async function subirImagen(autoId, file) {
+		if (!file) return;
+		uploadBusy = true;
+		uploadMsg = '';
+		try {
+			const formData = new FormData();
+			formData.append('file', file);
+			const token = localStorage.getItem('admon_token');
+			const res = await fetch(`/api/automoviles/${autoId}/imagen`, {
+				method: 'POST',
+				headers: token ? { Authorization: `Bearer ${token}` } : {},
+				body: formData,
+			});
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				throw new Error(err.detail || 'Error al subir imagen');
+			}
+			const data = await res.json();
+			uploadMsg = data.message || 'Imagen subida.';
+			await cargar();
+		} catch (e) {
+			uploadMsg = e.message || 'Error al subir imagen.';
+		} finally {
+			uploadBusy = false;
+		}
+	}
+
 	onMount(() => {
 		if (!auth.isLoggedIn()) { navigate('/login', { replace: true }); return; }
 		cargar();
@@ -137,10 +167,17 @@
 					</div>
 					<div class="auto-actions">
 						<button class="btn btn-sm btn-secondary" on:click={() => abrirEditar(a)}>✏️ Editar</button>
+						<label class="btn btn-sm btn-secondary" style="cursor: pointer;">
+							📷 Imagen
+							<input type="file" accept="image/*" style="display: none;" on:change={(e) => subirImagen(a.id, e.target.files[0])} />
+						</label>
 						{#if a.id_usuario_asignado}
 							<button class="btn btn-sm btn-danger" on:click={() => desasignar(a.id)}>🔓 Desasignar</button>
 						{/if}
 					</div>
+					{#if uploadMsg}
+						<div class="msg ok" style="margin-top: 0.5rem; font-size: 0.75rem;">{uploadMsg}</div>
+					{/if}
 				</div>
 			{/each}
 		</div>
