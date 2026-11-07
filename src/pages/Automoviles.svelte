@@ -92,7 +92,8 @@
 		try {
 			detalle = await api.get(`/automoviles/${id}`);
 		} catch (e) {
-			msg = e.message || 'Error al cargar detalle.';
+			msg = e.message || 'Error al cargar detalle: ' + (e.message || 'desconocido');
+			console.error('verDetalle error:', e);
 		} finally {
 			detalleLoading = false;
 		}
@@ -235,13 +236,13 @@
 						{/if}
 					</div>
 					<div class="auto-actions">
-						<button class="btn btn-sm btn-secondary" on:click={() => abrirEditar(a)}>✏️ Editar</button>
-						<label class="btn btn-sm btn-secondary" style="cursor: pointer;">
+						<button class="btn btn-sm btn-secondary" on:click|stopPropagation={() => abrirEditar(a)}>✏️ Editar</button>
+						<label class="btn btn-sm btn-secondary" style="cursor: pointer;" on:click|stopPropagation>
 							📷 Imagen
 							<input type="file" accept="image/*" style="display: none;" on:change={(e) => subirImagen(a.id, e.target.files[0])} />
 						</label>
 						{#if a.id_usuario_asignado}
-							<button class="btn btn-sm btn-danger" on:click={() => desasignar(a.id)}>🔓 Desasignar</button>
+							<button class="btn btn-sm btn-danger" on:click|stopPropagation={() => desasignar(a.id)}>🔓 Desasignar</button>
 						{/if}
 					</div>
 					{#if uploadMsg}
