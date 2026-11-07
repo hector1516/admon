@@ -35,6 +35,19 @@ async def automoviles_list(current_user: dict = Depends(get_current_user)):
         """)
         rows = cursor.fetchall()
         conn.close()
+        # Mapeo de nombre de auto a archivo de imagen
+        def _imagen_auto(marca_modelo):
+            if not marca_modelo:
+                return None
+            # Normalizar: lowercase, reemplazar espacios por guiones
+            slug = marca_modelo.lower().strip().replace(" ", "-").replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u")
+            path = f"/autos/{slug}.png"
+            import os
+            full = os.path.join("public", "autos", slug + ".png")
+            if os.path.exists(full):
+                return path
+            return None
+
         return [
             {
                 "id": r["Id"],
@@ -45,6 +58,7 @@ async def automoviles_list(current_user: dict = Depends(get_current_user)):
                 "usuario_asignado": r["UsuarioAsignado"] or "",
                 "email_asignado": r["EmailAsignado"] or "",
                 "ultimo_servicio_kms": r["UltimoServicioKms"] or 0,
+                "imagen": _imagen_auto(r["MarcaModelo"]),
             }
             for r in rows
         ]

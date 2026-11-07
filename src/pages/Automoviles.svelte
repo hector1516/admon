@@ -116,6 +116,11 @@
 		<div class="grid">
 			{#each autos as a (a.id)}
 				<div class="card-auto">
+					{#if a.imagen}
+						<div class="auto-img">
+							<img src={a.imagen} alt={a.marca_modelo} />
+						</div>
+					{/if}
 					<div class="auto-header">
 						<span class="auto-marca">{a.marca_modelo}</span>
 						<span class="auto-placas">{a.placas}</span>
@@ -185,7 +190,9 @@
 
 <style>
 	.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.75rem; }
-	.card-auto { background: var(--color-surface); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; }
+	.card-auto { background: var(--color-surface); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; overflow: hidden; }
+	.auto-img { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px; overflow: hidden; }
+	.auto-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
 	.auto-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
 	.auto-marca { font-weight: 700; font-size: 0.95rem; }
 	.auto-placas { font-size: 0.8rem; color: var(--color-text-muted); font-family: monospace; }
