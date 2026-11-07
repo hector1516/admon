@@ -29,7 +29,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY api/ ./api/
 COPY tz_mx.py ./tz_mx.py
-COPY --from=build /app/dist ./dist/
+COPY --from=build /app/dist/index.html ./dist/index.html
+COPY --from=build /app/dist/sw.js ./dist/sw.js
+COPY --from=build /app/dist/manifest.webmanifest ./dist/manifest.webmanifest
+COPY --from=build /app/dist/assets/ ./dist/assets/
 COPY ECCSA_SHELL_VERSION ./ECCSA_SHELL_VERSION
 COPY eccsa_logo.png ./eccsa_logo.png
 COPY ["formatos excel/Formato Cotizaciones.xlsx", "./formatos_excel/FormatoCotizaciones.xlsx"]
