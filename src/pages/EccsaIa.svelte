@@ -344,13 +344,15 @@ function formatearFecha(fecha) {
 		font-size: 1.1rem; flex-shrink: 0;
 	}
 	.wobnimo-avatar {
-		width: 40px; height: 40px;
+		width: 64px; height: 64px;
 		background: transparent;
 		overflow: hidden;
+		flex-shrink: 0;
 	}
 	.wobnimo-avatar wobnimo-mascot {
-		width: 100%;
-		height: 100%;
+		width: 64px;
+		height: 64px;
+		display: block;
 	}
 	.chat-names { display: flex; flex-direction: column; min-width: 0; }
 	.chat-names strong { font-size: 0.95rem; line-height: 1.2; }
