@@ -373,8 +373,8 @@ function formatearFecha(fecha) {
 		position: relative;
 	}
 	.wobnimo-avatar wobnimo-mascot {
-		width: 100%;
-		height: 100%;
+		width: 120px;
+		height: 120px;
 		display: block;
 	}
 	.chat-names { display: flex; flex-direction: column; min-width: 0; }
