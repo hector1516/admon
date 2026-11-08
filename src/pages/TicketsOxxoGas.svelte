@@ -4,6 +4,7 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
 	import Paginacion from '$lib/components/Paginacion.svelte';
+	import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 
 	// Tickets de OxxoGas: lectura de HUB_OxxoGasTickets (captura en Field/HUB)
 	// con factura CFDI enlazada y estación. Orden: más reciente arriba.
@@ -162,6 +163,11 @@
 						{#if t.pendiente_ticket}
 							<div class="pendiente-badge">⏳ Ticket pendiente</div>
 						{/if}
+						{#if t.marca_modelo && autoImageExists(t.marca_modelo)}
+							<div class="auto-thumb">
+								<img src={getAutoImage(t.marca_modelo)} alt={t.marca_modelo} onerror={(e) => { e.target.style.display = 'none'; }} />
+							</div>
+						{/if}
 						<div class="folio">{t.pendiente_ticket ? '🎫 ' + t.vale : '#' + t.folio}</div>
 						<div class="fecha">🧾 Ticket: {fmtFecha(t.fecha)}</div>
 						{#if t.fecha_vale}
@@ -209,6 +215,8 @@
 	.card-ticket.pendiente { border-color: rgba(251, 191, 36, 0.4); cursor: default; }
 	.card-ticket.pendiente:hover { transform: none; }
 	.pendiente-badge { font-size: 0.7rem; font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 999px; padding: 0.2rem 0.6rem; display: inline-block; margin-bottom: 0.4rem; }
+	.auto-thumb { width: 60px; height: 40px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.4rem; background: rgba(255, 255, 255, 0.03); border-radius: 6px; overflow: hidden; }
+	.auto-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
 	.card-ticket:hover { transform: translateY(-3px); border-color: rgba(255, 107, 0, 0.5); }
 
 	.body { padding: 0.75rem 0.85rem 0.9rem; }

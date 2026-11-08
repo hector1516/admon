@@ -3,6 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
+import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 
 	let autos = $state([]);
 	let usuarios = $state([]);
@@ -216,9 +217,9 @@
 		<div class="grid">
 			{#each autos as a (a.id)}
 				<div class="card-auto" style="cursor: pointer;" on:click={() => verDetalle(a.id)}>
-					{#if a.imagen}
+					{#if a.imagen || autoImageExists(a.marca_modelo)}
 						<div class="auto-img">
-							<img src={a.imagen} alt={a.marca_modelo} />
+							<img src={a.imagen || getAutoImage(a.marca_modelo)} alt={a.marca_modelo} on:error={(e) => { e.target.style.display = 'none'; }} />
 						</div>
 					{/if}
 					<div class="auto-header">
@@ -265,9 +266,9 @@
 					<button class="btn btn-sm btn-secondary" on:click={() => (detalle = null)}>✕</button>
 				</div>
 
-				{#if detalle.imagen}
+				{#if detalle.imagen || autoImageExists(detalle.marca_modelo)}
 					<div class="auto-img" style="margin-bottom: 1rem;">
-						<img src={detalle.imagen} alt={detalle.marca_modelo} />
+						<img src={detalle.imagen || getAutoImage(detalle.marca_modelo)} alt={detalle.marca_modelo} on:error={(e) => { e.target.style.display = 'none'; }} />
 					</div>
 				{/if}
 

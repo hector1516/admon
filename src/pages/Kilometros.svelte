@@ -3,6 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
+import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
 
 	// Módulo Kilómetros — dos pestañas:
@@ -258,6 +259,11 @@
 					<button class="card-auto" class:sin-lectura={v.registros === 0}
 						onclick={() => navigate(`/kilometros/vehiculo/${v.id}`)} title="Ver detalle del vehículo">
 						<div class="body">
+							{#if autoImageExists(v.marca_modelo)}
+								<div class="auto-thumb-km">
+									<img src={getAutoImage(v.marca_modelo)} alt={v.marca_modelo} onerror={(e) => { e.target.style.display = 'none'; }} />
+								</div>
+							{/if}
 							<div class="folio">{v.placas || 'SIN PLACAS'}</div>
 							<div class="fecha">{v.marca_modelo || '—'}</div>
 
@@ -400,6 +406,8 @@
 	/* Tarjetas (mismo estilo visual que Tickets de OxxoGas) */
 	.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.9rem; }
 	.grid-chicas { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+	.auto-thumb-km { width: 80px; height: 50px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.4rem; background: rgba(255, 255, 255, 0.03); border-radius: 6px; overflow: hidden; }
+	.auto-thumb-km img { max-width: 100%; max-height: 100%; object-fit: contain; }
 	.card-auto { text-align: left; background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px;
 		overflow: hidden; padding: 0; color: inherit; font: inherit; transition: transform 0.15s, border-color 0.15s; }
 	.card-auto:hover { transform: translateY(-3px); border-color: rgba(255, 107, 0, 0.5); }

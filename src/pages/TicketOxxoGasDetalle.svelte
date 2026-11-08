@@ -3,6 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
+import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 
 	// Detalle de un ticket de OxxoGas como PÁGINA COMPLETA
 	// (ruta /tickets_oxxogas/:id, deep-link soportado por el fallback SPA).
@@ -258,7 +259,12 @@
 					{#if t.vale}
 						<div class="info-line"><span>🎫 Vale</span><strong class="folio-inline">{t.vale}</strong></div>
 					{/if}
-					<div class="info-line"><span>🚗 Auto</span><strong>{[t.marca_modelo, t.placas].filter(Boolean).join(' · ') || '—'}</strong></div>
+					{#if t.marca_modelo && autoImageExists(t.marca_modelo)}
+					<div class="auto-detail-img">
+						<img src={getAutoImage(t.marca_modelo)} alt={t.marca_modelo} onerror={(e) => { e.target.style.display = 'none'; }} />
+					</div>
+				{/if}
+				<div class="info-line"><span>🚗 Auto</span><strong>{[t.marca_modelo, t.placas].filter(Boolean).join(' · ') || '—'}</strong></div>
 					<div class="info-line"><span>🏢 Empresa</span><strong>{t.cliente || '—'}</strong></div>
 					<div class="info-line"><span>📝 Proyecto / Servicio</span><strong>{t.descripcion || '—'}</strong></div>
 				</div>
@@ -335,6 +341,8 @@
 	.grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.1rem; align-items: start; }
 	@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
 
+	.auto-detail-img { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; overflow: hidden; }
+	.auto-detail-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
 	.img-box { position: relative; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 	.img-box img { width: 100%; max-height: 82vh; object-fit: contain; display: block; }
 	.img-box.has-zoom img { cursor: zoom-in; }
