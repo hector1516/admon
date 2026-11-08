@@ -35,6 +35,7 @@ import Automoviles from './pages/Automoviles.svelte';
 	import Kilometros from './pages/Kilometros.svelte';
 	import KilometroVehiculo from './pages/KilometroVehiculo.svelte';
 	import TicketOxxoGasDetalle from './pages/TicketOxxoGasDetalle.svelte';
+import CapturarTicketOxxoGas from './pages/CapturarTicketOxxoGas.svelte';
 
 	let ready = $state(false);
 	let splashDone = $state(false);
@@ -221,6 +222,8 @@ import Automoviles from './pages/Automoviles.svelte';
 				<KilometroVehiculo id={$path.split('/')[3]} />
 			{:else if $path === '/tickets_oxxogas'}
 				<TicketsOxxoGas />
+			{:else if $path === '/tickets_oxxogas/capturar'}
+				<CapturarTicketOxxoGas />
 			{:else if $path.startsWith('/tickets_oxxogas/')}
 				<TicketOxxoGasDetalle id={$path.split('/')[2]} />
 			{:else if $path === '/panel'}

@@ -1,5 +1,5 @@
 """api/routers/tickets.py — endpoints de tickets (Fase 4)."""
-from fastapi import APIRouter, HTTPException, Depends, Request, Query
+from fastapi import APIRouter, HTTPException, Depends, Request, Query, Form, UploadFile, File
 from fastapi.responses import Response
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
@@ -136,6 +136,25 @@ def tickets_oxxogas_list(
                 vales_por_usuario[uid] = []
             vales_por_usuario[uid].append(v)
 
+        # Vales GENERADOS desde ayer que aún no tienen ticket capturado.
+        conn2 = get_connection()
+        cur2 = conn2.cursor(as_dict=True)
+        cur2.execute("""
+            SELECT S.Id, S.IdSolicitante, S.FechaSolicitud, S.Placa, S.Descripcion,
+                   S.Cantidad, S.MontoUnit, S.IdAutomovil, S.IdCliente, S.IdValeGoVale,
+                   U.Nombre AS SolicitanteNombre,
+                   A.MarcaModelo, A.Placas AS AutoPlacas
+            FROM HUB_SolicitudVales S
+            LEFT JOIN HUB_Users U ON U.Id = S.IdSolicitante
+            LEFT JOIN HUB_Automoviles A ON A.Id = S.IdAutomovil
+            WHERE S.Estatus = 'GENERADO'
+              AND S.IdTicketCierre IS NULL
+              AND S.FechaSolicitud >= DATEADD(day, -1, CAST(GETDATE() AS DATE))
+            ORDER BY S.FechaSolicitud DESC
+        """)
+        solicitudes_pendientes = cur2.fetchall()
+        conn2.close()
+
         resultado = []
         for t in tickets:
             folio = (t["FolioTicket"] or "").strip()
@@ -194,6 +213,29 @@ def tickets_oxxogas_list(
                 "litros": float(v["XmlLitros"]) if v and v["XmlLitros"] is not None else None,
                 "concepto": v["XmlConcepto"] if v else None,
             })
+        # Agregar vales GENERADOS sin ticket como "tickets pendientes"
+        for s in solicitudes_pendientes:
+            resultado.append({
+                "id": f"vale-{s['Id']}",
+                "folio": None,
+                "fecha": s["FechaSolicitud"].isoformat() if s["FechaSolicitud"] else None,
+                "fecha_vale": s["FechaSolicitud"].isoformat() if s["FechaSolicitud"] else None,
+                "estacion": None,
+                "descripcion": s["Descripcion"] or "",
+                "tiene_foto": False,
+                "cliente": s["IdCliente"],
+                "vale": f"VL-{int(s['Id']):05d}",
+                "marca_modelo": s["MarcaModelo"],
+                "placas": s["AutoPlacas"] or s["Placa"],
+                "capturo": s["SolicitanteNombre"],
+                "factura": None,
+                "monto": float(s["MontoUnit"]) if s["MontoUnit"] is not None else None,
+                "litros": None,
+                "concepto": None,
+                "pendiente_ticket": True,
+                "id_solicitud": s["Id"],
+            })
+        total = len(resultado)
         return {"items": resultado, "total": total, "limit": limit, "offset": offset}
     except Exception as e:
         if conn:
@@ -297,6 +339,176 @@ async def tickets_oxxogas_imagen(ticket_id: int, w: int = 0,
 
 
 # ═══════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Captura manual de ticket OxxoGas desde Admon
+# ═══════════════════════════════════════════════════════════════════════════
+
+@router.get("/api/tickets-oxxogas/vales-abiertos")
+def tickets_oxxogas_vales_abiertos(
+    vehiculo: int = Query(...),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_vales_oxxogas(current_user)
+    conn = get_connection()
+    try:
+        cursor = conn.cursor(as_dict=True)
+        cursor.execute("""
+            SELECT S.Id, S.IdSolicitante, S.FechaSolicitud, S.Placa, S.Descripcion,
+                   S.Cantidad, S.MontoUnit, S.IdAutomovil, S.IdCliente, S.IdValeGoVale,
+                   U.Nombre AS SolicitanteNombre,
+                   A.MarcaModelo, A.Placas AS AutoPlacas
+            FROM HUB_SolicitudVales S
+            LEFT JOIN HUB_Users U ON U.Id = S.IdSolicitante
+            LEFT JOIN HUB_Automoviles A ON A.Id = S.IdAutomovil
+            WHERE S.Estatus = 'GENERADO'
+              AND S.IdTicketCierre IS NULL
+              AND S.IdAutomovil = %s
+            ORDER BY S.FechaSolicitud DESC
+        """, (vehiculo,))
+        return cursor.fetchall()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+    finally:
+        conn.close()
+
+
+@router.get("/api/tickets-oxxogas/estaciones")
+def tickets_oxxogas_estaciones(current_user: dict = Depends(get_current_user)):
+    _require_vales_oxxogas(current_user)
+    conn = get_connection()
+    try:
+        cursor = conn.cursor(as_dict=True)
+        cursor.execute("SELECT Estacion FROM HUB_EstacionesTickets ORDER BY Estacion")
+        return [r["Estacion"] for r in cursor.fetchall()]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+    finally:
+        conn.close()
+
+
+@router.post("/api/tickets-oxxogas/crear")
+async def tickets_oxxogas_crear(
+    id_vehiculo: int = Form(...),
+    id_cliente: str = Form(""),
+    folio_ticket: str = Form(""),
+    estacion: str = Form(""),
+    descripcion: str = Form(""),
+    id_solicitud_vale: str = Form(""),
+    foto: UploadFile = Form(None),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_vales_oxxogas(current_user)
+    folio_val = (folio_ticket or "").strip()
+    estacion_val = (estacion or "").strip()
+    desc_val = (descripcion or "").strip()
+    cliente_val = (id_cliente or "").strip() or None
+    vale_val = int(id_solicitud_vale) if (id_solicitud_vale or "").strip().isdigit() else None
+
+    if not folio_val:
+        raise HTTPException(status_code=400, detail="Folio del ticket es obligatorio")
+    if not estacion_val:
+        raise HTTPException(status_code=400, detail="Estacion es obligatoria")
+    if not foto:
+        raise HTTPException(status_code=400, detail="Foto del ticket es obligatoria")
+
+    image_bytes = await foto.read()
+    image_name = foto.filename or "ticket.jpg"
+
+    conn = get_connection()
+    try:
+        cursor = conn.cursor(as_dict=True)
+        if vale_val:
+            cursor.execute("SELECT IdCliente, Descripcion FROM HUB_SolicitudVales WHERE Id = %s", (vale_val,))
+            v = cursor.fetchone()
+            if v:
+                if not cliente_val:
+                    cliente_val = (v["IdCliente"] or "").strip() or None
+                if not desc_val:
+                    desc_val = (v["Descripcion"] or "").strip()
+
+        cursor.execute("""
+            INSERT INTO HUB_OxxoGasTickets
+            (FolioTicket, Estacion, ImagenTicket, ImagenNombre, IdVehiculo, Descripcion,
+             IdCliente, IdUsuario, FechaRegistro, IdSolicitudVale)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, GETDATE(), %s);
+            SELECT CAST(SCOPE_IDENTITY() AS INT) AS new_id;
+        """, (folio_val, estacion_val, image_bytes, image_name,
+              id_vehiculo, desc_val, cliente_val, current_user["id"], vale_val))
+        new_id = int(cursor.fetchone()["new_id"])
+
+        if vale_val:
+            cursor.execute("UPDATE HUB_SolicitudVales SET IdTicketCierre = %s, FechaCierre = GETDATE(), Estatus = 'CERRADO' WHERE Id = %s", (new_id, vale_val))
+
+        conn.commit()
+        return {"success": True, "folio": folio_val, "id_server": new_id}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+    finally:
+        conn.close()
+
+@router.post("/api/tickets/ai-extraer-folio")
+async def ai_extraer_folio(
+    foto: UploadFile = File(...),
+    current_user: dict = Depends(get_current_user),
+):
+    _require_vales_oxxogas(current_user)
+    api_key = None
+    model_name = "gemini-2.0-flash"
+    conn = get_connection()
+    try:
+        cursor = conn.cursor(as_dict=True)
+        cursor.execute("SELECT ApiKey, Model FROM HUB_AIConfig WHERE Id = 1")
+        row = cursor.fetchone()
+        if row:
+            api_key = row.get("ApiKey")
+            if row.get("Model"):
+                model_name = row["Model"]
+    except Exception:
+        pass
+    finally:
+        conn.close()
+    if not api_key:
+        raise HTTPException(status_code=400, detail="No hay clave de IA configurada")
+
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel("gemini-3.5-flash-lite")
+        image_bytes = await foto.read()
+        import PIL.Image
+        import io
+        img = PIL.Image.open(io.BytesIO(image_bytes))
+
+        prompt = (
+            "Eres un lector de tickets de OxxoGas. "
+            "Extrae el folio (numero de 10-12 digitos cerca de codigo de barras o etiqueta Folio/Ticket/Secuencia) "
+            "y la estacion (texto despues de ESTACION/Estacion/EST./SUCURSAL). "
+            "Responde EXACTAMENTE en este formato, sin nada mas:\n"
+            "FOLIO=numero_o_vacio ESTACION=texto_o_vacio"
+        )
+        response = model.generate_content([prompt, img])
+        text = (response.text or "").strip()
+        import re
+        folio_m = re.search(r"FOLIO\s*=\s*(\S+)", text, re.IGNORECASE)
+        est_m = re.search(r"ESTACION\s*=\s*(.+)$", text, re.IGNORECASE)
+        folio = folio_m.group(1) if folio_m else ""
+        estacion = est_m.group(1).strip() if est_m else ""
+        if not folio:
+            num_m = re.search(r"\b(\d{10,12})\b", text)
+            if num_m:
+                folio = num_m.group(1)
+        if folio and not re.match(r"^\d{6,15}$", folio):
+            folio_num = re.search(r"\d{6,15}", folio)
+            folio = folio_num.group(0) if folio_num else ""
+        return {"folio": folio, "estacion": estacion}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error con IA: {str(e)}")
+
+
+
+
 # Módulo Kilómetros — consumo semanal de la flota + captura de odómetro
 # ═══════════════════════════════════════════════════════════════════════════
 # Tabla de datos: HUB_RegistroKilometros (Id, IdAutomovil, Kilometros,

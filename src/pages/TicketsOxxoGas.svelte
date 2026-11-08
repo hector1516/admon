@@ -114,6 +114,7 @@
 		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver">⬅️</button>
 		<h1>⛽ Tickets de OxxoGas</h1>
 		<div style="flex:1"></div>
+		<button class="btn btn-sm btn-primary" onclick={() => navigate('/tickets_oxxogas/capturar')} title="Capturar ticket manualmente">➕ Capturar</button>
 		<span class="count">{filtrados.length} ticket{filtrados.length === 1 ? '' : 's'}</span>
 	</div>
 
@@ -156,9 +157,12 @@
 	{:else}
 		<div class="grid">
 			{#each pagActual as t (t.id)}
-				<button class="card-ticket" onclick={() => navigate(`/tickets_oxxogas/${t.id}`)} title="Ver detalle completo">
+				<button class="card-ticket" class:pendiente={t.pendiente_ticket} onclick={() => navigate(t.pendiente_ticket ? '#' : `/tickets_oxxogas/${t.id}`)} title={t.pendiente_ticket ? 'Ticket pendiente de captura' : 'Ver detalle completo'}>
 					<div class="body">
-						<div class="folio">#{t.folio}</div>
+						{#if t.pendiente_ticket}
+							<div class="pendiente-badge">⏳ Ticket pendiente</div>
+						{/if}
+						<div class="folio">{t.pendiente_ticket ? '🎫 ' + t.vale : '#' + t.folio}</div>
 						<div class="fecha">🧾 Ticket: {fmtFecha(t.fecha)}</div>
 						{#if t.fecha_vale}
 							<div class="fecha">🎫 Vale: {fmtFecha(t.fecha_vale)}</div>
@@ -202,6 +206,9 @@
 	.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 0.9rem; }
 
 	.card-ticket { text-align: left; background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; overflow: hidden; padding: 0; cursor: pointer; transition: transform 0.15s, border-color 0.15s; color: inherit; font: inherit; }
+	.card-ticket.pendiente { border-color: rgba(251, 191, 36, 0.4); cursor: default; }
+	.card-ticket.pendiente:hover { transform: none; }
+	.pendiente-badge { font-size: 0.7rem; font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 999px; padding: 0.2rem 0.6rem; display: inline-block; margin-bottom: 0.4rem; }
 	.card-ticket:hover { transform: translateY(-3px); border-color: rgba(255, 107, 0, 0.5); }
 
 	.body { padding: 0.75rem 0.85rem 0.9rem; }
@@ -211,6 +218,8 @@
 	.chip { font-size: 0.68rem; font-weight: 700; border-radius: 999px; padding: 0.22rem 0.6rem; border: 1px solid transparent; }
 	.chip.ok { color: #4ade80; background: rgba(74, 222, 128, 0.1); border-color: rgba(74, 222, 128, 0.25); }
 	.chip.pend { color: #fbbf24; background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.3); }
+	.btn-primary { background: #ff6b00; color: #fff; border: none; }
+	.btn-primary:hover { background: #e55a00; }
 	.row { font-size: 0.75rem; color: #cbd5e1; margin-top: 0.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 	/* Saldo Go Vale — mismo look que la vista Vales OxxoGas del HUB.
