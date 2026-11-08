@@ -210,24 +210,13 @@ function formatearFecha(fecha) {
 
 		// Cargar Wobnimo (mascota 3D Volt) via dynamic import
 		try {
-			const wobnimo = await import('https://cdn.jsdelivr.net/npm/wobnimo@0.2/dist/wobnimo.js');
-			if (mascotContainer) {
-				// Find the Volt character
-				const chars = wobnimo.characters || {};
-				let voltChar = chars.volt;
-				// If not found by name, search in all characters
-				if (!voltChar) {
-					for (const key of Object.keys(chars)) {
-						if (key.toLowerCase().includes('volt')) {
-							voltChar = chars[key];
-							break;
-						}
-					}
-				}
-				if (voltChar && wobnimo.mount) {
-					mascotInstance = wobnimo.mount(mascotContainer, voltChar);
-					mascotInstance.setState(mascotState);
-				}
+			const [wobnimo, voltModule] = await Promise.all([
+				import('https://cdn.jsdelivr.net/npm/wobnimo@0.2/dist/wobnimo.js'),
+				import('https://cdn.jsdelivr.net/npm/wobnimo@0.2/dist/characters/volt.js')
+			]);
+			if (mascotContainer && voltModule.volt && wobnimo.mount) {
+				mascotInstance = wobnimo.mount(mascotContainer, voltModule.volt);
+				mascotInstance.setState(mascotState);
 			}
 		} catch (e) {
 			console.error('Wobnimo load error:', e);
