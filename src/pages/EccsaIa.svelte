@@ -169,18 +169,20 @@ function formatearFecha(fecha) {
 			' ' + d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
 	}
 
-	// Configurar mascota Wobnimo cuando el elemento esté listo o cambie el estado
+	// Configurar mascota Wobnimo
+	function setupMascot() {
+		if (!mascotContainer) return;
+		const el = mascotContainer.querySelector('wobnimo-mascot');
+		if (!el) return;
+		customElements.whenDefined('wobnimo-mascot').then(() => {
+			el.setAttribute('character', 'volt');
+			el.setAttribute('state', mascotState);
+		});
+	}
+
 	$effect(() => {
 		void mascotState;
-		if (mascotContainer) {
-			const el = mascotContainer.querySelector('wobnimo-mascot');
-			if (el) {
-				customElements.whenDefined('wobnimo-mascot').then(() => {
-					el.setAttribute('character', 'volt');
-					el.setAttribute('state', mascotState);
-				});
-			}
-		}
+		setupMascot();
 	});
 
 	async function autoScroll() {
@@ -217,7 +219,7 @@ function formatearFecha(fecha) {
 		<button class="btn-icon" on:click={() => navigate('/')} title="Volver">⬅️</button>
 		<div class="chat-title">
 			<div class="chat-avatar wobnimo-avatar" bind:this={mascotContainer}>
-			<wobnimo-mascot></wobnimo-mascot>
+			{@html '<wobnimo-mascot character="volt" state="' + mascotState + '"></wobnimo-mascot>'}
 		</div>
 			<div class="chat-names">
 				<strong>ECCSA IA</strong>
