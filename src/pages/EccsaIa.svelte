@@ -20,7 +20,7 @@
 	let error = $state('');
 	let messagesContainer = $state(null);
 	let mascotState = $state('idle'); // idle | thinking | speaking | celebrating | error
-	let mascotEl = $state(null);
+	let mascotContainer = $state(null);
 
 	// Sugerencias iniciales (solo cuando la conversación está vacía)
 	const sugerencias = [
@@ -172,11 +172,14 @@ function formatearFecha(fecha) {
 	// Configurar mascota Wobnimo cuando el elemento esté listo o cambie el estado
 	$effect(() => {
 		void mascotState;
-		if (mascotEl) {
-			customElements.whenDefined('wobnimo-mascot').then(() => {
-				mascotEl.setAttribute('character', 'volt');
-				mascotEl.setAttribute('state', mascotState);
-			});
+		if (mascotContainer) {
+			const el = mascotContainer.querySelector('wobnimo-mascot');
+			if (el) {
+				customElements.whenDefined('wobnimo-mascot').then(() => {
+					el.setAttribute('character', 'volt');
+					el.setAttribute('state', mascotState);
+				});
+			}
 		}
 	});
 
@@ -213,8 +216,8 @@ function formatearFecha(fecha) {
 	<header class="chat-header">
 		<button class="btn-icon" on:click={() => navigate('/')} title="Volver">⬅️</button>
 		<div class="chat-title">
-			<div class="chat-avatar wobnimo-avatar">
-			<wobnimo-mascot bind:this={mascotEl}></wobnimo-mascot>
+			<div class="chat-avatar wobnimo-avatar" bind:this={mascotContainer}>
+			<wobnimo-mascot></wobnimo-mascot>
 		</div>
 			<div class="chat-names">
 				<strong>ECCSA IA</strong>
@@ -357,13 +360,15 @@ function formatearFecha(fecha) {
 	}
 	.wobnimo-avatar {
 		width: 120px; height: 120px;
-		background: rgba(255, 107, 0, 0.05);
+		background: rgba(255, 107, 0, 0.1);
+		border: 2px solid rgba(255, 107, 0, 0.3);
 		border-radius: 12px;
-		overflow: hidden;
+		overflow: visible;
 		flex-shrink: 0;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		position: relative;
 	}
 	.wobnimo-avatar wobnimo-mascot {
 		width: 100%;
