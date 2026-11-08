@@ -182,7 +182,9 @@ function formatearFecha(fecha) {
 
 	$effect(() => {
 		void mascotState;
-		setupMascot();
+		if (mascotInstance && typeof mascotInstance.setState === 'function') {
+			mascotInstance.setState(mascotState);
+		}
 	});
 
 	async function autoScroll() {
@@ -197,19 +199,39 @@ function formatearFecha(fecha) {
 		autoScroll();
 	});
 
+	let mascotInstance = null;
+
 	onMount(async () => {
 		if (!auth.isLoggedIn()) {
 			navigate('/login', { replace: true });
 			return;
 		}
-		// Cargar Wobnimo (mascota 3D Volt)
-		if (!document.querySelector('script[src*="wobnimo"]')) {
-			const script = document.createElement('script');
-			script.type = 'module';
-			script.src = 'https://cdn.jsdelivr.net/npm/wobnimo@0.2/dist/wobnimo.js';
-			document.head.appendChild(script);
-		}
 		await abrirConversacion();
+
+		// Cargar Wobnimo (mascota 3D Volt) via dynamic import
+		try {
+			const wobnimo = await import('https://cdn.jsdelivr.net/npm/wobnimo@0.2/dist/wobnimo.js');
+			if (mascotContainer) {
+				// Find the Volt character
+				const chars = wobnimo.characters || {};
+				let voltChar = chars.volt;
+				// If not found by name, search in all characters
+				if (!voltChar) {
+					for (const key of Object.keys(chars)) {
+						if (key.toLowerCase().includes('volt')) {
+							voltChar = chars[key];
+							break;
+						}
+					}
+				}
+				if (voltChar && wobnimo.mount) {
+					mascotInstance = wobnimo.mount(mascotContainer, voltChar);
+					mascotInstance.setState(mascotState);
+				}
+			}
+		} catch (e) {
+			console.error('Wobnimo load error:', e);
+		}
 	});
 </script>
 
@@ -219,7 +241,6 @@ function formatearFecha(fecha) {
 		<button class="btn-icon" on:click={() => navigate('/')} title="Volver">⬅️</button>
 		<div class="chat-title">
 			<div class="chat-avatar wobnimo-avatar" bind:this={mascotContainer}>
-			{@html '<wobnimo-mascot character="volt" state="' + mascotState + '"></wobnimo-mascot>'}
 		</div>
 			<div class="chat-names">
 				<strong>ECCSA IA</strong>
