@@ -20,6 +20,7 @@
 	let error = $state('');
 	let messagesContainer = $state(null);
 	let mascotState = $state('idle'); // idle | thinking | speaking | celebrating | error
+	let mascotEl = $state(null);
 
 	// Sugerencias iniciales (solo cuando la conversación está vacía)
 	const sugerencias = [
@@ -168,6 +169,17 @@ function formatearFecha(fecha) {
 			' ' + d.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
 	}
 
+	// Configurar mascota Wobnimo cuando el elemento esté listo o cambie el estado
+	$effect(() => {
+		void mascotState;
+		if (mascotEl) {
+			customElements.whenDefined('wobnimo-mascot').then(() => {
+				mascotEl.setAttribute('character', 'volt');
+				mascotEl.setAttribute('state', mascotState);
+			});
+		}
+	});
+
 	async function autoScroll() {
 		await tick();
 		if (messagesContainer) messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -202,7 +214,7 @@ function formatearFecha(fecha) {
 		<button class="btn-icon" on:click={() => navigate('/')} title="Volver">⬅️</button>
 		<div class="chat-title">
 			<div class="chat-avatar wobnimo-avatar">
-			<wobnimo-mascot character="volt" state={mascotState}></wobnimo-mascot>
+			<wobnimo-mascot bind:this={mascotEl}></wobnimo-mascot>
 		</div>
 			<div class="chat-names">
 				<strong>ECCSA IA</strong>
