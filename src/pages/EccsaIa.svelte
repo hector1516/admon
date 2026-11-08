@@ -217,6 +217,9 @@ function formatearFecha(fecha) {
 			if (mascotContainer && voltModule.volt && wobnimo.mount) {
 				mascotInstance = wobnimo.mount(mascotContainer, voltModule.volt);
 				mascotInstance.setState(mascotState);
+				// Ocultar fallback emoji
+				const fallback = mascotContainer.querySelector('.mascot-fallback');
+				if (fallback) fallback.style.display = 'none';
 			}
 		} catch (e) {
 			console.error('Wobnimo load error:', e);
@@ -230,6 +233,7 @@ function formatearFecha(fecha) {
 		<button class="btn-icon" on:click={() => navigate('/')} title="Volver">⬅️</button>
 		<div class="chat-title">
 			<div class="chat-avatar wobnimo-avatar" bind:this={mascotContainer}>
+			<span class="mascot-fallback">🤖</span>
 		</div>
 			<div class="chat-names">
 				<strong>ECCSA IA</strong>
