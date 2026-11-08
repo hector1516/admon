@@ -235,6 +235,8 @@ def tickets_oxxogas_list(
                 "pendiente_ticket": True,
                 "id_solicitud": s["Id"],
             })
+        # Ordenar por fecha descendente (más reciente primero)
+        resultado.sort(key=lambda x: x.get("fecha") or "", reverse=True)
         total = len(resultado)
         return {"items": resultado, "total": total, "limit": limit, "offset": offset}
     except Exception as e:
