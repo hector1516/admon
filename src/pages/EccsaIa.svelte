@@ -220,6 +220,9 @@ function formatearFecha(fecha) {
 				// Ocultar fallback emoji
 				const fallback = mascotContainer.querySelector('.mascot-fallback');
 				if (fallback) fallback.style.display = 'none';
+				console.log('Wobnimo Volt mounted successfully');
+			} else {
+				console.error('Wobnimo mount failed:', { mascotContainer: !!mascotContainer, volt: !!voltModule?.volt, mount: !!wobnimo?.mount });
 			}
 		} catch (e) {
 			console.error('Wobnimo load error:', e);
