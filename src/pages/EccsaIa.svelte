@@ -6,6 +6,7 @@
 	import { marked } from 'marked';
 
 	// ECCSA IA — chat de UNA SOLA conversación por usuario (estilo ChatGPT).
+	// Wobnimo: mascota 3D (Volt, robot LED) que reacciona al estado del chat.
 	// Backend clon del HUB views/edwin_jarvis.py: 3 tools
 	// (execute_query, send_quote_pdf, send_service_reports) + sugerencias SAT.
 	// Sin sidebar: al abrir se usa la conversación más reciente del usuario
@@ -18,6 +19,7 @@
 	let loading = $state(true);
 	let error = $state('');
 	let messagesContainer = $state(null);
+	let mascotState = $state('idle'); // idle | thinking | speaking | celebrating | error
 
 	// Sugerencias iniciales (solo cuando la conversación está vacía)
 	const sugerencias = [
@@ -102,6 +104,7 @@
 		nuevoMensaje = '';
 		enviando = true;
 		error = '';
+		mascotState = 'thinking';
 
 		// UI optimista: el mensaje del usuario aparece de inmediato
 		const msgUsuario = {
@@ -124,14 +127,19 @@
 
 			// Reemplaza con el historial real (incluye la respuesta de la IA)
 			mensajes = data.mensajes || [];
+			mascotState = 'celebrating';
 
 			// El backend titula la conversación con la primera pregunta
 			if (conversacion.Titulo === 'Nueva conversación' && data.titulo) {
 				conversacion.Titulo = data.titulo;
 			}
+			// Volver a idle después de celebrar
+			setTimeout(() => { mascotState = 'idle'; }, 2000);
 		} catch (e) {
 			error = e.message || 'Error al enviar mensaje.';
+			mascotState = 'error';
 			mensajes = mensajes.filter((m) => m.Id !== msgUsuario.Id);
+			setTimeout(() => { mascotState = 'idle'; }, 3000);
 		} finally {
 			enviando = false;
 			autoScroll();
@@ -177,6 +185,13 @@ function formatearFecha(fecha) {
 			navigate('/login', { replace: true });
 			return;
 		}
+		// Cargar Wobnimo (mascota 3D Volt)
+		if (!document.querySelector('script[src*="wobnimo"]')) {
+			const script = document.createElement('script');
+			script.type = 'module';
+			script.src = 'https://cdn.jsdelivr.net/npm/wobnimo@0.2/dist/wobnimo.js';
+			document.head.appendChild(script);
+		}
 		await abrirConversacion();
 	});
 </script>
@@ -186,7 +201,9 @@ function formatearFecha(fecha) {
 	<header class="chat-header">
 		<button class="btn-icon" on:click={() => navigate('/')} title="Volver">⬅️</button>
 		<div class="chat-title">
-			<div class="chat-avatar">🤖</div>
+			<div class="chat-avatar wobnimo-avatar">
+			<wobnimo-mascot character="volt" state={mascotState}></wobnimo-mascot>
+		</div>
 			<div class="chat-names">
 				<strong>ECCSA IA</strong>
 				<span class="chat-status">🟢 En línea · asistente de ECCSA Automation</span>
@@ -325,6 +342,15 @@ function formatearFecha(fecha) {
 		background: rgba(255, 107, 0, 0.15);
 		display: flex; align-items: center; justify-content: center;
 		font-size: 1.1rem; flex-shrink: 0;
+	}
+	.wobnimo-avatar {
+		width: 40px; height: 40px;
+		background: transparent;
+		overflow: hidden;
+	}
+	.wobnimo-avatar wobnimo-mascot {
+		width: 100%;
+		height: 100%;
 	}
 	.chat-names { display: flex; flex-direction: column; min-width: 0; }
 	.chat-names strong { font-size: 0.95rem; line-height: 1.2; }
