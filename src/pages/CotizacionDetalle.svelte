@@ -96,7 +96,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 		}
 	}
 
-	onMount(async () => {
+	onMount(async () => { try {
 		if (!auth.isLoggedIn()) {
 			navigate('/login', { replace: true });
 			return;
@@ -106,7 +106,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 			return;
 		}
 		await cargar();
-	});
+	 } catch (e) { console.error("CD onMount error:", e); error = e.message; loading = false; } });
 
 	async function onGuardarPdfShare() {
 		if (!h || h.folio == null) {
