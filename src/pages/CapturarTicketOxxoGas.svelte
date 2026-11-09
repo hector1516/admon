@@ -137,8 +137,10 @@
 
 		loading = true;
 		try {
+			const idLocal = crypto.randomUUID();
 			const formData = new FormData();
 			formData.append('id_vehiculo', form.id_vehiculo);
+			formData.append('idempotency_key', idLocal);
 			formData.append('id_cliente', form.id_cliente);
 			formData.append('folio_ticket', form.folio_ticket.trim());
 			formData.append('estacion', form.estacion.trim());
