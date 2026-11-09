@@ -1,5 +1,5 @@
 <script>
-	import { Briefcase } from 'lucide-svelte';
+	import { Briefcase , Radio } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';

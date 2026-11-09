@@ -1,5 +1,5 @@
 <script>
-	import { BarChart3, RefreshCw, Trash2 } from 'lucide-svelte';
+	import { BarChart3, RefreshCw, Trash2 , Circle } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';

@@ -1,5 +1,5 @@
 <script>
-	import { Save } from 'lucide-svelte';
+	import { Save , Bot, Package, Receipt } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BarChart3, ClipboardList, Flag, Smartphone } from 'lucide-svelte';
+	import { BarChart3, ClipboardList, Flag, Smartphone , Trophy } from 'lucide-svelte';
 
 	import { onMount, onDestroy } from 'svelte';
 	import { navigate as goto } from '$lib/router.js';

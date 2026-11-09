@@ -1,5 +1,5 @@
 <script>
-	import { User } from 'lucide-svelte';
+	import { User , Building2, Car, Receipt, Ticket } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';

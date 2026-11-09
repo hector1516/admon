@@ -1,5 +1,5 @@
 <script>
-	import { Trash2 } from 'lucide-svelte';
+	import { Trash2 , Copy, Download, Eye, FileEdit, FileText, Mail, Plus, Save, Settings, UserPlus } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';

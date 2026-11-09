@@ -1,5 +1,5 @@
 <script>
-	import { Download, Eye, Save, Trash2, Upload } from 'lucide-svelte';
+	import { Download, Eye, Save, Trash2, Upload , Skull } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';

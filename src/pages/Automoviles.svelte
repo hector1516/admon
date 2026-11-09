@@ -1,5 +1,5 @@
 <script>
-	import { Hammer, Unlock, Wrench } from 'lucide-svelte';
+	import { Hammer, Unlock, Wrench , Ruler } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';

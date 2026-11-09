@@ -1,5 +1,5 @@
 <script>
-	import { BarChart3, Save, User, Wrench } from 'lucide-svelte';
+	import { BarChart3, Save, User, Wrench , ArrowUp, Fuel, Ticket } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
