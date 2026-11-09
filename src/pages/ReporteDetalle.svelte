@@ -1,5 +1,5 @@
 <script>
-	import { Save, Trash2, Upload , Brush, FileText } from 'lucide-svelte';
+	import { Save, Trash2, Upload , Brush, FileText , X } from 'lucide-svelte';
 import HoldButton from '$lib/components/HoldButton.svelte';
 
 	import { onMount } from 'svelte';
@@ -423,7 +423,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 					</div>
 				</div>
 				<div class="grid-2">
-					<button class="btn btn-secondary btn-block" on:click={() => { editando = false; editForm = { ...editForm }; }}>❌ Cancelar</button>
+					<button class="btn btn-secondary btn-block" on:click={() => { editando = false; editForm = { ...editForm }; }}><X size={16} /> Cancelar</button>
 					<button class="btn btn-primary btn-block" on:click={guardarCambios} disabled={busy}><Save size={16} /> Guardar</button>
 				</div>
 			{:else}
@@ -511,7 +511,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 				<canvas bind:this={canvasRef} width="100%" height="200" style="border: 1px solid var(--color-border); border-radius: 8px; background: #fff; touch-action: none;" on:pointerdown={onPointerDown} on:pointermove={onPointerMove} on:pointerup={onPointerUp} on:pointerleave={onPointerUp}></canvas>
 				<div class="grid-3" style="margin-top: 0.5rem;">
 					<button class="btn btn-secondary btn-sm" on:click={limpiarFirma}><Brush size={16} /> Limpiar</button>
-					<button class="btn btn-secondary btn-sm" on:click={() => firmando = false}>❌ Cancelar</button>
+					<button class="btn btn-secondary btn-sm" on:click={() => firmando = false}><X size={16} /> Cancelar</button>
 					<button class="btn btn-primary btn-sm" on:click={guardarFirma} disabled={busy}><Save size={16} /> Guardar firma</button>
 				</div>
 			{:else if reporte.FirmaConformidad}

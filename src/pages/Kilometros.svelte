@@ -1,5 +1,5 @@
 <script>
-	import { BarChart3, Save, User, Wrench , ArrowUp, Fuel, Ticket } from 'lucide-svelte';
+	import { BarChart3, Save, User, Wrench , ArrowUp, Fuel, Ticket , ArrowDown, ArrowRight } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -286,7 +286,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 								{/if}
 								{#if v.consumo_ant > 0}
 									<span class="chip" class:subio={delta > 0} class:bajo={delta < 0}>
-										{delta > 0 ? '▲' : delta < 0 ? '▼' : '='} {fmtNum(Math.abs(delta))} vs. semana pasada
+										{delta > 0 ? '<ArrowUp size={16} />' : delta < 0 ? '<ArrowDown size={16} />' : '='} {fmtNum(Math.abs(delta))} vs. semana pasada
 									</span>
 								{/if}
 								{#if v.requiere_servicio}
@@ -297,7 +297,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 							{#if v.conductor}<div class="row"><User size={16} /> {v.conductor}</div>{/if}
 							<div class="row"><Fuel size={16} /> Odómetro: {fmtNum(v.km_actuales)} km</div>
 							{#if v.comparable}
-								<div class="row">↔️ {fmtNum(v.ultimo_km_pasada)} → {fmtNum(v.ultimo_km)} (sem. pasada → esta)</div>
+								<div class="row">↔️ {fmtNum(v.ultimo_km_pasada)} <ArrowRight size={16} /> {fmtNum(v.ultimo_km)} (sem. pasada <ArrowRight size={16} /> esta)</div>
 							{/if}
 							{#if v.kms_desde_servicio !== null}
 								<div class="row"><Wrench size={16} /> {fmtNum(v.kms_desde_servicio)} km desde el último servicio</div>

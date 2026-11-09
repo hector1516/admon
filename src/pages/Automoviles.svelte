@@ -1,5 +1,5 @@
 <script>
-	import { Hammer, Unlock, Wrench , Ruler } from 'lucide-svelte';
+	import { Hammer, Unlock, Wrench , Ruler , ArrowLeft, X } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -200,7 +200,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 <div class="page">
 	<div class="header">
 		<div class="brand-col">
-			<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver">←</button>
+			<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
 			<h1>🚗 Automóviles</h1>
 		</div>
 		<div style="flex:1"></div>
@@ -265,7 +265,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 			{:else if detalle}
 				<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
 					<h2 style="margin: 0; font-size: 1.1rem;">{detalle.marca_modelo}</h2>
-					<button class="btn btn-sm btn-secondary" on:click={() => (detalle = null)}>✕</button>
+					<button class="btn btn-sm btn-secondary" on:click={() => (detalle = null)}><X size={16} /></button>
 				</div>
 
 				{#if detalle.imagen || autoImageExists(detalle.marca_modelo)}

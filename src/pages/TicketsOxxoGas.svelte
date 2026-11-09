@@ -1,5 +1,5 @@
 <script>
-	import { User , Building2, Car, Receipt, Ticket } from 'lucide-svelte';
+	import { User , Building2, Car, Receipt, Ticket , Plus } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -117,7 +117,7 @@
 		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver">⬅️</button>
 		<h1>⛽ Tickets de OxxoGas</h1>
 		<div style="flex:1"></div>
-		<button class="btn btn-sm btn-primary" onclick={() => navigate('/tickets_oxxogas/capturar')} title="Capturar ticket manualmente">➕ Capturar</button>
+		<button class="btn btn-sm btn-primary" onclick={() => navigate('/tickets_oxxogas/capturar')} title="Capturar ticket manualmente"><Plus size={16} /> Capturar</button>
 		<span class="count">{filtrados.length} ticket{filtrados.length === 1 ? '' : 's'}</span>
 	</div>
 

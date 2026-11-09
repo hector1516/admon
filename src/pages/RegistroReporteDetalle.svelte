@@ -1,5 +1,5 @@
 <script>
-	import { Download, Eye, Save, Trash2, Upload , Skull } from 'lucide-svelte';
+	import { Download, Eye, Save, Trash2, Upload , Skull , X } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -466,7 +466,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 					</select>
 				</div>
 				<div class="grid-2" style="margin-top: 0.5rem;">
-					<button class="btn btn-secondary btn-block" onclick={cancelarEdicion}>❌ Cancelar</button>
+					<button class="btn btn-secondary btn-block" onclick={cancelarEdicion}><X size={16} /> Cancelar</button>
 					<button class="btn btn-primary btn-block" onclick={guardarEdicion} disabled={busy}><Save size={16} /> Guardar</button>
 				</div>
 			{:else}

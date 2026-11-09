@@ -90,11 +90,11 @@
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver">←</button>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>📋 Cotizaciones</h1>
 		<div style="flex:1"></div>
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/cotizaciones/comparar')} title="Comparar cotizaciones">⚖️</button>
-		<button class="btn btn-sm btn-primary" on:click={() => navigate('/cotizaciones/nueva')} title="Nueva cotización">➕</button>
+		<button class="btn btn-sm btn-primary" on:click={() => navigate('/cotizaciones/nueva')} title="Nueva cotización"><Plus size={16} /></button>
 	</div>
 
 	<div class="field">
@@ -135,7 +135,7 @@
 				>
 					<div class="body">
 						<div class="folio-row">
-							<span class="folio">{c.folio != null ? folioFmt(c.folio) : '⚠ Sin folio'}</span>
+							<span class="folio">{c.folio != null ? folioFmt(c.folio) : '<AlertTriangle size={16} /> Sin folio'}</span>
 							<span class="badge {estatusBadge(c.estatus)}" style="font-size: 0.6rem;">{mapEstatus(c.estatus)}</span>
 							{#if c.folio == null || !c.synced}
 								<span class="badge badge-warning" style="font-size: 0.6rem;">⏳ pendiente</span>

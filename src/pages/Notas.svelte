@@ -1,5 +1,5 @@
 <script>
-	import { Save } from 'lucide-svelte';
+	import { Save , Plus } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -153,12 +153,12 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 			<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver">⬅️</button>
 			<h1>📝 Notas</h1>
 			<div style="flex:1"></div>
-			<button class="btn btn-sm btn-primary" onclick={abrirNueva}>➕ Nueva nota</button>
+			<button class="btn btn-sm btn-primary" onclick={abrirNueva}><Plus size={16} /> Nueva nota</button>
 		</div>
 	{:else}
 		<!-- Modo pestaña: el botón queda arriba a la derecha, bajo la barra de pestañas -->
 		<div class="embed-bar">
-			<button class="btn btn-sm btn-primary" onclick={abrirNueva}>➕ Nueva nota</button>
+			<button class="btn btn-sm btn-primary" onclick={abrirNueva}><Plus size={16} /> Nueva nota</button>
 		</div>
 	{/if}
 

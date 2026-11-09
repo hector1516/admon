@@ -91,7 +91,7 @@
           <span class="file-icon">📄</span>
           <span class="file-name">{file.name}</span>
           <span class="file-size">{formatSize(file.size)}</span>
-          <button class="file-remove" onclick={() => removeFile(i)}>✕</button>
+          <button class="file-remove" onclick={() => removeFile(i)}><X size={16} /></button>
         </div>
       {/each}
     </div>

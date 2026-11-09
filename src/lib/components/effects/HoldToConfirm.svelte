@@ -74,7 +74,7 @@
   <div class="hold-fill" style="width: {progress}%"></div>
   <div class="hold-content">
     {#if confirmed}
-      <span class="hold-check">✓</span>
+      <span class="hold-check"><Check size={16} /></span>
       {confirmLabel}
     {:else}
       <span class="hold-icon">⏳</span>

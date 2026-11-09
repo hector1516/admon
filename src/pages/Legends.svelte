@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { BarChart3, ClipboardList, Flag, Smartphone , Trophy } from 'lucide-svelte';
+	import { BarChart3, ClipboardList, Flag, Smartphone , Trophy , ArrowLeft } from 'lucide-svelte';
 
 	import { onMount, onDestroy } from 'svelte';
 	import { navigate as goto } from '$lib/router.js';
@@ -388,7 +388,7 @@
 	{:else}
 		<!-- HEADER -->
 		<div class="legends-header" style="animation: slide-up 0.5s ease-out">
-			<button class="back-btn" onclick={() => goto('/')}>←</button>
+			<button class="back-btn" onclick={() => goto('/')}><ArrowLeft size={16} /></button>
 			<h1 class="title-epic">ECCSA LEGENDS</h1>
 			<div></div>
 		</div>

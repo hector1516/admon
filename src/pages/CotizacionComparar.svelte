@@ -54,7 +54,7 @@
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/cotizaciones_materiales')} title="Volver">←</button>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/cotizaciones_materiales')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>⚖️ Comparador de Cotizaciones</h1>
 	</div>
 

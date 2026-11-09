@@ -1,5 +1,5 @@
 <script>
-	import { Trash2 , Copy, Download, Eye, FileEdit, FileText, Mail, Plus, Save, Settings, UserPlus } from 'lucide-svelte';
+	import { Trash2 , Copy, Download, Eye, FileEdit, FileText, Mail, Plus, Save, Settings, UserPlus , X } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -375,7 +375,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 					{/each}
 					<p class="hint" style="margin: 0.4rem 0;">Partidas incluidas: <strong>{remSelCount}</strong> de {remRows.length}</p>
 					<div class="grid-2" style="margin-bottom: 0;">
-						<button class="btn btn-secondary btn-block" on:click={cancelarCrearRemision} disabled={remBusy}>❌ Cancelar</button>
+						<button class="btn btn-secondary btn-block" on:click={cancelarCrearRemision} disabled={remBusy}><X size={16} /> Cancelar</button>
 						<button class="btn btn-primary btn-block" on:click={crearRemision} disabled={remBusy || remSelCount === 0}><Plus size={18} /> Crear remisión</button>
 					</div>
 				</div>
@@ -420,7 +420,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 					</div>
 				{/if}
 				<button class="btn btn-primary btn-block" style="margin-top: 0.6rem;" on:click={abrirCrearRemision} disabled={bloqueado || pendiente || remBusy || items.length === 0}>
-					➕ Nueva remisión
+					<Plus size={16} /> Nueva remisión
 				</button>
 				{#if pendiente}
 					<p class="hint" style="margin-top: 0.35rem;">⏳ Se habilita al sincronizar la cotización (necesita folio real).</p>
@@ -465,7 +465,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 			<div class="modal" on:click|stopPropagation>
 				<div class="modal-header">
 					<h3>📜 Historial de cambios</h3>
-					<button class="btn btn-sm btn-secondary" on:click={() => mostrandoHistorial = false}>✕</button>
+					<button class="btn btn-sm btn-secondary" on:click={() => mostrandoHistorial = false}><X size={16} /></button>
 				</div>
 				{#if cargandoHistorial}
 					<div class="empty">Cargando historial…</div>

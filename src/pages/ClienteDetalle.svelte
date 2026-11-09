@@ -1,5 +1,5 @@
 <script>
-	import { Save, Siren, Trash2 } from 'lucide-svelte';
+	import { Save, Siren, Trash2 , X } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -210,7 +210,7 @@
 				<input id="cd-dias" type="number" class="input" min="0" bind:value={dias} />
 			</div>
 			<div class="grid-2" style="margin-bottom: 0.5rem;">
-				<button class="btn btn-secondary btn-block" on:click={() => navigate('/clientes')}>❌ Cancelar</button>
+				<button class="btn btn-secondary btn-block" on:click={() => navigate('/clientes')}><X size={16} /> Cancelar</button>
 				<button class="btn btn-primary btn-block" on:click={guardar} disabled={busy}><Save size={16} /> Guardar</button>
 			</div>
 			<button class="btn btn-danger btn-block" on:click={eliminar} disabled={busy}><Siren size={16} /> Eliminar cliente</button>
@@ -236,7 +236,7 @@
 									style="flex: 1;"
 								/>
 								<div style="display: flex; gap: 0.4rem; flex-shrink: 0;">
-									<button class="btn btn-sm btn-secondary" on:click={() => (editandoContacto = null)}>❌</button>
+									<button class="btn btn-sm btn-secondary" on:click={() => (editandoContacto = null)}><X size={16} /></button>
 									<button class="btn btn-sm btn-primary" on:click={guardarRenombre} disabled={busy}><Save size={16} /></button>
 								</div>
 							{:else}

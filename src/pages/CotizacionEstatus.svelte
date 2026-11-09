@@ -1,5 +1,5 @@
 <script>
-	import { Save } from 'lucide-svelte';
+	import { Save , Check } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -107,7 +107,7 @@
 						<div style="font-size: 0.8rem; color: var(--color-text-muted);">{op.desc}</div>
 					</div>
 					{#if parseInt(sel, 10) === op.color}
-						<span style="color: var(--color-success); font-size: 1.3rem;">✔</span>
+						<span style="color: var(--color-success); font-size: 1.3rem;"><Check size={16} /></span>
 					{/if}
 				</button>
 			{/each}

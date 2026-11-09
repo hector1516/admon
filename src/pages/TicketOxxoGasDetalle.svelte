@@ -1,5 +1,5 @@
 <script>
-	import { Search } from 'lucide-svelte';
+	import { Search , X } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -298,7 +298,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 	     cierra con Esc, con ✕ o tocando el encuadre a 1x. -->
 	<div class="lightbox" role="dialog" aria-modal="true" aria-label="Foto ampliada del ticket">
 		<div class="lb-bar">
-			<button class="btn btn-sm btn-secondary" onclick={cerrarZoom}>✕</button>
+			<button class="btn btn-sm btn-secondary" onclick={cerrarZoom}><X size={16} /></button>
 			<span class="lb-folio">🎫 #{t.folio}</span>
 			<div class="lb-spacer"></div>
 			<button class="lb-btn" onclick={() => zoomStep(-1)} disabled={zoom <= 1} aria-label="Alejar">−</button>

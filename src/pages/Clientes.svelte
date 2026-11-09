@@ -1,5 +1,5 @@
 <script>
-	import { Calendar, Save } from 'lucide-svelte';
+	import { Calendar, Save , ArrowLeft, ArrowRight, Plus, X } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -167,7 +167,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver">←</button>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>🏢 Clientes</h1>
 		<div style="flex:1"></div>
 		<button
@@ -180,7 +180,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 			}}
 			title="Nuevo cliente"
 		>
-			➕
+			<Plus size={16} />
 		</button>
 	</div>
 
@@ -221,7 +221,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 				<input id="ec-dias" type="number" class="input" min="0" bind:value={editDias} />
 			</div>
 			<div class="grid-2" style="margin-bottom: 0.5rem;">
-				<button class="btn btn-secondary btn-block" on:click={() => (selId = null)}>❌ Cancelar</button>
+				<button class="btn btn-secondary btn-block" on:click={() => (selId = null)}><X size={16} /> Cancelar</button>
 				<button class="btn btn-primary btn-block" on:click={guardarEdicion} disabled={busy}><Save size={16} /> Guardar</button>
 			</div>
 			<HoldButton label="Eliminar cliente" onConfirm={eliminar} disabled={busy} size="md" block={true} />
@@ -238,8 +238,8 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 	<p style="color: var(--color-text-muted); font-size: 0.8rem;">Mostrando {filtrados.length} de {totalClientes} clientes (página {paginaActual} de {Math.max(1, Math.ceil(totalClientes / porPagina))}).</p>
 	{#if totalClientes > porPagina}
 		<div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1rem;">
-			<button class="btn btn-secondary" disabled={paginaActual <= 1} on:click={() => { paginaActual--; cargar(); }}>← Anterior</button>
-			<button class="btn btn-secondary" disabled={paginaActual >= Math.ceil(totalClientes / porPagina)} on:click={() => { paginaActual++; cargar(); }}>Siguiente →</button>
+			<button class="btn btn-secondary" disabled={paginaActual <= 1} on:click={() => { paginaActual--; cargar(); }}><ArrowLeft size={16} /> Anterior</button>
+			<button class="btn btn-secondary" disabled={paginaActual >= Math.ceil(totalClientes / porPagina)} on:click={() => { paginaActual++; cargar(); }}>Siguiente <ArrowRight size={16} /></button>
 		</div>
 	{/if}
 

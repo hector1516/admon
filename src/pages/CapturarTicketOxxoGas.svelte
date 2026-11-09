@@ -1,5 +1,5 @@
 <script>
-	import { Brain, Save } from 'lucide-svelte';
+	import { Brain, Save , X } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -225,7 +225,7 @@
 			{#if fotoPreview}
 				<div class="foto-preview">
 					<img src={fotoPreview} alt="Ticket" />
-					<button class="photo-remove" onclick={removeFoto}>✕</button>
+					<button class="photo-remove" onclick={removeFoto}><X size={16} /></button>
 				</div>
 			{/if}
 		</div>

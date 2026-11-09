@@ -1,5 +1,5 @@
 <script>
-	import { Save , Bot, Package, Receipt } from 'lucide-svelte';
+	import { Save , Bot, Package, Receipt , X } from 'lucide-svelte';
 import HoldButton from '$lib/components/HoldButton.svelte';
 
 	import { onMount } from 'svelte';
@@ -354,7 +354,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 					</button>
 				{:else}
 					<div class="grid-2" style="margin-bottom: 0.5rem;">
-						<button class="btn btn-secondary btn-block" on:click={limpiarForm}>❌ Cancelar</button>
+						<button class="btn btn-secondary btn-block" on:click={limpiarForm}><X size={16} /> Cancelar</button>
 						<button class="btn btn-primary btn-block" on:click={onGuardar} disabled={!formListo}>
 							{busy ? 'Guardando…' : '<Save size={16} /> Guardar cambios'}
 						</button>

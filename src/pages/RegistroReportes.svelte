@@ -1,5 +1,5 @@
 <script>
-	import { BarChart3, RefreshCw, Trash2 , Circle } from 'lucide-svelte';
+	import { BarChart3, RefreshCw, Trash2 , Circle , X } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -335,7 +335,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 			{#if clienteSel}
 				<span class="chip" title="Cliente de la selección">
 					👤 {clienteSel}
-					<button class="chip-x" on:click={limpiarSeleccion} title="Vaciar selección">✕</button>
+					<button class="chip-x" on:click={limpiarSeleccion} title="Vaciar selección"><X size={16} /></button>
 				</span>
 			{/if}
 			<span class="excel-cuenta">
