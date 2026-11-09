@@ -4,7 +4,8 @@
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
-	import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBorrar, remisionAsignar, remisionUsuarios, remisionPdfDownload } from '$lib/cotizacionesApi.js';
+	import HoldButton from '$lib/components/HoldButton.svelte';
+import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBorrar, remisionAsignar, remisionUsuarios, remisionPdfDownload } from '$lib/cotizacionesApi.js';
 	import { folioFmt, fmtMXN, totales, mapEstatus, COLOR_LABEL } from '$lib/cotizaciones.js';
 
 	let { clave } = $props();

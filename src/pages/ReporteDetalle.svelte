@@ -1,5 +1,6 @@
 <script>
 	import { Save, Trash2, Upload , Brush, FileText } from 'lucide-svelte';
+import HoldButton from '$lib/components/HoldButton.svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
