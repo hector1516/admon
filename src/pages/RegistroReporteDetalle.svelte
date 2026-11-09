@@ -560,7 +560,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 			{#if reporte.Eliminado === 1 || reporte.Eliminado === true}
 				<div class="grid-1" style="margin-top: 0.5rem;">
 					<button class="btn btn-danger" onclick={eliminarDefinitivo} disabled={busy} style="width: 100%;">
-						💀 Eliminar definitivamente
+						<Skull size={16} /> Eliminar definitivamente
 					</button>
 				</div>
 			{/if}

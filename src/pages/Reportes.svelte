@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
+import { Phone } from 'lucide-svelte';
 	import { auth } from '$lib/stores/auth.js';
 	import { online } from '$lib/stores/online.js';
 	import Paginacion from '$lib/components/Paginacion.svelte';
@@ -141,7 +142,7 @@
 						<div class="cliente">{r.Cliente}</div>
 						<div class="meta">{r.Fecha} · {r.Tecnico}</div>
 						{#if r.Contacto}
-							<div class="contacto">📞 {r.Contacto}</div>
+							<div class="contacto"><Phone size={16} /> {r.Contacto}</div>
 						{/if}
 						{#if r.TiempoTraslado}
 							<div class="tiempo">⏱️ {r.TiempoTraslado}h traslado</div>

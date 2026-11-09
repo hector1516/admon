@@ -381,7 +381,7 @@
 	{#if loading}
 		<div class="loading">
 			<div class="loading-ring">
-				<div class="ring-inner">🏆</div>
+				<div class="ring-inner"><Trophy size={16} /></div>
 			</div>
 			<span class="loading-text">Cargando leyendas...</span>
 		</div>
@@ -466,7 +466,7 @@
 				<span class="tab-icon"><ClipboardList size={16} /></span>
 			</button>
 			<button class="tab" class:active={tab === 'historial'} onclick={() => tab = 'historial'}>
-				<span class="tab-icon">🏆</span>
+				<span class="tab-icon"><Trophy size={16} /></span>
 			</button>
 		</div>
 

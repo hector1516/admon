@@ -306,7 +306,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 				{/if}
 
 				{#if detalle.kilometros && detalle.kilometros.length > 0}
-					<h3 style="font-size: 0.9rem; margin: 1rem 0 0.5rem;">📏 Últimos registros de km</h3>
+					<h3 style="font-size: 0.9rem; margin: 1rem 0 0.5rem;"><Ruler size={16} /> Últimos registros de km</h3>
 					{#each detalle.kilometros as k}
 						<div class="detail-item">
 							<span style="font-size: 0.8rem;">{k.kilometros.toLocaleString()} km</span>
@@ -319,7 +319,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 				<div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
 					<button class="btn btn-sm btn-secondary" on:click={() => { showFormServicio = !showFormServicio; showFormReparacion = false; showFormKm = false; }}><Wrench size={16} /> + Servicio</button>
 					<button class="btn btn-sm btn-secondary" on:click={() => { showFormReparacion = !showFormReparacion; showFormServicio = false; showFormKm = false; }}><Hammer size={16} /> + Reparación</button>
-					<button class="btn btn-sm btn-secondary" on:click={() => { showFormKm = !showFormKm; showFormServicio = false; showFormReparacion = false; }}>📏 + Km</button>
+					<button class="btn btn-sm btn-secondary" on:click={() => { showFormKm = !showFormKm; showFormServicio = false; showFormReparacion = false; }}><Ruler size={16} /> + Km</button>
 				</div>
 
 				{#if showFormServicio}

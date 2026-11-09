@@ -1,6 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
+import { Send } from 'lucide-svelte';
 	import { auth } from '$lib/stores/auth.js';
 	import { header, partidas } from '$lib/cotizacionesApi.js';
 	import { folioFmt } from '$lib/cotizaciones.js';
@@ -129,7 +130,7 @@
 			{/if}
 
 			<button class="btn btn-primary btn-block" on:click={onEnviar} disabled={busy || !toEmail.trim()}>
-				{busy ? 'Enviando…' : '🚀 Enviar correo'}
+				{busy ? 'Enviando…' : '<Send size={16} /> Enviar correo'}
 			</button>
 		</div>
 	{/if}

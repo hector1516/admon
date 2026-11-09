@@ -132,7 +132,7 @@ usuarios = Array.isArray(res) ? res : (res.items || []);
 						     nunca empujan ni cortan los badges fuera del recuadro. -->
 						<div class="chips">
 							{#if u.mac_telefono}
-								<span class="badge badge-mac" title="MAC del teléfono (Detección de Red 📡)">📡 {u.mac_telefono}</span>
+								<span class="badge badge-mac" title="MAC del teléfono (Detección de Red <Radio size={16} />)"><Radio size={16} /> {u.mac_telefono}</span>
 							{/if}
 							{#if u.acceso_usuarios}
 								<span class="badge badge-warning">admin</span>
@@ -157,7 +157,7 @@ usuarios = Array.isArray(res) ? res : (res.items || []);
 	.embed-titulo { margin: 0 0 0.75rem; }
 	.embed-titulo h2 { margin: 0; font-size: 1.05rem; font-weight: 700; }
 
-	/* MAC del teléfono (Detección de Red 📡): monoespaciada para leerla de un
+	/* MAC del teléfono (Detección de Red <Radio size={16} />): monoespaciada para leerla de un
 	   vistazo. Va aquí y no en styles/app.css porque ese archivo es del shell
 	   canónico (lo genera tools/sync_shell.py) y el CI lo valida. */
 	.badge-mac {

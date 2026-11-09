@@ -133,7 +133,7 @@
 			{#if valesRestantes !== null}
 				<div class="vales-estimado" class:sin-vales={sinVales}>
 					<span class="vales-num">
-						{sinVales ? '⚠️ No alcanza para 1 vale' : `🎫 ~${valesRestantes} vale${valesRestantes === 1 ? '' : 's'}`}
+						{sinVales ? '⚠️ No alcanza para 1 vale' : `<Ticket size={16} /> ~${valesRestantes} vale${valesRestantes === 1 ? '' : 's'}`}
 					</span>
 					<span class="vales-nota">aprox. a ${fmtSaldo(montoVale)} c/u</span>
 				</div>
@@ -156,7 +156,7 @@
 	{:else if error}
 		<div class="state err">⚠️ {error}</div>
 	{:else if filtrados.length === 0}
-		<div class="state">🎫 No hay tickets{busqueda.trim() ? ` que coincidan con “${busqueda.trim()}”` : ''}.</div>
+		<div class="state"><Ticket size={16} /> No hay tickets{busqueda.trim() ? ` que coincidan con “${busqueda.trim()}”` : ''}.</div>
 	{:else}
 		<div class="grid">
 			{#each pagActual as t (t.id)}
@@ -170,14 +170,14 @@
 								<img src={getAutoImage(t.marca_modelo)} alt={t.marca_modelo} onerror={(e) => { e.target.style.display = 'none'; }} />
 							</div>
 						{/if}
-						<div class="folio">{t.pendiente_ticket ? '🎫 ' + t.vale : '#' + t.folio}</div>
-						<div class="fecha">🧾 Ticket: {fmtFecha(t.fecha)}</div>
+						<div class="folio">{t.pendiente_ticket ? '<Ticket size={16} /> ' + t.vale : '#' + t.folio}</div>
+						<div class="fecha"><Receipt size={16} /> Ticket: {fmtFecha(t.fecha)}</div>
 						{#if t.fecha_vale}
-							<div class="fecha">🎫 Vale: {fmtFecha(t.fecha_vale)}</div>
+							<div class="fecha"><Ticket size={16} /> Vale: {fmtFecha(t.fecha_vale)}</div>
 						{/if}
 						<div class="chips">
 							{#if t.factura}
-								<span class="chip ok" title="Factura enlazada">🧾 {t.factura}</span>
+								<span class="chip ok" title="Factura enlazada"><Receipt size={16} /> {t.factura}</span>
 							{:else}
 								<span class="chip pend" title="Sin factura">⏳ Factura: Pendiente</span>
 							{/if}
@@ -187,9 +187,9 @@
 								<span class="chip pend" title="Sin estación">⏳ Estación: Pendiente</span>
 							{/if}
 						</div>
-						{#if t.cliente}<div class="row">🏢 {t.cliente}</div>{/if}
+						{#if t.cliente}<div class="row"><Building2 size={16} /> {t.cliente}</div>{/if}
 						{#if t.marca_modelo || t.placas}
-							<div class="row">🚗 {[t.marca_modelo, t.placas].filter(Boolean).join(' · ')}</div>
+							<div class="row"><Car size={16} /> {[t.marca_modelo, t.placas].filter(Boolean).join(' · ')}</div>
 						{/if}
 						{#if t.capturo}<div class="row"><User size={16} /> Capturó: {t.capturo}</div>{/if}
 					</div>

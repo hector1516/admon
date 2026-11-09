@@ -278,7 +278,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 							</div>
 
 							<div class="chips">
-								<span class="chip vale">🎫 {v.vales} {v.vales === 1 ? 'ticket' : 'tickets'}</span>
+								<span class="chip vale"><Ticket size={16} /> {v.vales} {v.vales === 1 ? 'ticket' : 'tickets'}</span>
 								{#if v.registros > 0}
 									<span class="chip ok">{v.registros} {v.registros === 1 ? 'lectura' : 'lecturas'}</span>
 								{:else}
@@ -295,14 +295,14 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 							</div>
 
 							{#if v.conductor}<div class="row"><User size={16} /> {v.conductor}</div>{/if}
-							<div class="row">🛞 Odómetro: {fmtNum(v.km_actuales)} km</div>
+							<div class="row"><Fuel size={16} /> Odómetro: {fmtNum(v.km_actuales)} km</div>
 							{#if v.comparable}
 								<div class="row">↔️ {fmtNum(v.ultimo_km_pasada)} → {fmtNum(v.ultimo_km)} (sem. pasada → esta)</div>
 							{/if}
 							{#if v.kms_desde_servicio !== null}
 								<div class="row"><Wrench size={16} /> {fmtNum(v.kms_desde_servicio)} km desde el último servicio</div>
 							{/if}
-							<div class="row ver">👆 Toca para ver lecturas y tickets</div>
+							<div class="row ver"><ArrowUp size={16} /> Toca para ver lecturas y tickets</div>
 						</div>
 					</button>
 				{/each}

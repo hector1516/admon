@@ -336,7 +336,7 @@
 
 		<!-- Datos principales -->
 		<div class="card" style="margin-bottom: 0.75rem;">
-			<div class="card-title">📄 Datos del reporte</div>
+			<div class="card-title"><FileText size={16} /> Datos del reporte</div>
 
 			{#if editando}
 				<div class="grid-2">
@@ -451,7 +451,7 @@
 				</div>
 				<div class="grid-3" style="margin-top: 0.75rem;">
 					<button class="btn btn-primary btn-sm" on:click={() => { editForm = { ...editForm }; editando = true; }}>✏️ Editar</button>
-					<button class="btn btn-secondary btn-sm" on:click={abrirPDF}>📄 Ver PDF</button>
+					<button class="btn btn-secondary btn-sm" on:click={abrirPDF}><FileText size={16} /> Ver PDF</button>
 					<HoldButton label="Eliminar" onConfirm={eliminar} disabled={busy} size="sm" />
 				</div>
 			{/if}
@@ -509,7 +509,7 @@
 			{#if firmando}
 				<canvas bind:this={canvasRef} width="100%" height="200" style="border: 1px solid var(--color-border); border-radius: 8px; background: #fff; touch-action: none;" on:pointerdown={onPointerDown} on:pointermove={onPointerMove} on:pointerup={onPointerUp} on:pointerleave={onPointerUp}></canvas>
 				<div class="grid-3" style="margin-top: 0.5rem;">
-					<button class="btn btn-secondary btn-sm" on:click={limpiarFirma}>🧹 Limpiar</button>
+					<button class="btn btn-secondary btn-sm" on:click={limpiarFirma}><Brush size={16} /> Limpiar</button>
 					<button class="btn btn-secondary btn-sm" on:click={() => firmando = false}>❌ Cancelar</button>
 					<button class="btn btn-primary btn-sm" on:click={guardarFirma} disabled={busy}><Save size={16} /> Guardar firma</button>
 				</div>

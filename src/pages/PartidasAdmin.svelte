@@ -125,7 +125,7 @@
 		};
 	}
 
-	// Botón 🤖: resuelve códigos SAT de la descripción en vivo (índice →
+	// Botón <Bot size={16} />: resuelve códigos SAT de la descripción en vivo (índice →
 	// reglas locales → 1 llamada IA) sin guardar la partida.
 	async function onSugerirSat() {
 		error = '';
@@ -245,11 +245,11 @@
 									${Number(p.precio_compra).toFixed(2)} × (1+{p.factor}){p.flete ? ` + flete $${Number(p.flete).toFixed(2)}` : ''}
 								</div>
 								{#if p.articulo_generico}
-									<div style="font-size: 0.7rem; color: var(--color-text-muted);">📦 {p.articulo_generico}</div>
+									<div style="font-size: 0.7rem; color: var(--color-text-muted);"><Package size={16} /> {p.articulo_generico}</div>
 								{/if}
 								{#if p.sat_prod_serv}
 									<div style="font-size: 0.7rem; color: var(--color-text-muted);">
-										🧾 SAT: {p.sat_prod_serv}{p.sat_unidad ? ` · ${p.sat_unidad}` : ''}
+										<Receipt size={16} /> SAT: {p.sat_prod_serv}{p.sat_unidad ? ` · ${p.sat_unidad}` : ''}
 										{#if p.sat_fuente}· {p.sat_fuente}{/if}
 									</div>
 								{/if}
@@ -328,10 +328,10 @@
 					</div>
 				</div>
 				<button class="btn btn-secondary btn-block" on:click={onSugerirSat} disabled={satBusy || busy || !descripcion.trim()}>
-					{satBusy ? 'Consultando…' : '🤖 Sugerir artículo y SAT por descripción'}
+					{satBusy ? 'Consultando…' : '<Bot size={16} /> Sugerir artículo y SAT por descripción'}
 				</button>
 				{#if satInfo}
-					<p class="hint" style="margin-top: 0.35rem;">🧾 {satInfo}</p>
+					<p class="hint" style="margin-top: 0.35rem;"><Receipt size={16} /> {satInfo}</p>
 				{/if}
 				<p class="hint">Déjalos vacíos y al guardar el servidor los resuelve solo (índice → reglas → IA).</p>
 
