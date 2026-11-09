@@ -62,7 +62,10 @@ import CapturarTicketOxxoGas from './pages/CapturarTicketOxxoGas.svelte';
 		}
 		splashDone = true;
 
-		if ('serviceWorker' in navigator) {
+			if ('serviceWorker' in navigator) {
+		navigator.serviceWorker.register('/sw.js').then((reg) => {
+			reg.update();
+		}).catch(() => {});
 		navigator.serviceWorker.addEventListener('controllerchange', () => {
 			window.location.reload();
 		});
