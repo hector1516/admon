@@ -1,4 +1,6 @@
 <script>
+	import { Hammer, Unlock, Wrench } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -243,7 +245,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 							<input type="file" accept="image/*" style="display: none;" on:change={(e) => subirImagen(a.id, e.target.files[0])} />
 						</label>
 						{#if a.id_usuario_asignado}
-							<button class="btn btn-sm btn-danger" on:click|stopPropagation={() => desasignar(a.id)}>🔓 Desasignar</button>
+							<button class="btn btn-sm btn-danger" on:click|stopPropagation={() => desasignar(a.id)}><Unlock size={16} /> Desasignar</button>
 						{/if}
 					</div>
 					{#if uploadMsg}
@@ -315,8 +317,8 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 
 				<!-- Botones para agregar registros -->
 				<div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
-					<button class="btn btn-sm btn-secondary" on:click={() => { showFormServicio = !showFormServicio; showFormReparacion = false; showFormKm = false; }}>🔧 + Servicio</button>
-					<button class="btn btn-sm btn-secondary" on:click={() => { showFormReparacion = !showFormReparacion; showFormServicio = false; showFormKm = false; }}>🔨 + Reparación</button>
+					<button class="btn btn-sm btn-secondary" on:click={() => { showFormServicio = !showFormServicio; showFormReparacion = false; showFormKm = false; }}><Wrench size={16} /> + Servicio</button>
+					<button class="btn btn-sm btn-secondary" on:click={() => { showFormReparacion = !showFormReparacion; showFormServicio = false; showFormKm = false; }}><Hammer size={16} /> + Reparación</button>
 					<button class="btn btn-sm btn-secondary" on:click={() => { showFormKm = !showFormKm; showFormServicio = false; showFormReparacion = false; }}>📏 + Km</button>
 				</div>
 

@@ -1,4 +1,6 @@
 <script>
+	import { Brain, Save } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -233,7 +235,7 @@
 			<div class="folio-row">
 				<input class="input" placeholder="Ej. 1234567890" bind:value={form.folio_ticket} />
 				<button class="btn btn-sm btn-info" onclick={extraerFolioConIA} disabled={ocrLoading || !fotoFile}>
-					{ocrLoading ? '⏳' : '🧠'} IA
+					{ocrLoading ? '⏳' : '<Brain size={16} />'} IA
 				</button>
 			</div>
 		</div>
@@ -254,7 +256,7 @@
 		</div>
 
 		<button class="btn btn-primary btn-block" onclick={guardar} disabled={loading}>
-			{loading ? 'Guardando...' : '💾 Guardar Ticket'}
+			{loading ? 'Guardando...' : '<Save size={16} /> Guardar Ticket'}
 		</button>
 	</div>
 </div>

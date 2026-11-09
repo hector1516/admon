@@ -1,4 +1,6 @@
 <script>
+	import { User } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -189,7 +191,7 @@
 						{#if t.marca_modelo || t.placas}
 							<div class="row">🚗 {[t.marca_modelo, t.placas].filter(Boolean).join(' · ')}</div>
 						{/if}
-						{#if t.capturo}<div class="row">👤 Capturó: {t.capturo}</div>{/if}
+						{#if t.capturo}<div class="row"><User size={16} /> Capturó: {t.capturo}</div>{/if}
 					</div>
 				</button>
 			{/each}

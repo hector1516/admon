@@ -1,4 +1,6 @@
 <script>
+	import { Check, ClipboardList, Save, Siren, Trash2 } from 'lucide-svelte';
+
 	import { onMount, onDestroy } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -407,7 +409,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 						disabled={busyFoto}
 						style="margin-top: 0.5rem;"
 					>
-							{busyFoto ? 'Quitando…' : '🗑️ Quitar foto'}
+							{busyFoto ? 'Quitando…' : '<Trash2 size={16} />️ Quitar foto'}
 						</button>
 					{/if}
 				</div>
@@ -427,7 +429,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 				<div class="ficha-row">
 					<code class="ficha-url">{fichaUrl}</code>
 					<button class="btn btn-sm" on:click={copiarFicha}>
-						{copiado ? '✅ Copiado' : '📋 Copiar'}
+						{copiado ? '<Check size={16} /> Copiado' : '<ClipboardList size={16} /> Copiar'}
 					</button>
 				</div>
 				<div class="ficha-extra">
@@ -546,7 +548,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 			{#if msgMac}<div class="msg ok">{msgMac}</div>{/if}
 
 			<button class="btn btn-secondary btn-block" on:click={guardarMac} disabled={busyMac}>
-				{busyMac ? 'Guardando…' : macTel.trim() ? '💾 Guardar MAC' : '💾 Desvincular teléfono'}
+				{busyMac ? 'Guardando…' : macTel.trim() ? '<Save size={16} /> Guardar MAC' : '<Save size={16} /> Desvincular teléfono'}
 			</button>
 		</div>
 
@@ -572,13 +574,13 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 		{/if}
 
 		<button class="btn btn-primary btn-block" on:click={guardar} disabled={busy}>
-			{busy ? 'Guardando…' : '💾 Guardar cambios'}
+			{busy ? 'Guardando…' : '<Save size={16} /> Guardar cambios'}
 		</button>
 		{#if isSelf}
 			<p class="hint" style="margin-top: 0.75rem;">ℹ️ No puedes eliminar tu propia cuenta desde aquí.</p>
 		{:else}
 			<button class="btn btn-danger btn-block" style="margin-top: 0.5rem;" on:click={eliminar} disabled={busy}>
-				🚨 Eliminar usuario
+				<Siren size={16} /> Eliminar usuario
 			</button>
 		{/if}
 	{/if}

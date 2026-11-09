@@ -1,4 +1,6 @@
 <script>
+	import { Download, Eye, Save, Trash2, Upload } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -465,7 +467,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 				</div>
 				<div class="grid-2" style="margin-top: 0.5rem;">
 					<button class="btn btn-secondary btn-block" onclick={cancelarEdicion}>❌ Cancelar</button>
-					<button class="btn btn-primary btn-block" onclick={guardarEdicion} disabled={busy}>💾 Guardar</button>
+					<button class="btn btn-primary btn-block" onclick={guardarEdicion} disabled={busy}><Save size={16} /> Guardar</button>
 				</div>
 			{:else}
 				<div class="grid-2" style="font-size: 0.9rem;">
@@ -513,7 +515,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 							<img src={p} alt="Preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--color-border);" />
 						{/each}
 					</div>
-					<button class="btn btn-primary btn-sm" onclick={guardarFotos} disabled={busy}>💾 Guardar Fotos</button>
+					<button class="btn btn-primary btn-sm" onclick={guardarFotos} disabled={busy}><Save size={16} /> Guardar Fotos</button>
 				{/if}
 			{:else}
 				<p style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 0.5rem;">ℹ️ Este reporte ya tiene el máximo de 6 fotos.</p>
@@ -535,15 +537,15 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 		<div class="card">
 			<div class="grid-2" style="gap: 0.5rem;">
 				<button class="btn btn-primary" onclick={descargarPDF} disabled={pdfLoading} style="flex: 1;">
-					{pdfLoading ? '⏳ Cargando…' : '📥 Descargar PDF'}
+					{pdfLoading ? '⏳ Cargando…' : '<Download size={16} /> Descargar PDF'}
 				</button>
 				<button class="btn btn-info" onclick={abrirPreview} disabled={pdfLoading} style="flex: 1;">
-					👁️ Previsualizar
+					<Eye size={16} />️ Previsualizar
 				</button>
 			</div>
 			<div class="grid-2" style="margin-top: 0.5rem; gap: 0.5rem;">
 				<button class="btn btn-secondary" onclick={compartirPDF} disabled={pdfLoading} style="flex: 1;">
-					📤 Compartir
+					<Upload size={16} /> Compartir
 				</button>
 				{#if reporte.Eliminado === 1 || reporte.Eliminado === true}
 					<button class="btn btn-success" onclick={restaurar} disabled={busy} style="flex: 1;">
@@ -551,7 +553,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 					</button>
 				{:else}
 					<button class="btn btn-danger" onclick={moverAPapelera} disabled={busy} style="flex: 1;">
-						🗑️ Mover a papelera
+						<Trash2 size={16} />️ Mover a papelera
 					</button>
 				{/if}
 			</div>

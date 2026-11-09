@@ -1,4 +1,6 @@
 <script>
+	import { Save } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -202,7 +204,7 @@
 
 			<div class="grid-2" style="margin-top: 0.5rem;">
 				<button class="btn btn-secondary btn-block" on:click={() => navigate('/reportes')}>❌ Cancelar</button>
-				<button class="btn btn-primary btn-block" on:click={guardar} disabled={busy}>💾 Crear reporte</button>
+				<button class="btn btn-primary btn-block" on:click={guardar} disabled={busy}><Save size={16} /> Crear reporte</button>
 			</div>
 		</div>
 	{/if}

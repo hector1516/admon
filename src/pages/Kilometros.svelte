@@ -1,4 +1,6 @@
 <script>
+	import { BarChart3, Save, User, Wrench } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -197,7 +199,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 	<OfflineNotice />
 
 	<div class="tabs">
-		<button class="tab" class:active={tab === 'consumo'} onclick={() => (tab = 'consumo')}>📊 Consumo semanal</button>
+		<button class="tab" class:active={tab === 'consumo'} onclick={() => (tab = 'consumo')}><BarChart3 size={16} /> Consumo semanal</button>
 		<button class="tab" class:active={tab === 'captura'} onclick={() => (tab = 'captura')}>✍️ Capturar kilómetros</button>
 	</div>
 
@@ -288,17 +290,17 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 									</span>
 								{/if}
 								{#if v.requiere_servicio}
-									<span class="chip warn">🔧 Requiere servicio</span>
+									<span class="chip warn"><Wrench size={16} /> Requiere servicio</span>
 								{/if}
 							</div>
 
-							{#if v.conductor}<div class="row">👤 {v.conductor}</div>{/if}
+							{#if v.conductor}<div class="row"><User size={16} /> {v.conductor}</div>{/if}
 							<div class="row">🛞 Odómetro: {fmtNum(v.km_actuales)} km</div>
 							{#if v.comparable}
 								<div class="row">↔️ {fmtNum(v.ultimo_km_pasada)} → {fmtNum(v.ultimo_km)} (sem. pasada → esta)</div>
 							{/if}
 							{#if v.kms_desde_servicio !== null}
-								<div class="row">🔧 {fmtNum(v.kms_desde_servicio)} km desde el último servicio</div>
+								<div class="row"><Wrench size={16} /> {fmtNum(v.kms_desde_servicio)} km desde el último servicio</div>
 							{/if}
 							<div class="row ver">👆 Toca para ver lecturas y tickets</div>
 						</div>
@@ -357,7 +359,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 				</div>
 			</div>
 			<button class="btn btn-primary btn-block" onclick={registrar} disabled={busy || !selVehiculo}>
-				{busy ? 'Guardando…' : '💾 Registrar kilómetros'}
+				{busy ? 'Guardando…' : '<Save size={16} /> Registrar kilómetros'}
 			</button>
 			<p class="hint" style="margin: 0.6rem 0 0;">
 				Un registro por automóvil por día. Lo capturado aquí o en el HUB aparece en la pestaña de consumo.

@@ -1,4 +1,6 @@
 <script>
+	import { Save } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -199,7 +201,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 			</div>
 			<div class="editor-acciones">
 				<button class="btn btn-sm btn-primary" onclick={guardar} disabled={guardando || !formTitulo.trim() || !formContenido.trim()}>
-					{guardando ? '⏳ Guardando…' : '💾 Guardar'}
+					{guardando ? '⏳ Guardando…' : '<Save size={16} /> Guardar'}
 				</button>
 				<button class="btn btn-sm btn-secondary" onclick={cancelarEditor} disabled={guardando}>Cancelar</button>
 			</div>

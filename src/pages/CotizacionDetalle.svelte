@@ -1,4 +1,6 @@
 <script>
+	import { Trash2 } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -373,9 +375,7 @@
 					<p class="hint" style="margin: 0.4rem 0;">Partidas incluidas: <strong>{remSelCount}</strong> de {remRows.length}</p>
 					<div class="grid-2" style="margin-bottom: 0;">
 						<button class="btn btn-secondary btn-block" on:click={cancelarCrearRemision} disabled={remBusy}>❌ Cancelar</button>
-						<button class="btn btn-primary btn-block" on:click={crearRemision} disabled={remBusy || remSelCount === 0}>
-							{remBusy ? 'Creando…' : '🧾 Crear remisión'}
-						</button>
+						<button class="btn btn-primary btn-block" on:click={crearRemision} disabled={remBusy || remSelCount === 0}><Plus size={18} /> Crear remisión</button>
 					</div>
 				</div>
 			{:else}
@@ -398,9 +398,9 @@
 										{/if}
 									</div>
 									<div style="display: flex; gap: 0.35rem; flex-shrink: 0; align-items: flex-start;">
-										<button class="btn btn-sm btn-secondary" on:click={() => descargarRemisionPdf(r)} disabled={remBusy} title="Descargar PDF">📥</button>
-										<button class="btn btn-sm btn-secondary" on:click={() => abrirAsignar(r)} disabled={remBusy} title="Asignar usuario para firmar en Field">👤</button>
-										<button class="btn btn-sm btn-danger" on:click={() => borrarRemision(r)} disabled={remBusy} title="Eliminar remisión">🗑️</button>
+										<button class="btn btn-sm btn-secondary" on:click={() => descargarRemisionPdf(r)} disabled={remBusy} title="Descargar PDF"><Download size={16} /></button>
+										<button class="btn btn-sm btn-secondary" on:click={() => abrirAsignar(r)} disabled={remBusy} title="Asignar usuario para firmar en Field"><UserPlus size={16} /></button>
+										<button class="btn btn-sm btn-danger" on:click={() => borrarRemision(r)} disabled={remBusy} title="Eliminar remisión"><Trash2 size={16} />️</button>
 									</div>
 								</div>
 								{#if asignandoId === r.id}
@@ -411,7 +411,7 @@
 												<option value={String(u.id)}>{u.nombre} ({u.email})</option>
 											{/each}
 										</select>
-										<button class="btn btn-sm btn-primary" on:click={() => guardarAsignar(r)} disabled={remBusy}>💾</button>
+										<button class="btn btn-sm btn-primary" on:click={() => guardarAsignar(r)} disabled={remBusy}><Save size={16} /></button>
 									</div>
 								{/if}
 							</div>
@@ -435,8 +435,8 @@
 		{/if}
 
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
-			<button class="btn btn-primary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/pdf`)} disabled={busy}>👁️ Previsualizar PDF</button>
-			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/enviar`)} disabled={busy}>📧 Enviar</button>
+			<button class="btn btn-primary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/pdf`)} disabled={busy}><Eye size={18} /> Previsualizar PDF</button>
+			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/enviar`)} disabled={busy}><Mail size={18} /> Enviar</button>
 		</div>
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
 			<button class="btn btn-block" on:click={onGuardarPdfShare} disabled={guardandoPdf || busy || bloqueado}
@@ -445,14 +445,14 @@
 			</button>
 		</div>
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
-			<button class="btn btn-primary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/partidas`)} disabled={bloqueado || busy}>📝 Partidas</button>
+			<button class="btn btn-primary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/partidas`)} disabled={bloqueado || busy}><FileText size={18} /> Partidas</button>
 			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/editar`)} disabled={bloqueado || busy}>✏️ Modificar</button>
 		</div>
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
-			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/nota`)} disabled={busy}>📝 Nota</button>
-			<button class="btn btn-secondary btn-block" on:click={onClonar} disabled={busy}>🐑 Clonar</button>
+			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/nota`)} disabled={busy}><FileEdit size={18} /> Nota</button>
+			<button class="btn btn-secondary btn-block" on:click={onClonar} disabled={busy}><Copy size={18} /> Clonar</button>
 		</div>
-		<button class="btn btn-secondary btn-block" style="margin-bottom: 0.5rem;" on:click={() => navigate(`/cotizaciones/${clave}/estatus`)} disabled={busy}>🚦 Cambiar estatus</button>
+		<button class="btn btn-secondary btn-block" style="margin-bottom: 0.5rem;" on:click={() => navigate(`/cotizaciones/${clave}/estatus`)} disabled={busy}><Settings size={18} /> Cambiar estatus</button>
 		<button class="btn btn-secondary btn-block" style="margin-bottom: 0.5rem;" on:click={abrirHistorial} disabled={busy}>Historial de cambios</button>
 		<HoldButton label="Borrar cotización" onConfirm={onBorrar} disabled={bloqueado} size="md" block={true} />
 		{#if bloqueado}

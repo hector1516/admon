@@ -1,5 +1,7 @@
 <!-- BusquedaGlobal.svelte - Búsqueda global estilo Cmd+K -->
 <script>
+	import { Search } from 'lucide-svelte';
+
 	import { onMount, onDestroy } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -176,7 +178,7 @@
 
 <!-- Botón flotante -->
 <button class="fab" on:click={abrir} title="Búsqueda global (Ctrl+K)">
-	🔍
+	<Search size={16} />
 </button>
 
 <style>

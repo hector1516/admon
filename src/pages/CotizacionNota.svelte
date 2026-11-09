@@ -1,4 +1,6 @@
 <script>
+	import { Save } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -87,7 +89,7 @@
 			{/if}
 
 			<button class="btn btn-primary btn-block" on:click={onGuardar} disabled={busy}>
-				{busy ? 'Guardando…' : '💾 Guardar nota'}
+				{busy ? 'Guardando…' : '<Save size={16} /> Guardar nota'}
 			</button>
 		</div>
 	{/if}

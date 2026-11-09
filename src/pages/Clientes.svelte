@@ -1,4 +1,6 @@
 <script>
+	import { Calendar, Save } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -203,7 +205,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 				<label for="nc-dias">Días de pago:</label>
 				<input id="nc-dias" type="number" class="input" min="0" bind:value={newDias} />
 			</div>
-			<button class="btn btn-primary btn-block" on:click={crear} disabled={busy}>💾 Guardar cliente</button>
+			<button class="btn btn-primary btn-block" on:click={crear} disabled={busy}><Save size={16} /> Guardar cliente</button>
 		</div>
 	{/if}
 
@@ -220,7 +222,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 			</div>
 			<div class="grid-2" style="margin-bottom: 0.5rem;">
 				<button class="btn btn-secondary btn-block" on:click={() => (selId = null)}>❌ Cancelar</button>
-				<button class="btn btn-primary btn-block" on:click={guardarEdicion} disabled={busy}>💾 Guardar</button>
+				<button class="btn btn-primary btn-block" on:click={guardarEdicion} disabled={busy}><Save size={16} /> Guardar</button>
 			</div>
 			<HoldButton label="Eliminar cliente" onConfirm={eliminar} disabled={busy} size="md" block={true} />
 		</div>
@@ -252,7 +254,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 					<div class="body">
 						<div class="id">{c.id_cliente}</div>
 						<div class="nombre">{c.nombre}</div>
-						<div class="dias">📅 {c.dias_pago ?? 30} días de pago</div>
+						<div class="dias"><Calendar size={16} /> {c.dias_pago ?? 30} días de pago</div>
 					</div>
 				</button>
 			{/each}

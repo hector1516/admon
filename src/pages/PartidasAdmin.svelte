@@ -1,4 +1,6 @@
 <script>
+	import { Save } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -347,13 +349,13 @@
 
 				{#if editando == null}
 					<button class="btn btn-primary btn-block" on:click={onGuardar} disabled={!formListo}>
-						{busy ? 'Guardando…' : '💾 Guardar partida'}
+						{busy ? 'Guardando…' : '<Save size={16} /> Guardar partida'}
 					</button>
 				{:else}
 					<div class="grid-2" style="margin-bottom: 0.5rem;">
 						<button class="btn btn-secondary btn-block" on:click={limpiarForm}>❌ Cancelar</button>
 						<button class="btn btn-primary btn-block" on:click={onGuardar} disabled={!formListo}>
-							{busy ? 'Guardando…' : '💾 Guardar cambios'}
+							{busy ? 'Guardando…' : '<Save size={16} /> Guardar cambios'}
 						</button>
 					</div>
 					<HoldButton label="Eliminar partida" onConfirm={onEliminar} disabled={busy} size="md" block={true} />

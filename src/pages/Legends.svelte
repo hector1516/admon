@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { BarChart3, ClipboardList, Flag, Smartphone } from 'lucide-svelte';
+
 	import { onMount, onDestroy } from 'svelte';
 	import { navigate as goto } from '$lib/router.js';
 	import { api } from '$lib/api';
@@ -448,20 +450,20 @@
 			{#if shareLoading}
 				<span class="share-spinner"></span> Generando...
 			{:else}
-				📱 Compartir como imagen
+				<Smartphone size={16} /> Compartir como imagen
 			{/if}
 		</button>
 
 <!-- TABS -->
 		<div class="tabs" style="animation: slide-up 1.1s ease-out">
 			<button class="tab" class:active={tab === 'ranking'} onclick={() => tab = 'ranking'}>
-				<span class="tab-icon">📊</span>
+				<span class="tab-icon"><BarChart3 size={16} /></span>
 			</button>
 			<button class="tab" class:active={tab === 'rivales'} onclick={() => tab = 'rivales'}>
-				<span class="tab-icon">🏁</span>
+				<span class="tab-icon"><Flag size={16} /></span>
 			</button>
 			<button class="tab" class:active={tab === 'mis_puntos'} onclick={() => tab = 'mis_puntos'}>
-				<span class="tab-icon">📋</span>
+				<span class="tab-icon"><ClipboardList size={16} /></span>
 			</button>
 			<button class="tab" class:active={tab === 'historial'} onclick={() => tab = 'historial'}>
 				<span class="tab-icon">🏆</span>

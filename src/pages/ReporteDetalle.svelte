@@ -1,4 +1,6 @@
 <script>
+	import { Save, Trash2, Upload } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -421,7 +423,7 @@
 				</div>
 				<div class="grid-2">
 					<button class="btn btn-secondary btn-block" on:click={() => { editando = false; editForm = { ...editForm }; }}>❌ Cancelar</button>
-					<button class="btn btn-primary btn-block" on:click={guardarCambios} disabled={busy}>💾 Guardar</button>
+					<button class="btn btn-primary btn-block" on:click={guardarCambios} disabled={busy}><Save size={16} /> Guardar</button>
 				</div>
 			{:else}
 				<div class="grid-2" style="font-size: 0.9rem;">
@@ -480,7 +482,7 @@
 			<div class="card-title">📸 Fotos ({fotos.length})</div>
 			<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
 				<input type="file" accept="image/*" on:change={handleFileSelect} class="input" style="flex: 1; min-width: 180px;" disabled={busy} />
-				<button class="btn btn-primary btn-sm" on:click={subirFoto} disabled={busy || !nuevaFoto}>📤 Subir</button>
+				<button class="btn btn-primary btn-sm" on:click={subirFoto} disabled={busy || !nuevaFoto}><Upload size={16} /> Subir</button>
 			</div>
 			{#if nuevaFotoPreview}
 				<div style="margin-bottom: 0.5rem;">
@@ -494,7 +496,7 @@
 					{#each fotos as f}
 						<div style="position: relative; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden;">
 							<img src="data:image/jpeg;base64,{f.base64}" alt="Foto {f.orden}" style="width: 100%; aspect-ratio: 4/3; object-fit: cover;" />
-							<button class="btn btn-sm btn-danger" style="position: absolute; top: 4px; right: 4px; padding: 0.2rem 0.4rem; font-size: 0.7rem;" on:click={() => borrarFoto(f.id)}>🗑️</button>
+							<button class="btn btn-sm btn-danger" style="position: absolute; top: 4px; right: 4px; padding: 0.2rem 0.4rem; font-size: 0.7rem;" on:click={() => borrarFoto(f.id)}><Trash2 size={16} />️</button>
 						</div>
 					{/each}
 				</div>
@@ -509,7 +511,7 @@
 				<div class="grid-3" style="margin-top: 0.5rem;">
 					<button class="btn btn-secondary btn-sm" on:click={limpiarFirma}>🧹 Limpiar</button>
 					<button class="btn btn-secondary btn-sm" on:click={() => firmando = false}>❌ Cancelar</button>
-					<button class="btn btn-primary btn-sm" on:click={guardarFirma} disabled={busy}>💾 Guardar firma</button>
+					<button class="btn btn-primary btn-sm" on:click={guardarFirma} disabled={busy}><Save size={16} /> Guardar firma</button>
 				</div>
 			{:else if reporte.FirmaConformidad}
 				<img src="data:image/png;base64,{reporte.FirmaConformidad}" alt="Firma" style="max-width: 100%; border: 1px solid var(--color-border); border-radius: 8px;" />
@@ -526,7 +528,7 @@
 					<label for="email_env">Destinatario</label>
 					<input id="email_env" type="email" class="input" bind:value={emailEnviar} placeholder="cliente@dominio.com" />
 				</div>
-				<button class="btn btn-primary btn-sm" style="height: 38px;" on:click={enviarPDF} disabled={enviando || !emailEnviar.trim()}>📤 Enviar</button>
+				<button class="btn btn-primary btn-sm" style="height: 38px;" on:click={enviarPDF} disabled={enviando || !emailEnviar.trim()}><Upload size={16} /> Enviar</button>
 			</div>
 			<p class="hint">Se adjunta el PDF del reporte. Si hay firma, se incluye en el PDF.</p>
 		</div>

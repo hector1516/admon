@@ -1,4 +1,6 @@
 <script>
+	import { BarChart3, RefreshCw, Trash2 } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -292,7 +294,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 		<h1>📋 Registro de Reportes</h1>
 		<p class="subtitle">Visualización global de reportes de servicio técnico de todos los ingenieros.</p>
 		<div style="flex:1"></div>
-		<button class="btn btn-sm btn-secondary" on:click={cargar} title="Sincronizar">🔄</button>
+		<button class="btn btn-sm btn-secondary" on:click={cargar} title="Sincronizar"><RefreshCw size={16} /></button>
 	</div>
 
 	<input class="input" placeholder="Buscar por cliente, folio, técnico, contacto, cotización…" bind:value={busqueda} style="margin-bottom: 0.75rem;" />
@@ -315,7 +317,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 			on:click={() => cambiarTab('excel')}
 			style="padding: 0.5rem 1rem; border: none; background: transparent; color: var(--color-text); font-weight: 600; border-bottom: 2px solid transparent; cursor: pointer;"
 		>
-			📊 Excel ({firmados.length})
+			<BarChart3 size={16} /> Excel ({firmados.length})
 		</button>
 		<button 
 			class="tab-btn" 
@@ -323,7 +325,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 			on:click={() => cambiarTab('papelera')}
 			style="padding: 0.5rem 1rem; border: none; background: transparent; color: var(--color-text); font-weight: 600; border-bottom: 2px solid transparent; cursor: pointer;"
 		>
-			🗑️ Papelera ({papelera.length})
+			<Trash2 size={16} />️ Papelera ({papelera.length})
 		</button>
 	</div>
 

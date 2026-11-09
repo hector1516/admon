@@ -1,4 +1,6 @@
 <script>
+	import { Eye } from 'lucide-svelte';
+
 	// Campo de contraseña con botón para mostrar/ocultar (modo runes).
 	let { value = $bindable(''), id = '', placeholder = '', autocomplete = 'new-password' } = $props();
 	let show = $state(false);
@@ -14,7 +16,7 @@
 		bind:value
 	/>
 	<button type="button" class="pw-toggle" on:click={() => (show = !show)} title={show ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
-		{show ? '🙈' : '👁️'}
+		{show ? '🙈' : '<Eye size={16} />️'}
 	</button>
 </div>
 

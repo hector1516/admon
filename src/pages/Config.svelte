@@ -1,4 +1,6 @@
 <script>
+	import { Bell, BellOff, FlaskConical, Megaphone, Save, Smartphone } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -312,7 +314,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 			<p class="hint">✅ App instalada. Las notificaciones push funcionan en este equipo.</p>
 		{:else if canInstall}
 			<p class="hint">Instala Admon para notificaciones push y acceso directo.</p>
-			<button class="btn btn-primary btn-block" on:click={installApp}>📲 Instalar Admon</button>
+			<button class="btn btn-primary btn-block" on:click={installApp}><Smartphone size={16} /> Instalar Admon</button>
 		{:else if isIos}
 			<p class="hint">En iPhone: toca <strong>Compartir</strong> (cuadro con ↑) → <strong>Añadir a pantalla de inicio</strong>. Solo instalada llegan las notificaciones.</p>
 		{:else}
@@ -352,10 +354,10 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 			{/if}
 
 			<button class="btn btn-secondary btn-block" on:click={desactivarPush} disabled={pushBusy}>
-				{pushBusy ? 'Un momento...' : '🔕 Apagar en este equipo'}
+				{pushBusy ? 'Un momento...' : '<BellOff size={16} /> Apagar en este equipo'}
 			</button>
 			<button class="btn btn-block" on:click={probarPush} disabled={pushBusy}>
-				{pushBusy ? 'Un momento...' : '🧪 Enviar prueba'}
+				{pushBusy ? 'Un momento...' : '<FlaskConical size={16} /> Enviar prueba'}
 			</button>
 		{:else}
 			<p class="hint">
@@ -385,7 +387,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 			{/if}
 
 			<button class="btn btn-primary btn-block" on:click={activarPush} disabled={pushBusy}>
-				{pushBusy ? 'Un momento...' : '🔔 Activar notificaciones'}
+				{pushBusy ? 'Un momento...' : '<Bell size={16} /> Activar notificaciones'}
 			</button>
 		{/if}
 	</div>
@@ -417,7 +419,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 				<div class="msg ok">{avMsg}</div>
 			{/if}
 			<button class="btn btn-primary btn-block" on:click={sendAviso} disabled={avBusy}>
-				{avBusy ? 'Enviando...' : '📣 Enviar aviso'}
+				{avBusy ? 'Enviando...' : '<Megaphone size={16} /> Enviar aviso'}
 			</button>
 		</div>
 	{/if}
@@ -469,7 +471,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 			<div class="msg ok">{pwMsg}</div>
 		{/if}
 		<button class="btn btn-primary btn-block" on:click={changePassword} disabled={pwBusy}>
-			{pwBusy ? 'Guardando...' : '💾 Guardar nueva contraseña'}
+			{pwBusy ? 'Guardando...' : '<Save size={16} /> Guardar nueva contraseña'}
 		</button>
 	</div>
 

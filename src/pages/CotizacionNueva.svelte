@@ -1,4 +1,6 @@
 <script>
+	import { Save } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -161,7 +163,7 @@
 		{/if}
 
 		<button class="btn btn-primary btn-block" on:click={onCrear} disabled={!listo}>
-			{busy ? 'Creando…' : '💾 Crear cotización'}
+			{busy ? 'Creando…' : '<Save size={16} /> Crear cotización'}
 		</button>
 	</div>
 </div>

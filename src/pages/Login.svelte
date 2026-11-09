@@ -1,4 +1,6 @@
 <script>
+	import { Key, Lock } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -139,7 +141,7 @@ import TextGenerate from '$lib/components/effects/TextGenerate.svelte';
 					<div class="error">{error}</div>
 				{/if}
 				<button type="button" class="btn btn-primary btn-block" on:click={createPasskey} disabled={suggestLoading}>
-					{suggestLoading ? 'Creando...' : '🔐 Crear mi passkey'}
+					{suggestLoading ? 'Creando...' : '<Lock size={16} /> Crear mi passkey'}
 				</button>
 				<button type="button" class="btn btn-secondary btn-block" style="margin-top:0.5rem" on:click={() => navigate('/dashboard', { replace: true })}>
 					Ahora no
@@ -148,7 +150,7 @@ import TextGenerate from '$lib/components/effects/TextGenerate.svelte';
 		{:else}
 			{#if pkSupported && !privateMode}
 				<button type="button" class="btn btn-primary btn-block" style="margin-bottom:1rem" on:click={usePasskey} disabled={loading}>
-					🔐 Entrar con passkey
+					<Lock size={16} /> Entrar con passkey
 				</button>
 				<p class="divider">o con contraseña</p>
 			{/if}
@@ -186,7 +188,7 @@ import TextGenerate from '$lib/components/effects/TextGenerate.svelte';
 
 				<div class="field" style="margin-top:1rem;">
 					<button type="submit" class="btn btn-primary btn-block" disabled={loading}>
-						{loading ? 'Verificando…' : '🔑 Ingresar'}
+						{loading ? 'Verificando…' : '<Key size={16} /> Ingresar'}
 					</button>
 				</div>
 				<button type="button" class="btn btn-secondary btn-block" style="margin-top:0.5rem" on:click={limpiar}>

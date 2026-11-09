@@ -1,4 +1,6 @@
 <script>
+	import { Briefcase } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -124,7 +126,7 @@ usuarios = Array.isArray(res) ? res : (res.items || []);
 						<div class="nombre">{u.nombre}</div>
 						<div class="correo">{u.email}</div>
 						{#if u.puesto}
-							<div class="puesto">💼 {u.puesto}</div>
+							<div class="puesto"><Briefcase size={16} /> {u.puesto}</div>
 						{/if}
 						<!-- Los chips van en su propia fila: así el correo o un puesto largo
 						     nunca empujan ni cortan los badges fuera del recuadro. -->

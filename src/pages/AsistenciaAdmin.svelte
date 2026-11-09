@@ -17,6 +17,8 @@
 	la red y no de un checador.
 -->
 <script>
+	import { RefreshCw } from 'lucide-svelte';
+
 	import { onMount, onDestroy } from 'svelte';
 	import { auth } from '$lib/stores/auth.js';
 
@@ -158,7 +160,7 @@
 		{/if}
 	</span>
 	<button class="btn btn-sm btn-secondary" onclick={() => cargar()} disabled={loading}>
-		{loading ? 'Cargando…' : '🔄 Actualizar'}
+		{loading ? 'Cargando…' : '<RefreshCw size={16} /> Actualizar'}
 	</button>
 </div>
 

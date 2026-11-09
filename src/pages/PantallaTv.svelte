@@ -1,4 +1,6 @@
 <script>
+	import { Upload } from 'lucide-svelte';
+
 	import { onMount, onDestroy } from 'svelte';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
@@ -284,7 +286,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 			disabled={!archivo || subiendo}
 			onclick={subirPortada}
 		>
-			{subiendo ? (leyendoArchivo ? '⏳ Subiendo…' : '⏳ Preparando…') : '📤 Subir a la pantalla'}
+			{subiendo ? (leyendoArchivo ? '⏳ Subiendo…' : '⏳ Preparando…') : '<Upload size={16} /> Subir a la pantalla'}
 		</button>
 
 		{#if historial.length > 1}

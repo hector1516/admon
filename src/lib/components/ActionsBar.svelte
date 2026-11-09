@@ -1,4 +1,6 @@
 <script>
+	import { ClipboardList } from 'lucide-svelte';
+
 	/* ECCSA-Shell · barra de acciones (referencia Svelte). ESTÁNDAR.
 	   ------------------------------------------------------------------
 	   Los botones de siempre: 👥 usuarios en línea · 📋 novedades ·
@@ -51,7 +53,7 @@
 		</button>
 	{/if}
 	{#if onchangelog}
-		<button class="btn btn-sm btn-secondary" onclick={onchangelog} title="Novedades">📋</button>
+		<button class="btn btn-sm btn-secondary" onclick={onchangelog} title="Novedades"><ClipboardList size={16} /></button>
 	{/if}
 	{#if onconfig}
 		<button class="btn btn-sm btn-secondary" onclick={onconfig} title="Configuración">⚙️</button>

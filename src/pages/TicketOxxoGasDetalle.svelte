@@ -1,4 +1,6 @@
 <script>
+	import { Search } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -205,7 +207,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 					<!--
 					  La foto va DENTRO de un <button>: da área táctil completa,
 					  resuelve el teclado (Enter/Espacio) y evita el aviso a11y de
-					  "click sobre <img>". El 🔍 pasa a span para no anidar botones.
+					  "click sobre <img>". El <Search size={16} /> pasa a span para no anidar botones.
 					-->
 					<button class="img-zoom-trigger" type="button" onclick={abrirZoom} aria-label="Ampliar la foto del ticket {t.folio}">
 						<img
@@ -213,7 +215,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 							alt="Ticket {t.folio}"
 							onerror={() => (imgError = true)}
 						/>
-						<span class="zoom-fab" aria-hidden="true">🔍</span>
+						<span class="zoom-fab" aria-hidden="true"><Search size={16} /></span>
 						<span class="zoom-hint">Toca para ampliar</span>
 					</button>
 				{:else if t.tiene_foto}

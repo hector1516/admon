@@ -1,4 +1,6 @@
 <script>
+	import { Download, RefreshCw, Upload } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -98,8 +100,8 @@
 		<button class="btn btn-ghost" on:click={volver} title="Volver">⬅️</button>
 		<h1>👁️ Previsualizar: {reporte.Folio}</h1>
 		<div style="display: flex; gap: 0.5rem;">
-			<button class="btn btn-secondary" on:click={descargar} disabled={!pdfBlob}>📥 Descargar</button>
-			<button class="btn btn-primary" on:click={compartir} disabled={!pdfBlob}>📤 Compartir</button>
+			<button class="btn btn-secondary" on:click={descargar} disabled={!pdfBlob}><Download size={16} /> Descargar</button>
+			<button class="btn btn-primary" on:click={compartir} disabled={!pdfBlob}><Upload size={16} /> Compartir</button>
 		</div>
 	</header>
 
@@ -108,7 +110,7 @@
 	{:else if error}
 		<div class="preview-error">
 			<p>{error}</p>
-			<button class="btn btn-primary" on:click={cargar}>🔄 Reintentar</button>
+			<button class="btn btn-primary" on:click={cargar}><RefreshCw size={16} /> Reintentar</button>
 			<button class="btn btn-secondary" on:click={volver}>⬅️ Volver</button>
 		</div>
 	{:else if pdfBlob}

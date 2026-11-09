@@ -1,4 +1,6 @@
 <script>
+	import { User } from 'lucide-svelte';
+
 	/* ECCSA-Shell · banner común (referencia Svelte). ESTE ES EL ESTÁNDAR.
 	   ------------------------------------------------------------------
 	   Nació del banner de Field (que ya tenía el `.sync-header` con estado de
@@ -131,7 +133,7 @@
 	<span class="dot {PUNTO[effective] || 'ok'}"></span><span>{texto()}</span>
 	{#if nombre}
 		<span class="who">
-			👤 {nombre}
+			<User size={16} /> {nombre}
 			<span class="lugar {modo}" title={ipFinal}>{lug.icono} {lug.texto}</span>
 		</span>
 	{/if}

@@ -1,4 +1,6 @@
 <script>
+	import { Smartphone, Trash2 } from 'lucide-svelte';
+
 	import { onMount, tick } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -243,7 +245,7 @@ function formatearFecha(fecha) {
 				<span class="chat-status">🟢 En línea · asistente de ECCSA Automation</span>
 			</div>
 		</div>
-		<button class="btn-icon" on:click={borrarConversacion} title="Borrar la conversación">🗑️</button>
+		<button class="btn-icon" on:click={borrarConversacion} title="Borrar la conversación"><Trash2 size={16} />️</button>
 	</header>
 
 	{#if error}
@@ -293,7 +295,7 @@ function formatearFecha(fecha) {
 						{/if}
 						{#if esIA}
 							<button class="btn-wa-share" on:click={() => compartirWhatsApp(m.Contenido)} title="Compartir por WhatsApp">
-								📱 WhatsApp
+								<Smartphone size={16} /> WhatsApp
 							</button>
 						{/if}
 						<div class="msg-time">{formatearFecha(m.FechaRegistro)}</div>

@@ -1,4 +1,6 @@
 <script>
+	import { Download, Upload } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -138,9 +140,9 @@
 	{:else}
 		<div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; flex-shrink: 0;">
 			<button class="btn btn-secondary btn-block" on:click={sharePdf} disabled={sharing}>
-				{sharing ? '…' : '📤 Compartir'}
+				{sharing ? '…' : '<Upload size={16} /> Compartir'}
 			</button>
-			<button class="btn btn-primary btn-block" on:click={downloadPdfNative}>📥 Descargar</button>
+			<button class="btn btn-primary btn-block" on:click={downloadPdfNative}><Download size={16} /> Descargar</button>
 		</div>
 		{#if msg}
 			<p style="font-size: 0.8rem; color: var(--color-text-muted); text-align: center; margin: 0 1rem 0.4rem;">{msg}</p>
