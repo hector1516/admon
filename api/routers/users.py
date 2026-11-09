@@ -122,12 +122,12 @@ def _require_reporte(*a, **kw):
     return getattr(_r, "_require_reporte")(*a, **kw)
 
 @router.get("/api/users/me", response_model=UserInfo)
-async def get_me(current_user: dict = Depends(get_current_user)):
+def get_me(current_user: dict = Depends(get_current_user)):
     return UserInfo(**current_user)
 
 
 @router.get("/api/users")
-async def get_users(
+def get_users(
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
     current_user: dict = Depends(get_current_user),
@@ -173,7 +173,7 @@ async def get_users(
 
 
 @router.get("/api/usuarios")
-async def api_list_usuarios(current_user: dict = Depends(get_current_user)):
+def api_list_usuarios(current_user: dict = Depends(get_current_user)):
     """Catálogo ligero {Id, Nombre, Activo} de HUB_Users para los selects de
     técnicos en el detalle/edición de reportes (la página pide /api/usuarios;
     antes no existía y el select quedaba siempre vacío). Mismo permiso que
@@ -268,7 +268,7 @@ def _user_row_to_dict(row) -> dict:
 
 
 @router.get("/api/users/{user_id:int}")
-async def get_user_detail(user_id: int, current_user: dict = Depends(get_current_user)):
+def get_user_detail(user_id: int, current_user: dict = Depends(get_current_user)):
     _require_admin(current_user)
     try:
         conn = get_connection()
@@ -286,7 +286,7 @@ async def get_user_detail(user_id: int, current_user: dict = Depends(get_current
 
 
 @router.get("/api/users/{user_id:int}/ficha")
-async def get_user_ficha(user_id: int, current_user: dict = Depends(get_current_user)):
+def get_user_ficha(user_id: int, current_user: dict = Depends(get_current_user)):
     """Enlace publico de la tarjeta NFC de un usuario, para copiarlo.
 
     Se devuelve aqui y no se mete en `/api/users` porque la lista es de todos los
@@ -327,7 +327,7 @@ class UserUpdateRequest(BaseModel):
 
 
 @router.put("/api/users/{user_id:int}")
-async def update_user_detail(user_id: int, body: UserUpdateRequest, current_user: dict = Depends(get_current_user)):
+def update_user_detail(user_id: int, body: UserUpdateRequest, current_user: dict = Depends(get_current_user)):
     _require_admin(current_user)
     if not body.nombre.strip() or not body.email.strip() or not body.password.strip():
         raise HTTPException(status_code=400, detail="Nombre, correo y contraseña son obligatorios.")
@@ -367,7 +367,7 @@ async def update_user_detail(user_id: int, body: UserUpdateRequest, current_user
 
 
 @router.delete("/api/users/{user_id:int}")
-async def delete_user_detail(user_id: int, current_user: dict = Depends(get_current_user)):
+def delete_user_detail(user_id: int, current_user: dict = Depends(get_current_user)):
     _require_admin(current_user)
     try:
         conn = get_connection()
@@ -476,7 +476,7 @@ class TelefonoMacRequest(BaseModel):
 
 
 @router.get("/api/users/{user_id:int}/telefono")
-async def get_user_telefono(user_id: int, current_user: dict = Depends(get_current_user)):
+def get_user_telefono(user_id: int, current_user: dict = Depends(get_current_user)):
     """MAC del celular vinculado + estado de presencia (¿está en la oficina?)."""
     _require_admin(current_user)
     try:
@@ -496,7 +496,7 @@ async def get_user_telefono(user_id: int, current_user: dict = Depends(get_curre
 
 
 @router.put("/api/users/{user_id:int}/telefono")
-async def set_user_telefono(user_id: int, body: TelefonoMacRequest,
+def set_user_telefono(user_id: int, body: TelefonoMacRequest,
                             current_user: dict = Depends(get_current_user)):
     """Vincula (o desvincula) la MAC del celular al usuario.
 
@@ -615,7 +615,7 @@ class FotoUsuarioRequest(BaseModel):
 
 
 @router.get("/api/users/{user_id:int}/foto")
-async def get_user_foto(user_id: int, current_user: dict = Depends(get_current_user)):
+def get_user_foto(user_id: int, current_user: dict = Depends(get_current_user)):
     """Foto del usuario en binario. Devuelve 404 si no tiene foto, para que el
     front pueda pintar un avatar con iniciales sin descargar nada."""
     _require_admin(current_user)
@@ -626,7 +626,7 @@ async def get_user_foto(user_id: int, current_user: dict = Depends(get_current_u
 
 
 @router.put("/api/users/{user_id:int}/foto")
-async def set_user_foto(user_id: int, body: FotoUsuarioRequest,
+def set_user_foto(user_id: int, body: FotoUsuarioRequest,
                         current_user: dict = Depends(get_current_user)):
     """Sube o reemplaza la foto del usuario. Llega en base64 (mismo camino que
     la imagen de portada de la TV), no multipart, para no sumar dependencias."""
@@ -652,7 +652,7 @@ async def set_user_foto(user_id: int, body: FotoUsuarioRequest,
 
 
 @router.delete("/api/users/{user_id:int}/foto")
-async def delete_user_foto(user_id: int, current_user: dict = Depends(get_current_user)):
+def delete_user_foto(user_id: int, current_user: dict = Depends(get_current_user)):
     _require_admin(current_user)
     r = _foto_usuario.borrar_foto_usuario(get_connection, int(user_id))
     if not r.get("ok"):

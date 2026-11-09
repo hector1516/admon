@@ -9,15 +9,15 @@ router = APIRouter()
 
 
 @router.get("/api")
-async def api_info():
+def api_info():
     return {"message": "HUB Admon API", "version": "1.0.0"}
 
 
 @router.get("/health")
-async def health():
+def health():
     return {"status": "ok"}
 
 
 @router.get("/api/health")
-async def api_health():
+def api_health():
     return {"status": "ok"}

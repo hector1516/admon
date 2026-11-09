@@ -82,7 +82,7 @@ def _serializable(fila):
     return out
 
 @router.get("/api/pantalla/estado")
-async def pantalla_estado(current_user: dict = Depends(get_current_user)):
+def pantalla_estado(current_user: dict = Depends(get_current_user)):
     """Estado del kiosco: si la TV está conectada, qué pantallas hay y qué
     commanders le mandaron por última vez (con su confirmación)."""
     return _panel_estado()
@@ -94,7 +94,7 @@ class PanelComandoRequest(BaseModel):
 
 
 @router.post("/api/pantalla/comando")
-async def pantalla_comando(body: PanelComandoRequest, current_user: dict = Depends(get_current_user)):
+def pantalla_comando(body: PanelComandoRequest, current_user: dict = Depends(get_current_user)):
     """Control remoto del kiosco: ver una pantalla, avanzar, pausar o seguir.
 
     La TV consulta cada 3 s: el cambio se ve en pantalla en ~3 s, no al
@@ -141,7 +141,7 @@ def pantalla_portada_actual(current_user: dict = Depends(get_current_user)):
 
 
 @router.post("/api/pantalla/portada")
-async def pantalla_subir_portada(body: ImagenPantallaRequest,
+def pantalla_subir_portada(body: ImagenPantallaRequest,
                                  current_user: dict = Depends(get_current_user)):
     """Sube la imagen de portada. No va por HTTP al kiosco: se guarda en
     HUB_PantallaImagenes y la TV la toma en su próxima vuelta."""
@@ -160,7 +160,7 @@ async def pantalla_subir_portada(body: ImagenPantallaRequest,
 
 
 @router.post("/api/pantalla/portada/{id_imagen:int}/restaurar")
-async def pantalla_restaurar_portada(id_imagen: int, current_user: dict = Depends(get_current_user)):
+def pantalla_restaurar_portada(id_imagen: int, current_user: dict = Depends(get_current_user)):
     """Vuelve a poner en pantalla una portada anterior sin resubirla."""
     r = _pantalla.restaurar_imagen_pantalla(get_connection, id_imagen)
     if not r.get("ok"):
@@ -169,7 +169,7 @@ async def pantalla_restaurar_portada(id_imagen: int, current_user: dict = Depend
 
 
 @router.delete("/api/pantalla/portada/{id_imagen:int}")
-async def pantalla_borrar_portada(id_imagen: int, current_user: dict = Depends(get_current_user)):
+def pantalla_borrar_portada(id_imagen: int, current_user: dict = Depends(get_current_user)):
     """Borra una portada del historial (la que está en pantalla no se puede)."""
     r = _pantalla.borrar_imagen_pantalla(get_connection, id_imagen)
     if not r.get("ok"):

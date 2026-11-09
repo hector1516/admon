@@ -197,7 +197,7 @@ def _build_login_response(*a, **kw):
     return getattr(_m, "_build_login_response")(*a, **kw)
 
 @router.post("/api/passkeys/login/options")
-async def passkey_login_options(body: PasskeyLoginOptionsReq = None):
+def passkey_login_options(body: PasskeyLoginOptionsReq = None):
     """Opciones de login discoverable (sin correo) para el rp raíz."""
     try:
         state, challenge = _issue_challenge("wk_login")
@@ -210,7 +210,7 @@ async def passkey_login_options(body: PasskeyLoginOptionsReq = None):
 
 
 @router.post("/api/passkeys/login/verify")
-async def passkey_login_verify(body: PasskeyLoginVerifyReq, request: Request = None):
+def passkey_login_verify(body: PasskeyLoginVerifyReq, request: Request = None):
     """Valida el assertion y devuelve la sesión igual que /api/auth/login."""
     challenge = _read_challenge(body.state, "wk_login")
     origin = _origin_for_request(request)
@@ -269,7 +269,7 @@ async def passkey_login_verify(body: PasskeyLoginVerifyReq, request: Request = N
 
 
 @router.post("/api/passkeys/register/options")
-async def passkey_register_options(
+def passkey_register_options(
     body: PasskeyRegisterOptionsReq = None,
     current_user: dict = Depends(get_current_user),
     request: Request = None,
@@ -309,7 +309,7 @@ async def passkey_register_options(
 
 
 @router.post("/api/passkeys/register/verify")
-async def passkey_register_verify(
+def passkey_register_verify(
     body: PasskeyRegisterVerifyReq,
     current_user: dict = Depends(get_current_user),
     request: Request = None,
@@ -359,7 +359,7 @@ async def passkey_register_verify(
 
 
 @router.get("/api/passkeys/mine")
-async def passkey_mine(current_user: dict = Depends(get_current_user)):
+def passkey_mine(current_user: dict = Depends(get_current_user)):
     """Passkeys del usuario con badge nueva/legacy para la UI."""
     conn = get_connection()
     cursor = conn.cursor(as_dict=True)
@@ -380,7 +380,7 @@ async def passkey_mine(current_user: dict = Depends(get_current_user)):
 
 
 @router.delete("/api/passkeys/{pid}")
-async def passkey_delete(pid: int, current_user: dict = Depends(get_current_user)):
+def passkey_delete(pid: int, current_user: dict = Depends(get_current_user)):
     """Elimina una passkey propia."""
     conn = get_connection()
     cursor = conn.cursor()

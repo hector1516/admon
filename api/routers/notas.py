@@ -62,7 +62,7 @@ def _nota_desde_row(r: dict) -> dict:
     }
 
 @router.get("/api/notas")
-async def notas_listar(current_user: dict = Depends(get_current_user)):
+def notas_listar(current_user: dict = Depends(get_current_user)):
     """Notas del tablero, en el mismo orden que las ve el kiosco (fijas primero)."""
     conn = get_connection()
     try:
@@ -83,7 +83,7 @@ async def notas_listar(current_user: dict = Depends(get_current_user)):
 
 
 @router.post("/api/notas")
-async def notas_crear(body: NotaCrear, current_user: dict = Depends(get_current_user)):
+def notas_crear(body: NotaCrear, current_user: dict = Depends(get_current_user)):
     """Crea una nota; el autor es el usuario logueado."""
     titulo = (body.titulo or "").strip()
     contenido = (body.contenido or "").strip()
@@ -116,7 +116,7 @@ async def notas_crear(body: NotaCrear, current_user: dict = Depends(get_current_
 
 
 @router.put("/api/notas/{id_nota:int}")
-async def notas_editar(id_nota: int, body: NotaActualizar,
+def notas_editar(id_nota: int, body: NotaActualizar,
                        current_user: dict = Depends(get_current_user)):
     """Edita la nota; actualiza FechaModificado (sube en el orden del kiosco)."""
     titulo = (body.titulo or "").strip()
@@ -154,7 +154,7 @@ async def notas_editar(id_nota: int, body: NotaActualizar,
 
 
 @router.delete("/api/notas/{id_nota:int}")
-async def notas_borrar(id_nota: int, current_user: dict = Depends(get_current_user)):
+def notas_borrar(id_nota: int, current_user: dict = Depends(get_current_user)):
     """Borra una nota (desaparece de la pantalla del kiosco)."""
     conn = get_connection()
     try:

@@ -34,7 +34,7 @@ def _avatares_miniatura(*a, **kw):
     return getattr(_m, "_avatares_miniatura")(*a, **kw)
 
 @router.get("/api/legends/overview")
-async def legends_overview(current_user: dict = Depends(get_current_user)):
+def legends_overview(current_user: dict = Depends(get_current_user)):
     """Todo lo que pinta la pantalla de Legends en una sola llamada.
 
     Contrato compartido con Field (`legends_core.overview`): usuario, ranking,
@@ -77,7 +77,7 @@ async def legends_overview(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/api/legends/score")
-async def legends_score(current_user: dict = Depends(get_current_user)):
+def legends_score(current_user: dict = Depends(get_current_user)):
     """Puntuación del usuario actual (semanal + total + nivel + racha)."""
     conn = get_connection()
     try:
@@ -115,7 +115,7 @@ async def legends_score(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/api/legends/score-log")
-async def legends_score_log(current_user: dict = Depends(get_current_user)):
+def legends_score_log(current_user: dict = Depends(get_current_user)):
     """Bitácora semanal de puntos del usuario actual.
     Muestra cada evento que sumó o restó puntos esta semana.
     La semana cambia el domingo 00:00; los puntos se reconstruyen desde
@@ -229,7 +229,7 @@ def legends_ranking(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/api/legends/winners")
-async def legends_winners(current_user: dict = Depends(get_current_user)):
+def legends_winners(current_user: dict = Depends(get_current_user)):
     """Historial de ganadores semanales (últimas 12 semanas)."""
     conn = get_connection()
     try:
@@ -256,7 +256,7 @@ async def legends_winners(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/api/legends/avatar")
-async def legends_avatar(current_user: dict = Depends(get_current_user)):
+def legends_avatar(current_user: dict = Depends(get_current_user)):
     """Avatar IA del usuario actual."""
     conn = get_connection()
     try:
@@ -277,7 +277,7 @@ async def legends_avatar(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/api/legends/weekly-winner")
-async def legends_weekly_winner(current_user: dict = Depends(get_current_user)):
+def legends_weekly_winner(current_user: dict = Depends(get_current_user)):
     """Ganador de la semana más reciente."""
     conn = get_connection()
     try:
@@ -308,7 +308,7 @@ async def legends_weekly_winner(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/api/legends/celebrations")
-async def legends_celebrations(current_user: dict = Depends(get_current_user)):
+def legends_celebrations(current_user: dict = Depends(get_current_user)):
     """Cumpleaños y aniversarios del mes actual, combinados."""
     import datetime as _dt
     import sys, os
@@ -383,7 +383,7 @@ async def legends_celebrations(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/api/legends/metrics/config")
-async def legends_metrics_config():
+def legends_metrics_config():
     """Catálogo de puntos, niveles, logros y guía (para la UI)."""
     return {
         "nombre_puntos": "ECCSA Points",

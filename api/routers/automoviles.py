@@ -21,7 +21,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 @router.get("/api/automoviles")
-async def automoviles_list(current_user: dict = Depends(get_current_user)):
+def automoviles_list(current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -57,7 +57,7 @@ async def automoviles_list(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/api/automoviles/usuarios")
-async def automoviles_usuarios(current_user: dict = Depends(get_current_user)):
+def automoviles_usuarios(current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -71,7 +71,7 @@ async def automoviles_usuarios(current_user: dict = Depends(get_current_user)):
 
 
 @router.post("/api/automoviles")
-async def automoviles_create(
+def automoviles_create(
     marca_modelo: str = Query(...),
     placas: str = Query(...),
     poliza_seguro: Optional[str] = Query(None),
@@ -94,7 +94,7 @@ async def automoviles_create(
 
 
 @router.put("/api/automoviles/{auto_id}")
-async def automoviles_update(
+def automoviles_update(
     auto_id: int,
     marca_modelo: Optional[str] = Query(None),
     placas: Optional[str] = Query(None),
@@ -133,7 +133,7 @@ async def automoviles_update(
 
 
 @router.put("/api/automoviles/{auto_id}/asignar/{user_id}")
-async def automoviles_asignar(
+def automoviles_asignar(
     auto_id: int,
     user_id: int,
     current_user: dict = Depends(get_current_user),
@@ -152,7 +152,7 @@ async def automoviles_asignar(
 
 
 @router.put("/api/automoviles/{auto_id}/desasignar")
-async def automoviles_desasignar(
+def automoviles_desasignar(
     auto_id: int,
     current_user: dict = Depends(get_current_user),
 ):
@@ -169,7 +169,7 @@ async def automoviles_desasignar(
 
 
 @router.get("/api/automoviles/{auto_id}")
-async def automoviles_detalle(
+def automoviles_detalle(
     auto_id: int,
     current_user: dict = Depends(get_current_user),
 ):
@@ -240,7 +240,7 @@ async def automoviles_detalle(
 
 
 @router.post("/api/automoviles/{auto_id}/imagen")
-async def automoviles_subir_imagen(
+def automoviles_subir_imagen(
     auto_id: int,
     file: UploadFile = File(...),
     current_user: dict = Depends(get_current_user),
@@ -305,7 +305,7 @@ async def automoviles_subir_imagen(
 
 
 @router.delete("/api/automoviles/{auto_id}/imagen")
-async def automoviles_eliminar_imagen(
+def automoviles_eliminar_imagen(
     auto_id: int,
     current_user: dict = Depends(get_current_user),
 ):
@@ -331,7 +331,7 @@ async def automoviles_eliminar_imagen(
 
 
 @router.post("/api/automoviles/{auto_id}/servicios")
-async def automoviles_agregar_servicio(
+def automoviles_agregar_servicio(
     auto_id: int,
     fecha: str = Query(...),
     kilometros: int = Query(...),
@@ -355,7 +355,7 @@ async def automoviles_agregar_servicio(
 
 
 @router.post("/api/automoviles/{auto_id}/reparaciones")
-async def automoviles_agregar_reparacion(
+def automoviles_agregar_reparacion(
     auto_id: int,
     fecha: str = Query(...),
     costo: float = Query(0),
@@ -379,7 +379,7 @@ async def automoviles_agregar_reparacion(
 
 
 @router.post("/api/automoviles/{auto_id}/kilometros")
-async def automoviles_agregar_kilometros(
+def automoviles_agregar_kilometros(
     auto_id: int,
     kilometros: int = Query(...),
     current_user: dict = Depends(get_current_user),

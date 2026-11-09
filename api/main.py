@@ -247,7 +247,7 @@ from api.routers.clientes import SyncPushRequest
 # --- Auth Endpoints ---
 
 @app.post("/api/token")
-async def login(user: UserLogin):
+def login(user: UserLogin):
     """Login with email and password, returns JWT token"""
     try:
         conn = get_connection()
@@ -316,7 +316,7 @@ def _build_login_response(email: str, row) -> dict:
 
 
 @app.post("/api/auth/login")
-async def api_login(body: LoginRequest):
+def api_login(body: LoginRequest):
     """Login que usa el frontend Svelte. Valida dominio y password de HUB_Users."""
     try:
         valid_domains = ["@ecc-ssa.com.mx", "@ecc-sa.com.mx"]
@@ -344,7 +344,7 @@ class ChangePasswordRequest(BaseModel):
 
 
 @app.post("/api/auth/change-password")
-async def api_change_password(body: ChangePasswordRequest, current_user: dict = Depends(get_current_user)):
+def api_change_password(body: ChangePasswordRequest, current_user: dict = Depends(get_current_user)):
     """Cambia el Password en HUB_Users tras verificar el actual. Mínimo 6 caracteres."""
     try:
         if not body.actual or not body.nueva:
@@ -397,7 +397,7 @@ class PushSendRequest(BaseModel):
 
 
 @app.post("/api/push/send")
-async def api_push_send(body: PushSendRequest, current_user: dict = Depends(get_current_user)):
+def api_push_send(body: PushSendRequest, current_user: dict = Depends(get_current_user)):
     if not current_user.get("acceso_usuarios"):
         raise HTTPException(status_code=403, detail="No access")
     if not body.title.strip() or not body.body.strip():
@@ -539,7 +539,7 @@ async def api_push_vapid(current_user: dict = Depends(get_current_user)):
 
 
 @app.post("/api/push/subscribe")
-async def api_push_subscribe(request: Request, body: PushSubscribeRequest,
+def api_push_subscribe(request: Request, body: PushSubscribeRequest,
                              current_user: dict = Depends(get_current_user)):
     """
     Registra (o re-registra) la suscripción de ESTE dispositivo.
@@ -600,7 +600,7 @@ async def api_push_subscribe(request: Request, body: PushSubscribeRequest,
 
 
 @app.post("/api/push/unsubscribe")
-async def api_push_unsubscribe(body: PushSubscribeRequest,
+def api_push_unsubscribe(body: PushSubscribeRequest,
                                current_user: dict = Depends(get_current_user)):
     """Da de baja SOLO este dispositivo. Las filas se marcan Activo=0 en vez de
     borrarse: si el usuario vuelve a entrar, la fila sigue ahí y reactivarla es
@@ -620,7 +620,7 @@ async def api_push_unsubscribe(body: PushSubscribeRequest,
 
 
 @app.get("/api/push/suscripciones")
-async def api_push_suscripciones(current_user: dict = Depends(get_current_user)):
+def api_push_suscripciones(current_user: dict = Depends(get_current_user)):
     """Dispositivos de ESTE usuario, para poder decir 'este teléfono sí, esa
     laptop no'."""
     conn = get_connection()
@@ -641,7 +641,7 @@ async def api_push_suscripciones(current_user: dict = Depends(get_current_user))
 
 
 @app.post("/api/push/prueba")
-async def api_push_prueba(current_user: dict = Depends(get_current_user)):
+def api_push_prueba(current_user: dict = Depends(get_current_user)):
     """
     Manda un push de prueba a los dispositivos de QUIEN LO PIDIÓ.
 
@@ -1301,7 +1301,7 @@ def _listar_cotizaciones(conn, top: int = TOP_COTIZACIONES, pagina: int = 1,
 
 
 @app.post("/api/sync/push")
-async def sync_push(body: SyncPushRequest, current_user: dict = Depends(get_current_user)):
+def sync_push(body: SyncPushRequest, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     autor = current_user.get("nombre") or current_user.get("email")
     results = []

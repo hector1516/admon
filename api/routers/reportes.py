@@ -40,7 +40,7 @@ def _require_reporte(current_user: dict):
         raise HTTPException(status_code=403, detail="Requiere permiso de Reportes de Servicio")
 
 @router.get("/api/reportes")
-async def api_list_reportes(
+def api_list_reportes(
     tecnico: str = "",
     eliminados: bool = False,
     limit: int = Query(100, ge=1, le=500),
@@ -104,7 +104,7 @@ async def api_list_reportes(
 
 
 @router.get("/api/reportes/excel")
-async def api_reportes_excel(ids: str, current_user: dict = Depends(get_current_user)):
+def api_reportes_excel(ids: str, current_user: dict = Depends(get_current_user)):
     """Genera el formato de Excel (hoja "Calculo") con UN reporte por fila.
 
     Formato: "formatos excel/Formato Cotizaciones.xlsx" (en el contenedor se
@@ -262,7 +262,7 @@ async def api_reportes_excel(ids: str, current_user: dict = Depends(get_current_
 
 
 @router.get("/api/reportes/{id_reporte}")
-async def api_get_reporte(id_reporte: int, current_user: dict = Depends(get_current_user)):
+def api_get_reporte(id_reporte: int, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
     try:
         conn = get_connection()
@@ -305,7 +305,7 @@ def _fecha_hora(fecha, hora):
 
 
 @router.post("/api/reportes")
-async def api_create_reporte(body: ReporteCreate, current_user: dict = Depends(get_current_user)):
+def api_create_reporte(body: ReporteCreate, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
     try:
         conn = get_connection()
@@ -373,7 +373,7 @@ async def api_create_reporte(body: ReporteCreate, current_user: dict = Depends(g
 
 
 @router.put("/api/reportes/{id_reporte}")
-async def api_update_reporte(id_reporte: int, body: ReporteUpdate, current_user: dict = Depends(get_current_user)):
+def api_update_reporte(id_reporte: int, body: ReporteUpdate, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
     try:
         conn = get_connection()
@@ -447,7 +447,7 @@ async def api_update_reporte(id_reporte: int, body: ReporteUpdate, current_user:
 
 
 @router.delete("/api/reportes/{id_reporte}")
-async def api_delete_reporte(id_reporte: int, current_user: dict = Depends(get_current_user)):
+def api_delete_reporte(id_reporte: int, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
     try:
         conn = get_connection()
@@ -482,7 +482,7 @@ async def api_delete_reporte(id_reporte: int, current_user: dict = Depends(get_c
 
 
 @router.post("/api/reportes/{id_reporte}/restaurar")
-async def api_restaurar_reporte(id_reporte: int, current_user: dict = Depends(get_current_user)):
+def api_restaurar_reporte(id_reporte: int, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
     try:
         conn = get_connection()
@@ -500,7 +500,7 @@ async def api_restaurar_reporte(id_reporte: int, current_user: dict = Depends(ge
 
 
 @router.delete("/api/reportes/{id_reporte}/purge")
-async def api_purge_reporte(id_reporte: int, current_user: dict = Depends(get_current_user)):
+def api_purge_reporte(id_reporte: int, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
     try:
         conn = get_connection()
@@ -521,7 +521,7 @@ async def api_purge_reporte(id_reporte: int, current_user: dict = Depends(get_cu
 
 
 @router.get("/api/reportes/{id_reporte}/fotos")
-async def api_get_fotos(id_reporte: int, current_user: dict = Depends(get_current_user)):
+def api_get_fotos(id_reporte: int, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
     try:
         conn = get_connection()
@@ -547,7 +547,7 @@ async def api_get_fotos(id_reporte: int, current_user: dict = Depends(get_curren
 
 
 @router.post("/api/reportes/{id_reporte}/fotos")
-async def api_save_fotos(id_reporte: int, body: ReporteFotosSave, current_user: dict = Depends(get_current_user)):
+def api_save_fotos(id_reporte: int, body: ReporteFotosSave, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
     try:
         conn = get_connection()
@@ -587,7 +587,7 @@ async def api_save_fotos(id_reporte: int, body: ReporteFotosSave, current_user: 
 
 
 @router.delete("/api/reportes/{id_reporte}/fotos/{id_foto}")
-async def api_delete_foto(id_reporte: int, id_foto: int, current_user: dict = Depends(get_current_user)):
+def api_delete_foto(id_reporte: int, id_foto: int, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
     try:
         conn = get_connection()
@@ -601,7 +601,7 @@ async def api_delete_foto(id_reporte: int, id_foto: int, current_user: dict = De
 
 
 @router.get("/api/reportes/{id_reporte}/tecnicos")
-async def api_get_tecnicos(id_reporte: int, current_user: dict = Depends(get_current_user)):
+def api_get_tecnicos(id_reporte: int, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
     try:
         conn = get_connection()
@@ -619,7 +619,7 @@ async def api_get_tecnicos(id_reporte: int, current_user: dict = Depends(get_cur
 
 
 @router.post("/api/reportes/{id_reporte}/tecnicos")
-async def api_save_tecnicos(id_reporte: int, body: ReporteTecnicosSave, current_user: dict = Depends(get_current_user)):
+def api_save_tecnicos(id_reporte: int, body: ReporteTecnicosSave, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
     try:
         conn = get_connection()
@@ -638,7 +638,7 @@ async def api_save_tecnicos(id_reporte: int, body: ReporteTecnicosSave, current_
 
 
 @router.post("/api/reportes/{id_reporte}/firma")
-async def api_save_firma(id_reporte: int, body: ReporteSignatureSave, current_user: dict = Depends(get_current_user)):
+def api_save_firma(id_reporte: int, body: ReporteSignatureSave, current_user: dict = Depends(get_current_user)):
     _require_reporte(current_user)
     try:
         conn = get_connection()
@@ -666,7 +666,7 @@ async def api_save_firma(id_reporte: int, body: ReporteSignatureSave, current_us
 
 
 @router.get("/api/reportes/{id_reporte}/pdf")
-async def api_reporte_pdf(id_reporte: int, request: Request, current_user: dict = Depends(_user_from_header_or_query)):
+def api_reporte_pdf(id_reporte: int, request: Request, current_user: dict = Depends(_user_from_header_or_query)):
     """Genera PDF del reporte de servicio IDÉNTICO al HUB (pdf_generator.generate_service_report_pdf)."""
     _require_reporte(current_user)
     try:
@@ -735,7 +735,7 @@ async def api_reporte_pdf(id_reporte: int, request: Request, current_user: dict 
 
 
 @router.get("/api/reportes/{id_reporte}/enviar")
-async def api_reporte_enviar(id_reporte: int, email: str, current_user: dict = Depends(get_current_user)):
+def api_reporte_enviar(id_reporte: int, email: str, current_user: dict = Depends(get_current_user)):
     """Envía PDF del reporte por email (adjunto) — usa el mismo PDF IDÉNTICO al HUB."""
     _require_reporte(current_user)
     try:

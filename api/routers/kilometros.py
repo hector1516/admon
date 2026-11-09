@@ -66,7 +66,7 @@ def _require_registro_kilometros(current_user: dict):
         raise HTTPException(status_code=403, detail="No access")
 
 @router.get("/api/kilometros/vehiculos")
-async def kilometros_vehiculos(current_user: dict = Depends(get_current_user)):
+def kilometros_vehiculos(current_user: dict = Depends(get_current_user)):
     """Flota completa con el último odómetro leído, para el selector de captura."""
     _require_registro_kilometros(current_user)
     conn = get_connection()
@@ -114,7 +114,7 @@ async def kilometros_vehiculos(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/api/kilometros/consumo")
-async def kilometros_consumo(anio: str = "", semana: str = "",
+def kilometros_consumo(anio: str = "", semana: str = "",
                              current_user: dict = Depends(get_current_user)):
     """Consumo de la flota por vehículo.
 
@@ -247,7 +247,7 @@ async def kilometros_consumo(anio: str = "", semana: str = "",
 
 
 @router.get("/api/kilometros/vehiculo/{id_automovil:int}")
-async def kilometros_vehiculo(id_automovil: int, n: int = 30,
+def kilometros_vehiculo(id_automovil: int, n: int = 30,
                               current_user: dict = Depends(get_current_user)):
     """Detalle de un vehículo: sus lecturas de odómetro y sus tickets de(vales)."""
     _require_registro_kilometros(current_user)
@@ -336,7 +336,7 @@ async def kilometros_vehiculo(id_automovil: int, n: int = 30,
 
 
 @router.get("/api/kilometros/recientes")
-async def kilometros_recientes(n: int = 15, current_user: dict = Depends(get_current_user)):
+def kilometros_recientes(n: int = 15, current_user: dict = Depends(get_current_user)):
     """Últimas capturas de odómetro (de Field o del HUB: es la misma tabla)."""
     _require_registro_kilometros(current_user)
     try:
@@ -372,7 +372,7 @@ async def kilometros_recientes(n: int = 15, current_user: dict = Depends(get_cur
 
 
 @router.post("/api/kilometros/registro")
-async def kilometros_registro(body: KilometroRegistroReq,
+def kilometros_registro(body: KilometroRegistroReq,
                               current_user: dict = Depends(get_current_user)):
     """Captura de odómetro. Mismas reglas que el HUB (views/kilometros.py):
     un registro por automóvil por día y el odómetro nunca puede bajar."""

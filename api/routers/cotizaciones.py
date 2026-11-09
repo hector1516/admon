@@ -194,7 +194,7 @@ def cotizaciones_resumen(pagina: int = 1, porPagina: int = TOP_COTIZACIONES,
 
 
 @router.get("/api/cotizaciones/{folio:int}")
-async def cotizacion_header(folio: int, current_user: dict = Depends(get_current_user)):
+def cotizacion_header(folio: int, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -221,7 +221,7 @@ async def cotizacion_header(folio: int, current_user: dict = Depends(get_current
 
 
 @router.post("/api/cotizaciones")
-async def cotizacion_create(body: CotizacionCreate, current_user: dict = Depends(get_current_user)):
+def cotizacion_create(body: CotizacionCreate, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     idc = (body.id_cliente or "").strip().upper()
     if not idc or not (body.contacto or "").strip() or not (body.descripcion or "").strip():
@@ -258,7 +258,7 @@ async def cotizacion_create(body: CotizacionCreate, current_user: dict = Depends
 
 
 @router.put("/api/cotizaciones/{folio:int}")
-async def cotizacion_update(folio: int, body: CotizacionUpdate, current_user: dict = Depends(get_current_user)):
+def cotizacion_update(folio: int, body: CotizacionUpdate, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     idc = (body.id_cliente or "").strip().upper()
     if not idc or not (body.contacto or "").strip() or not (body.descripcion or "").strip():
@@ -360,7 +360,7 @@ async def cotizacion_update(folio: int, body: CotizacionUpdate, current_user: di
 
 
 @router.get("/api/cotizaciones/{folio:int}/historial")
-async def cotizacion_historial(folio: int, current_user: dict = Depends(get_current_user)):
+def cotizacion_historial(folio: int, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -377,7 +377,7 @@ async def cotizacion_historial(folio: int, current_user: dict = Depends(get_curr
 
 
 @router.get("/api/cotizaciones/lista-para-facturar")
-async def cotizaciones_lista_facturar(current_user: dict = Depends(get_current_user)):
+def cotizaciones_lista_facturar(current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -423,7 +423,7 @@ async def cotizaciones_lista_facturar(current_user: dict = Depends(get_current_u
 
 
 @router.put("/api/cotizaciones/{folio:int}/nota")
-async def cotizacion_nota(folio: int, body: CotizacionNota, current_user: dict = Depends(get_current_user)):
+def cotizacion_nota(folio: int, body: CotizacionNota, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -437,7 +437,7 @@ async def cotizacion_nota(folio: int, body: CotizacionNota, current_user: dict =
 
 
 @router.delete("/api/cotizaciones/{folio:int}")
-async def cotizacion_delete(folio: int, current_user: dict = Depends(get_current_user)):
+def cotizacion_delete(folio: int, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -466,7 +466,7 @@ async def cotizacion_delete(folio: int, current_user: dict = Depends(get_current
 
 
 @router.post("/api/cotizaciones/{folio:int}/clonar")
-async def cotizacion_clonar(folio: int, current_user: dict = Depends(get_current_user)):
+def cotizacion_clonar(folio: int, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -526,7 +526,7 @@ def _cotizacion_pdf_bytes(folio: int) -> tuple:
 
 
 @router.get("/cotizacion/{token}")
-async def cotizacion_verificar(token: str, request: Request):
+def cotizacion_verificar(token: str, request: Request):
     """Verifica un token QR y retorna la cotizacion asociada. Sin auth (publico)."""
     folio = verificar_token_qr(token)
     if folio is None:
@@ -539,7 +539,7 @@ async def cotizacion_verificar(token: str, request: Request):
 
 
 @router.get("/api/cotizaciones/{folio:int}/pdf/existe")
-async def cotizacion_pdf_existe(folio: int, request: Request):
+def cotizacion_pdf_existe(folio: int, request: Request):
     """Verifica si el PDF de la cotización ya está guardado en el share SMB."""
     _user = _user_from_header_or_query(request)
     _require_cotiz(_user)
@@ -560,7 +560,7 @@ async def cotizacion_pdf_existe(folio: int, request: Request):
 
 
 @router.get("/api/cotizaciones/{folio:int}/pdf")
-async def cotizacion_pdf(folio: int, request: Request):
+def cotizacion_pdf(folio: int, request: Request):
     _user = _user_from_header_or_query(request)
     _require_cotiz(_user)
     try:
@@ -624,7 +624,7 @@ def _smtp_send_with_pdf(to_email: str, subject: str, body: str, pdf_bytes: bytes
 
 
 @router.post("/api/cotizaciones/{folio:int}/enviar")
-async def cotizacion_enviar(folio: int, body: CotizacionEnviar, current_user: dict = Depends(get_current_user)):
+def cotizacion_enviar(folio: int, body: CotizacionEnviar, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     to_email = (body.to_email or "").strip()
     if not to_email or "@" not in to_email:
@@ -652,7 +652,7 @@ async def cotizacion_enviar(folio: int, body: CotizacionEnviar, current_user: di
 # ----- Partidas -----
 
 @router.get("/api/cotizaciones/{folio:int}/partidas")
-async def cotizacion_partidas(folio: int, current_user: dict = Depends(get_current_user)):
+def cotizacion_partidas(folio: int, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -672,7 +672,7 @@ async def cotizacion_partidas(folio: int, current_user: dict = Depends(get_curre
 
 
 @router.post("/api/cotizaciones/{folio:int}/partidas")
-async def cotizacion_partida_add(folio: int, body: PartidaCreate, current_user: dict = Depends(get_current_user)):
+def cotizacion_partida_add(folio: int, body: PartidaCreate, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     _validate_partida_input(body.cantidad, body.descripcion)
     # Códigos SAT capturados por el usuario: validar ANTES de escribir
@@ -729,7 +729,7 @@ async def cotizacion_partida_add(folio: int, body: PartidaCreate, current_user: 
 
 
 @router.put("/api/cotizaciones/{folio:int}/partidas/{partida:int}")
-async def cotizacion_partida_update(folio: int, partida: int, body: PartidaUpdate, current_user: dict = Depends(get_current_user)):
+def cotizacion_partida_update(folio: int, partida: int, body: PartidaUpdate, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     _validate_partida_input(body.cantidad, body.descripcion)
     # Códigos SAT capturados por el usuario: validar ANTES de escribir
@@ -774,7 +774,7 @@ async def cotizacion_partida_update(folio: int, partida: int, body: PartidaUpdat
 
 
 @router.delete("/api/cotizaciones/{folio:int}/partidas/{partida:int}")
-async def cotizacion_partida_delete(folio: int, partida: int, current_user: dict = Depends(get_current_user)):
+def cotizacion_partida_delete(folio: int, partida: int, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -809,7 +809,7 @@ class SatSugerir(BaseModel):
 
 
 @router.post("/api/sat/sugerir")
-async def sat_sugerir(body: SatSugerir, current_user: dict = Depends(get_current_user)):
+def sat_sugerir(body: SatSugerir, current_user: dict = Depends(get_current_user)):
     """Resuelve códigos SAT para mostrarlos en el formulario SIN guardar la
     partida: índice → reglas keywords → 1 llamada a Gemini. Solo hace upsert
     del índice (HUB_SatArticulos), no toca la partida ni las tablas existentes."""
@@ -845,7 +845,7 @@ class RemisionAsignar(BaseModel):
 
 
 @router.get("/api/remisiones/usuarios")
-async def remision_usuarios(current_user: dict = Depends(get_current_user)):
+def remision_usuarios(current_user: dict = Depends(get_current_user)):
     """Usuarios activos para asignar la firma de la remisión en Field."""
     _require_cotiz(current_user)
     try:
@@ -861,7 +861,7 @@ async def remision_usuarios(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/api/cotizaciones/{folio:int}/remisiones")
-async def remisiones_list(folio: int, current_user: dict = Depends(get_current_user)):
+def remisiones_list(folio: int, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -893,7 +893,7 @@ async def remisiones_list(folio: int, current_user: dict = Depends(get_current_u
 
 
 @router.post("/api/cotizaciones/{folio:int}/remisiones")
-async def remision_create(folio: int, body: RemisionCreate, current_user: dict = Depends(get_current_user)):
+def remision_create(folio: int, body: RemisionCreate, current_user: dict = Depends(get_current_user)):
     """Crea una remisión inmutable desde la CM. Copia cantidad/descripción de
     las partidas elegidas (SIN precios); los códigos SAT se resuelven al
     generar el PDF vía HUB_PartidasSat."""
@@ -955,7 +955,7 @@ async def remision_create(folio: int, body: RemisionCreate, current_user: dict =
 
 
 @router.delete("/api/remisiones/{id_remision:int}")
-async def remision_delete(id_remision: int, current_user: dict = Depends(get_current_user)):
+def remision_delete(id_remision: int, current_user: dict = Depends(get_current_user)):
     """Borra la remisión (índice + partidas por cascade). No se puede editar."""
     _require_cotiz(current_user)
     try:
@@ -979,7 +979,7 @@ async def remision_delete(id_remision: int, current_user: dict = Depends(get_cur
 
 
 @router.put("/api/remisiones/{id_remision:int}/asignar")
-async def remision_asignar(id_remision: int, body: RemisionAsignar,
+def remision_asignar(id_remision: int, body: RemisionAsignar,
                            current_user: dict = Depends(get_current_user)):
     """Asigna (o con id_usuario null desasigna) un usuario para firmar en Field."""
     _require_cotiz(current_user)
@@ -1010,7 +1010,7 @@ async def remision_asignar(id_remision: int, body: RemisionAsignar,
 
 
 @router.get("/api/remisiones/{id_remision:int}/pdf")
-async def remision_pdf(id_remision: int, request: Request):
+def remision_pdf(id_remision: int, request: Request):
     """PDF de la remisión (auth por header o query ?s=TOKEN para abrir en pestaña)."""
     _user = _user_from_header_or_query(request)
     _require_cotiz(_user)

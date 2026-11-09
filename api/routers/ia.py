@@ -60,7 +60,7 @@ def _cleanup_fifo_conversaciones(cursor, user_id: int):
     """, (user_id,))
 
 @router.get("/api/ia/conversaciones")
-async def ia_list_conversaciones(current_user: dict = Depends(get_current_user)):
+def ia_list_conversaciones(current_user: dict = Depends(get_current_user)):
     _require_ia(current_user)
     try:
         conn = get_connection()
@@ -82,7 +82,7 @@ async def ia_list_conversaciones(current_user: dict = Depends(get_current_user))
 
 
 @router.post("/api/ia/conversaciones")
-async def ia_create_conversacion(body: IaConversacionCreate, current_user: dict = Depends(get_current_user)):
+def ia_create_conversacion(body: IaConversacionCreate, current_user: dict = Depends(get_current_user)):
     _require_ia(current_user)
     try:
         conn = get_connection()
@@ -102,7 +102,7 @@ async def ia_create_conversacion(body: IaConversacionCreate, current_user: dict 
 
 
 @router.get("/api/ia/conversaciones/{id_conversacion}/mensajes")
-async def ia_get_mensajes(id_conversacion: int, current_user: dict = Depends(get_current_user)):
+def ia_get_mensajes(id_conversacion: int, current_user: dict = Depends(get_current_user)):
     _require_ia(current_user)
     try:
         conn = get_connection()
@@ -129,7 +129,7 @@ async def ia_get_mensajes(id_conversacion: int, current_user: dict = Depends(get
 
 
 @router.post("/api/ia/conversaciones/{id_conversacion}/mensajes")
-async def ia_send_mensaje(id_conversacion: int, body: IaMensajeCreate, current_user: dict = Depends(get_current_user)):
+def ia_send_mensaje(id_conversacion: int, body: IaMensajeCreate, current_user: dict = Depends(get_current_user)):
     """
     CLON EXACTO del HUB views/edwin_jarvis.py process_jarvis_query
     4 Tools: execute_query, send_quote_pdf, send_service_reports, send_email
@@ -162,7 +162,7 @@ async def ia_send_mensaje(id_conversacion: int, body: IaMensajeCreate, current_u
                           (id_conversacion, "❌ No hay una clave de API (API Key) configurada para Google Gemini. Por favor configúrala en el HUB en 'Configuración IA'."))
             conn.commit()
             conn.close()
-            return await ia_get_mensajes(id_conversacion, current_user)
+            return ia_get_mensajes(id_conversacion, current_user)
 
         api_key, model_name = ai_cfg_row[0], ai_cfg_row[1] or 'gemini-3.5-flash-lite'
 
@@ -498,7 +498,7 @@ Sé claro, directo, estructurado y presenta los datos de forma elegante en tabla
 
 
 @router.delete("/api/ia/conversaciones/{id_conversacion}")
-async def ia_delete_conversacion(id_conversacion: int, current_user: dict = Depends(get_current_user)):
+def ia_delete_conversacion(id_conversacion: int, current_user: dict = Depends(get_current_user)):
     _require_ia(current_user)
     try:
         conn = get_connection()

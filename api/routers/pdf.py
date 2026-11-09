@@ -21,7 +21,7 @@ def __getattr__(name):
     return getattr(_m, name)
 
 @router.post("/api/pdf/generate")
-async def generate_pdf(current_user: dict = Depends(get_current_user)):
+def generate_pdf(current_user: dict = Depends(get_current_user)):
     """Generate PDF for cotización or reporte"""
     if not current_user["acceso_cotizaciones"]:
         raise HTTPException(status_code=403, detail="No access")

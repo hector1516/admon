@@ -51,7 +51,7 @@ def _require_cotiz(*a, **kw):
     return getattr(_m, "_require_cotiz")(*a, **kw)
 
 @router.get("/api/clientes")
-async def clientes_list(
+def clientes_list(
     limit: int = Query(100, ge=1, le=500),
     offset: int = Query(0, ge=0),
     q: str = Query(""),
@@ -89,7 +89,7 @@ async def clientes_list(
 
 
 @router.post("/api/clientes")
-async def cliente_create(body: ClienteCreate, current_user: dict = Depends(get_current_user)):
+def cliente_create(body: ClienteCreate, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     idc = (body.id_cliente or "").strip().upper()
     if not idc or not (body.nombre or "").strip():
@@ -120,7 +120,7 @@ async def cliente_create(body: ClienteCreate, current_user: dict = Depends(get_c
 
 
 @router.put("/api/clientes/{id_cliente}")
-async def cliente_update(id_cliente: str, body: ClienteUpdate, current_user: dict = Depends(get_current_user)):
+def cliente_update(id_cliente: str, body: ClienteUpdate, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     if not (body.nombre or "").strip():
         raise HTTPException(status_code=400, detail="La razón social no puede estar vacía.")
@@ -139,7 +139,7 @@ async def cliente_update(id_cliente: str, body: ClienteUpdate, current_user: dic
 
 
 @router.delete("/api/clientes/{id_cliente}")
-async def cliente_delete(id_cliente: str, current_user: dict = Depends(get_current_user)):
+def cliente_delete(id_cliente: str, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -159,7 +159,7 @@ async def cliente_delete(id_cliente: str, current_user: dict = Depends(get_curre
 
 
 @router.get("/api/clientes/{id_cliente}/nombre")
-async def cliente_nombre(id_cliente: str, current_user: dict = Depends(get_current_user)):
+def cliente_nombre(id_cliente: str, current_user: dict = Depends(get_current_user)):
     _require_cotiz(current_user)
     try:
         conn = get_connection()
@@ -182,7 +182,7 @@ class ContactoRename(BaseModel):
 
 
 @router.put("/api/clientes/{id_cliente}/contactos")
-async def cliente_contacto_rename(id_cliente: str, body: ContactoRename, current_user: dict = Depends(get_current_user)):
+def cliente_contacto_rename(id_cliente: str, body: ContactoRename, current_user: dict = Depends(get_current_user)):
     """Renombra un contacto en todas las cotizaciones del cliente (los contactos
     son historial en IndiceMateriales.Contacto, no catálogo: renombrar = UPDATE)."""
     _require_cotiz(current_user)
@@ -217,7 +217,7 @@ class ContactoBorrar(BaseModel):
 
 
 @router.delete("/api/clientes/{id_cliente}/contactos")
-async def cliente_contacto_delete(id_cliente: str, body: ContactoBorrar, current_user: dict = Depends(get_current_user)):
+def cliente_contacto_delete(id_cliente: str, body: ContactoBorrar, current_user: dict = Depends(get_current_user)):
     """Quita un contacto del catálogo HUB_ContactosClientes (decisión de diseño:
     SOLO catálogo — las cotizaciones NO se modifican, conservan su campo Contacto
     y por eso el contacto puede seguir apareciendo en el historial)."""
@@ -258,7 +258,7 @@ async def cliente_contacto_delete(id_cliente: str, body: ContactoBorrar, current
 
 
 @router.get("/api/clientes/{id_cliente}/contactos")
-async def cliente_contactos(id_cliente: str, current_user: dict = Depends(get_current_user)):
+def cliente_contactos(id_cliente: str, current_user: dict = Depends(get_current_user)):
     """Contactos del cliente: catálogo HUB_ContactosClientes + historial de
     cotizaciones (mismo UNION que el HUB/Field; si el catálogo no existe en la
     BD, regresa solo el historial)."""
@@ -295,7 +295,7 @@ def _contactos_union(cursor, idc: str):
 
 
 @router.get("/api/clientes/{id_cliente}/contactos/detalle")
-async def cliente_contactos_detalle(id_cliente: str, current_user: dict = Depends(get_current_user)):
+def cliente_contactos_detalle(id_cliente: str, current_user: dict = Depends(get_current_user)):
     """Detalle de cada contacto con su origen: en_catálogo (borrable con el botón)
     y cuántas cotizaciones lo usan (esas NO se tocan al borrar)."""
     _require_cotiz(current_user)

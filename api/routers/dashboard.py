@@ -20,7 +20,7 @@ def __getattr__(name):
     return getattr(_m, name)
 
 @router.get("/api/dashboard/kpis")
-async def get_dashboard_kpis(current_user: dict = Depends(get_current_user)):
+def get_dashboard_kpis(current_user: dict = Depends(get_current_user)):
     """Get KPIs filtered by user permissions"""
     try:
         conn = get_connection()

@@ -300,7 +300,7 @@ def tickets_oxxogas_saldo(current_user: dict = Depends(get_current_user)):
 
 
 @router.get("/api/tickets-oxxogas/{ticket_id:int}/imagen")
-async def tickets_oxxogas_imagen(ticket_id: int, w: int = 0,
+def tickets_oxxogas_imagen(ticket_id: int, w: int = 0,
                                  current_user: dict = Depends(_user_from_header_or_query)):
     """JPEG del ticket. Acepta ?token= en query para poder usarse en <img>
     (auth vía _user_from_header_or_query, igual que los PDFs). w>0 = thumbnail.
@@ -390,7 +390,7 @@ def tickets_oxxogas_estaciones(current_user: dict = Depends(get_current_user)):
 
 
 @router.post("/api/tickets-oxxogas/crear")
-async def tickets_oxxogas_crear(
+def tickets_oxxogas_crear(
     id_vehiculo: int = Form(...),
     id_cliente: str = Form(""),
     folio_ticket: str = Form(""),
@@ -423,7 +423,7 @@ async def tickets_oxxogas_crear(
     if not foto:
         raise HTTPException(status_code=400, detail="Foto del ticket es obligatoria")
 
-    image_bytes = await foto.read()
+    image_bytes = foto.file.read()
     image_name = foto.filename or "ticket.jpg"
 
     conn = get_connection()
@@ -467,7 +467,7 @@ async def tickets_oxxogas_crear(
         conn.close()
 
 @router.post("/api/tickets/ai-extraer-folio")
-async def ai_extraer_folio(
+def ai_extraer_folio(
     foto: UploadFile = File(...),
     current_user: dict = Depends(get_current_user),
 ):
@@ -494,7 +494,7 @@ async def ai_extraer_folio(
         import google.generativeai as genai
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel("gemini-3.5-flash-lite")
-        image_bytes = await foto.read()
+        image_bytes = foto.file.read()
         import PIL.Image
         import io
         img = PIL.Image.open(io.BytesIO(image_bytes))
