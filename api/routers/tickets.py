@@ -397,6 +397,7 @@ async def tickets_oxxogas_crear(
     estacion: str = Form(""),
     descripcion: str = Form(""),
     id_solicitud_vale: str = Form(""),
+    idempotency_key: str = Form(""),
     foto: UploadFile = Form(None),
     current_user: dict = Depends(get_current_user),
 ):
@@ -406,6 +407,14 @@ async def tickets_oxxogas_crear(
     desc_val = (descripcion or "").strip()
     cliente_val = (id_cliente or "").strip() or None
     vale_val = int(id_solicitud_vale) if (id_solicitud_vale or "").strip().isdigit() else None
+
+    # Idempotency check
+    if idempotency_key:
+        cursor = conn.cursor(as_dict=True)
+        cursor.execute("SELECT IdEntidad FROM HUB_IdempotencyKeys WHERE Clave = %s", (idempotency_key,))
+        row_check = cursor.fetchone()
+        if row_check and row_check.get("IdEntidad"):
+            return {"success": True, "duplicate": True, "folio": folio_val, "id_server": row_check["IdEntidad"]}
 
     if not folio_val:
         raise HTTPException(status_code=400, detail="Folio del ticket es obligatorio")
@@ -441,6 +450,13 @@ async def tickets_oxxogas_crear(
 
         if vale_val:
             cursor.execute("UPDATE HUB_SolicitudVales SET IdTicketCierre = %s, FechaCierre = GETDATE(), Estatus = 'CERRADO' WHERE Id = %s", (new_id, vale_val))
+
+        # Registrar clave de idempotencia
+        if idempotency_key:
+            try:
+                cursor.execute("INSERT INTO HUB_IdempotencyKeys (Clave, Entidad, IdEntidad) VALUES (%s, %s, %s)", (idempotency_key, 'ticket', new_id))
+            except Exception:
+                pass
 
         conn.commit()
         return {"success": True, "folio": folio_val, "id_server": new_id}
