@@ -53,6 +53,7 @@ import CapturarTicketOxxoGas from './pages/CapturarTicketOxxoGas.svelte';
 	];
 
 	onMount(async () => {
+	window.addEventListener("error", (e) => console.error("GLOBAL ERROR:", e.error || e.message));
 		// Splash corto con logo Admon
 		const msgs = [...splashMessages].sort(() => Math.random() - 0.5).slice(0, 2);
 		for (let i = 0; i < msgs.length; i++) {
