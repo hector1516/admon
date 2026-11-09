@@ -87,29 +87,25 @@ export async function listar({ pagina = 1, porPagina = 100, q = '' } = {}) {
 			const filas = r.cotizaciones || [];
 			total = r.total ?? filas.length;
 			foliosDeLaPagina = new Set(filas.map((c) => srvKey(c.folio)));
-			for (const c of filas) {
-				const idLocal = srvKey(c.folio);
-				const prev = await db.cotizaciones.get(idLocal);
-				await db.cotizaciones.put({
-					...(prev || {}),
-					idLocal,
-					folio: c.folio,
-					id_cliente: c.id_cliente,
-					cliente: c.cliente,
-					contacto: c.contacto,
-					fecha: c.fecha,
-					descripcion: c.descripcion,
-					autor: c.autor,
-					estatus: c.estatus,
-					suma_partidas: c.suma_partidas,
-					flete: c.flete,
-					subtotal: c.subtotal,
-					iva: c.iva,
-					total: c.total,
-					synced: true,
-					ts: Date.now()
-				});
-			}
+			const items = filas.map((c) => ({
+				idLocal: srvKey(c.folio),
+				folio: c.folio,
+				id_cliente: c.id_cliente,
+				cliente: c.cliente,
+				contacto: c.contacto,
+				fecha: c.fecha,
+				descripcion: c.descripcion,
+				autor: c.autor,
+				estatus: c.estatus,
+				suma_partidas: c.suma_partidas,
+				flete: c.flete,
+				subtotal: c.subtotal,
+				iva: c.iva,
+				total: c.total,
+				synced: true,
+				ts: Date.now()
+			}));
+			await db.cotizaciones.bulkPut(items);
 		} catch (e) {
 			if (!isNetworkError(e)) throw e;
 			// sin red: se sirve de la caché local
