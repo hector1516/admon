@@ -105,7 +105,15 @@ export async function listar({ pagina = 1, porPagina = 100, q = '' } = {}) {
 				synced: true,
 				ts: Date.now()
 			}));
-			await db.cotizaciones.bulkPut(items);
+			try {
+				await db.cotizaciones.bulkPut(items);
+			} catch (e) {
+				console.error('bulkPut error:', e);
+				// Fallback to individual puts
+				for (const item of items) {
+					await db.cotizaciones.put(item);
+				}
+			}
 		} catch (e) {
 			if (!isNetworkError(e)) throw e;
 			// sin red: se sirve de la caché local
