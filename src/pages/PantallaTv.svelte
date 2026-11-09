@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
+import HoldButton from '$lib/components/HoldButton.svelte';
 
 	// Pestaña "Pantalla de la TV" del módulo Notas.
 	//
@@ -297,7 +298,7 @@
 							<span class="chip chip-ok">en pantalla</span>
 						{:else}
 							<button class="btn-icon" onclick={() => restaurar(h.id)} title="Volver a ponerla">♻️</button>
-							<button class="btn-icon" onclick={() => borrarImagen(h.id)} title="Borrar del historial">🗑️</button>
+							<HoldButton label="Borrar" onConfirm={() => borrarImagen(h.id)} size="sm" />
 						{/if}
 					</div>
 				{/each}

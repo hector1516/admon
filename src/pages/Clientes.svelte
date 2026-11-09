@@ -4,6 +4,7 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { clientes } from '$lib/cotizacionesApi.js';
 	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
+import HoldButton from '$lib/components/HoldButton.svelte';
 
 	let lista = $state([]);
 	let totalClientes = $state(0);
@@ -221,7 +222,7 @@
 				<button class="btn btn-secondary btn-block" on:click={() => (selId = null)}>❌ Cancelar</button>
 				<button class="btn btn-primary btn-block" on:click={guardarEdicion} disabled={busy}>💾 Guardar</button>
 			</div>
-			<button class="btn btn-danger btn-block" on:click={eliminar} disabled={busy}>🗑️ Eliminar cliente</button>
+			<HoldButton label="Eliminar cliente" onConfirm={eliminar} disabled={busy} size="md" block={true} />
 		</div>
 	{/if}
 

@@ -356,7 +356,7 @@
 							{busy ? 'Guardando…' : '💾 Guardar cambios'}
 						</button>
 					</div>
-					<button class="btn btn-danger btn-block" on:click={onEliminar} disabled={busy}>🚨 Eliminar partida</button>
+					<HoldButton label="Eliminar partida" onConfirm={onEliminar} disabled={busy} size="md" block={true} />
 				{/if}
 			</div>
 		{/if}

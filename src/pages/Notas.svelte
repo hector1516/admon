@@ -3,6 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
+import HoldButton from '$lib/components/HoldButton.svelte';
 	import Paginacion from '$lib/components/Paginacion.svelte';
 
 	// Notas del equipo → tabla HUB_DashboardNotas, la MISMA que lee la pantalla
@@ -219,7 +220,7 @@
 						<h2 class="nota-titulo">{#if n.fija}<span class="nota-fija">📌 fija</span>{/if}{n.titulo}</h2>
 						<div class="nota-acciones">
 							<button class="btn-icon" onclick={() => abrirEditar(n)} title="Editar">✏️</button>
-							<button class="btn-icon" onclick={() => borrar(n)} title="Borrar">🗑️</button>
+							<HoldButton label="Borrar" onConfirm={() => borrar(n)} size="sm" />
 						</div>
 					</div>
 					<div class="nota-contenido">{n.contenido}</div>

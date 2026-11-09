@@ -3,6 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
+import HoldButton from '$lib/components/HoldButton.svelte';
 	import { passkeySupported, registerPasskey, randomDeviceName } from '$lib/passkey.js';
 	import { estado as pushEstadoActual, activar as pushActivar, desactivar as pushDesactivar, dispositivos as pushDispositivosList, enviarPrueba as pushEnviarPrueba } from '$lib/push.js';
 
@@ -437,7 +438,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 								<span class="pk-badge pk-warn">legacy</span>
 							{/if}
 						</span>
-						<button class="btn btn-sm btn-danger" on:click={() => delKey(k.Id, k.Etiqueta)}>Eliminar</button>
+						<HoldButton label="Eliminar" onConfirm={() => delKey(k.Id, k.Etiqueta)} size="sm" />
 					</div>
 				{/each}
 			{/if}

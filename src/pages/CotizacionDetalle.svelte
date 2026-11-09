@@ -454,7 +454,7 @@
 		</div>
 		<button class="btn btn-secondary btn-block" style="margin-bottom: 0.5rem;" on:click={() => navigate(`/cotizaciones/${clave}/estatus`)} disabled={busy}>🚦 Cambiar estatus</button>
 		<button class="btn btn-secondary btn-block" style="margin-bottom: 0.5rem;" on:click={abrirHistorial} disabled={busy}>Historial de cambios</button>
-		<button class="btn btn-danger btn-block" on:click={onBorrar} disabled={bloqueado || busy}>🚨 Borrar cotización</button>
+		<HoldButton label="Borrar cotización" onConfirm={onBorrar} disabled={bloqueado} size="md" block={true} />
 		{#if bloqueado}
 			<p class="hint" style="margin-top: 0.5rem;">🔒 Bloqueada (lista para facturar / facturada).</p>
 		{/if}
@@ -508,5 +508,6 @@
 </style>
 / /   t r i g g e r 
  
- / /   t r i g g e r   C I  
+ / /   t r i g g e r   C I 
+ 
  

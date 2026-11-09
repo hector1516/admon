@@ -450,7 +450,7 @@
 				<div class="grid-3" style="margin-top: 0.75rem;">
 					<button class="btn btn-primary btn-sm" on:click={() => { editForm = { ...editForm }; editando = true; }}>✏️ Editar</button>
 					<button class="btn btn-secondary btn-sm" on:click={abrirPDF}>📄 Ver PDF</button>
-					<button class="btn btn-danger btn-sm" on:click={eliminar} disabled={busy}>🚨 Eliminar</button>
+					<HoldButton label="Eliminar" onConfirm={eliminar} disabled={busy} size="sm" />
 				</div>
 			{/if}
 		</div>

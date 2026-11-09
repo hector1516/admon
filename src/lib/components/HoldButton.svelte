@@ -1,7 +1,7 @@
 <script>
 	import { Trash2 } from 'lucide-svelte';
 
-	let { onConfirm, label = 'Borrar', disabled = false, size = 'sm' } = $props();
+	let { onConfirm, label = 'Borrar', disabled = false, size = 'sm', block = false } = $props();
 	let progress = $state(0);
 	let interval = null;
 
@@ -30,7 +30,7 @@
 </script>
 
 <button
-	class="btn btn-danger btn-{size} btn-hold"
+	class="btn btn-danger btn-{size} btn-hold {block ? 'btn-block' : ''}"
 	onpointerdown={startHold}
 	onpointerup={cancelHold}
 	onpointerleave={cancelHold}
