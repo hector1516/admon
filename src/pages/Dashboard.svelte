@@ -34,7 +34,8 @@
 	}
 
 	function go(mod) {
-		navigate(mod.path);
+		console.log("go called with", mod.path);
+		try { navigate(mod.path); } catch (e) { console.error("navigate error:", e); }
 	}
 
 	function handleLogout() {
