@@ -66,7 +66,7 @@ def get_connection():
             _thread_local.conn = None
     conn = pymssql.connect(server=DB_SERVER, user=DB_USER, password=DB_PASSWORD, database=DB_DATABASE, autocommit=True)
     # Hacer close() un no-op para reutilizar la conexion (pool por thread)
-    _original_close = conn.close
+    conn._real_close = conn.close
     def _noop_close():
         pass
     conn.close = _noop_close
