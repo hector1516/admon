@@ -56,7 +56,6 @@ import CapturarTicketOxxoGas from './pages/CapturarTicketOxxoGas.svelte';
 	window.addEventListener("error", (e) => console.error("GLOBAL ERROR:", e.error || e.message));
 	window.addEventListener("error", (e) => console.error("GLOBAL ERROR:", e.error || e.message));
 	window.addEventListener("error", (e) => console.error("GLOBAL ERROR:", e.error || e.message));
-	window.addEventListener("error", (e) => console.error("GLOBAL ERROR:", e.error || e.message));
 		// Splash corto con logo Admon
 		const msgs = [...splashMessages].sort(() => Math.random() - 0.5).slice(0, 2);
 		for (let i = 0; i < msgs.length; i++) {
@@ -155,12 +154,6 @@ import CapturarTicketOxxoGas from './pages/CapturarTicketOxxoGas.svelte';
 			fetcher={shellFetch}
 			onsync={shellSync}
 		/>
-
-		<!-- Popup de novedades (del shell). Va UNA vez acá, en el App, para
-		     que salte aunque se entre por cualquier ruta. El texto de los
-		     cambios está en public/changelog.json, así se edita sin recompilar. -->
-		<Changelog appId="admon" appName="Admon" version={APP_VERSION}
-		           url="/changelog.json" />
 	{/if}
 
 	<!-- shell-below-banner: el padding para no quedar bajo el banner fijo lo
