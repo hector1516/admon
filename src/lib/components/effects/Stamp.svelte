@@ -8,6 +8,7 @@
 	Uso: <Stamp text="¡Feliz cumpleaños!" subtext="Juan Pérez" color="#ffae00" />
 -->
 <script lang="ts">
+	import { Stamp } from 'lucide-svelte';
 	interface Props {
 		/** Texto principal del sello */
 		text: string;
