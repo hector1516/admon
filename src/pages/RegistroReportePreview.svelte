@@ -1,5 +1,5 @@
 <script>
-	import { Download, RefreshCw, Upload } from 'lucide-svelte';
+	import { Download, RefreshCw, Upload , ArrowLeft } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -97,7 +97,7 @@
 
 <div class="preview-page">
 	<header class="preview-header">
-		<button class="btn btn-ghost" on:click={volver} title="Volver">⬅️</button>
+		<button class="btn btn-ghost" on:click={volver} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>👁️ Previsualizar: {reporte.Folio}</h1>
 		<div style="display: flex; gap: 0.5rem;">
 			<button class="btn btn-secondary" on:click={descargar} disabled={!pdfBlob}><Download size={16} /> Descargar</button>
@@ -111,7 +111,7 @@
 		<div class="preview-error">
 			<p>{error}</p>
 			<button class="btn btn-primary" on:click={cargar}><RefreshCw size={16} /> Reintentar</button>
-			<button class="btn btn-secondary" on:click={volver}>⬅️ Volver</button>
+			<button class="btn btn-secondary" on:click={volver}><ArrowLeft size={16} /> Volver</button>
 		</div>
 	{:else if pdfBlob}
 		<iframe 

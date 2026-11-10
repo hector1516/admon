@@ -1,5 +1,5 @@
 <script>
-	import { Search , X } from 'lucide-svelte';
+	import { Search , X , ArrowLeft, Minus, Plus, RefreshCw } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -187,7 +187,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/tickets_oxxogas')} title="Volver al listado">⬅️</button>
+		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/tickets_oxxogas')} title="Volver al listado"><ArrowLeft size={16} /></button>
 		<h1>🎫 Ticket {t ? `#${t.folio}` : ''}</h1>
 		<div style="flex:1"></div>
 		{#if t}
@@ -287,7 +287,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 					{/if}
 				</div>
 
-				<button class="btn btn-secondary btn-back" onclick={() => navigate('/tickets_oxxogas')}>⬅️ Volver al listado de tickets</button>
+				<button class="btn btn-secondary btn-back" onclick={() => navigate('/tickets_oxxogas')}><ArrowLeft size={16} /> Volver al listado de tickets</button>
 			</div>
 		</div>
 	{/if}
@@ -301,10 +301,10 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 			<button class="btn btn-sm btn-secondary" onclick={cerrarZoom}><X size={16} /></button>
 			<span class="lb-folio">🎫 #{t.folio}</span>
 			<div class="lb-spacer"></div>
-			<button class="lb-btn" onclick={() => zoomStep(-1)} disabled={zoom <= 1} aria-label="Alejar">−</button>
+			<button class="lb-btn" onclick={() => zoomStep(-1)} disabled={zoom <= 1} aria-label="Alejar"><Minus size={16} /></button>
 			<span class="lb-pct">{Math.round(zoom * 100)}%</span>
-			<button class="lb-btn" onclick={() => zoomStep(1)} disabled={zoom >= 6} aria-label="Acercar">＋</button>
-			<button class="lb-btn lb-reset" onclick={resetZoom} disabled={zoom === 1 && panX === 0 && panY === 0} aria-label="Restablecer">↺</button>
+			<button class="lb-btn" onclick={() => zoomStep(1)} disabled={zoom >= 6} aria-label="Acercar"><Plus size={16} /></button>
+			<button class="lb-btn lb-reset" onclick={resetZoom} disabled={zoom === 1 && panX === 0 && panY === 0} aria-label="Restablecer"><RefreshCw size={16} /></button>
 		</div>
 
 		<div

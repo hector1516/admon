@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-import { ArrowLeft, Plus } from 'lucide-svelte';
+import { ArrowLeft, Plus , Clock, Minus , Scale } from 'lucide-svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { online } from '$lib/stores/online.js';
@@ -94,7 +94,7 @@ import { ArrowLeft, Plus } from 'lucide-svelte';
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>📋 Cotizaciones</h1>
 		<div style="flex:1"></div>
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/cotizaciones/comparar')} title="Comparar cotizaciones">⚖️</button>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/cotizaciones/comparar')} title="Comparar cotizaciones"><Scale size={16} /></button>
 		<button class="btn btn-sm btn-primary" on:click={() => navigate('/cotizaciones/nueva')} title="Nueva cotización"><Plus size={16} /></button>
 	</div>
 
@@ -139,14 +139,14 @@ import { ArrowLeft, Plus } from 'lucide-svelte';
 							<span class="folio">{c.folio != null ? folioFmt(c.folio) : '<AlertTriangle size={16} /> Sin folio'}</span>
 							<span class="badge {estatusBadge(c.estatus)}" style="font-size: 0.6rem;">{mapEstatus(c.estatus)}</span>
 							{#if c.folio == null || !c.synced}
-								<span class="badge badge-warning" style="font-size: 0.6rem;">⏳ pendiente</span>
+								<span class="badge badge-warning" style="font-size: 0.6rem;"><Clock size={16} /> pendiente</span>
 							{/if}
 							{#if c.pdf_en_smb}
 								<span style="font-size: 0.6rem; font-weight: 700; border-radius: 999px; padding: 0.15rem 0.5rem; background: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3);">PDF</span>
 							{/if}
 						</div>
 						<div class="cliente">{c.cliente || c.id_cliente || 'N/A'}</div>
-						<div class="meta">{c.contacto || '—'} · {c.fecha || ''}</div>
+						<div class="meta">{c.contacto || '<Minus size={16} />'} · {c.fecha || ''}</div>
 						{#if c.descripcion}
 							<div class="desc">{c.descripcion}</div>
 						{/if}

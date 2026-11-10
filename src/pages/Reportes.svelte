@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
-import { Phone , ArrowLeft, Plus } from 'lucide-svelte';
+import { Phone , ArrowLeft, Plus , Timer } from 'lucide-svelte';
 	import { auth } from '$lib/stores/auth.js';
 	import { online } from '$lib/stores/online.js';
 	import Paginacion from '$lib/components/Paginacion.svelte';
@@ -145,7 +145,7 @@ import { Phone , ArrowLeft, Plus } from 'lucide-svelte';
 							<div class="contacto"><Phone size={16} /> {r.Contacto}</div>
 						{/if}
 						{#if r.TiempoTraslado}
-							<div class="tiempo">⏱️ {r.TiempoTraslado}h traslado</div>
+							<div class="tiempo"><Timer size={16} /> {r.TiempoTraslado}h traslado</div>
 						{/if}
 					</div>
 				</button>

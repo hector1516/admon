@@ -1,5 +1,7 @@
 <!-- HoldToConfirm.svelte — Acción deliberada que se llena mientras se mantiene -->
 <script lang="ts">
+	import { Clock , Check } from 'lucide-svelte';
+
   interface Props {
     label?: string;
     confirmLabel?: string;
@@ -77,7 +79,7 @@
       <span class="hold-check"><Check size={16} /></span>
       {confirmLabel}
     {:else}
-      <span class="hold-icon">⏳</span>
+      <span class="hold-icon"><Clock size={16} /></span>
       {label}
     {/if}
   </div>

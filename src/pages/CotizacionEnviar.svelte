@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
-import { Send } from 'lucide-svelte';
+import { Send , ArrowLeft } from 'lucide-svelte';
 	import { auth } from '$lib/stores/auth.js';
 	import { header, partidas } from '$lib/cotizacionesApi.js';
 	import { folioFmt } from '$lib/cotizaciones.js';
@@ -98,7 +98,7 @@ import { Send } from 'lucide-svelte';
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate(`/cotizaciones/${clave}`)} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate(`/cotizaciones/${clave}`)} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>📧 Enviar {folio ? folioFmt(folio) : ''}</h1>
 	</div>
 

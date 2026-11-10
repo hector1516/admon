@@ -1,5 +1,5 @@
 <script>
-	import { Save , X } from 'lucide-svelte';
+	import { Save , X , ArrowLeft } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -110,7 +110,7 @@
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/reportes')} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/reportes')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>📝 Nuevo Reporte</h1>
 	</div>
 

@@ -1,5 +1,5 @@
 <script>
-	import { User , Building2, Car, Receipt, Ticket , Plus } from 'lucide-svelte';
+	import { User , Building2, Car, Receipt, Ticket , Plus , ArrowLeft, Clock , Fuel } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -114,7 +114,7 @@
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>⛽ Tickets de OxxoGas</h1>
 		<div style="flex:1"></div>
 		<button class="btn btn-sm btn-primary" onclick={() => navigate('/tickets_oxxogas/capturar')} title="Capturar ticket manualmente"><Plus size={16} /> Capturar</button>
@@ -163,7 +163,7 @@
 				<button class="card-ticket" class:pendiente={t.pendiente_ticket} onclick={() => navigate(t.pendiente_ticket ? '#' : `/tickets_oxxogas/${t.id}`)} title={t.pendiente_ticket ? 'Ticket pendiente de captura' : 'Ver detalle completo'}>
 					<div class="body">
 						{#if t.pendiente_ticket}
-							<div class="pendiente-badge">⏳ Ticket pendiente</div>
+							<div class="pendiente-badge"><Clock size={16} /> Ticket pendiente</div>
 						{/if}
 						{#if t.marca_modelo && autoImageExists(t.marca_modelo)}
 							<div class="auto-thumb">
@@ -179,12 +179,12 @@
 							{#if t.factura}
 								<span class="chip ok" title="Factura enlazada"><Receipt size={16} /> {t.factura}</span>
 							{:else}
-								<span class="chip pend" title="Sin factura">⏳ Factura: Pendiente</span>
+								<span class="chip pend" title="Sin factura"><Clock size={16} /> Factura: Pendiente</span>
 							{/if}
 							{#if t.estacion}
-								<span class="chip ok" title="Estación capturada">⛽ {t.estacion}</span>
+								<span class="chip ok" title="Estación capturada"><Fuel size={16} /> {t.estacion}</span>
 							{:else}
-								<span class="chip pend" title="Sin estación">⏳ Estación: Pendiente</span>
+								<span class="chip pend" title="Sin estación"><Clock size={16} /> Estación: Pendiente</span>
 							{/if}
 						</div>
 						{#if t.cliente}<div class="row"><Building2 size={16} /> {t.cliente}</div>{/if}

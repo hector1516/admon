@@ -1,5 +1,5 @@
 <script>
-	import { Save, Siren, Trash2 , X } from 'lucide-svelte';
+	import { Save, Siren, Trash2 , X , ArrowLeft, Pencil } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -191,7 +191,7 @@
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/clientes')} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/clientes')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>📇 {idCliente}</h1>
 	</div>
 
@@ -253,9 +253,9 @@
 										on:click={() => borrarContacto(c)}
 										disabled={busy}
 										title="Quitar del catálogo (no borra cotizaciones)"
-									><Trash2 size={16} />️</button>
+									><Trash2 size={16} /></button>
 								{/if}
-								<button class="btn btn-sm btn-secondary" on:click={() => empezarRenombre(c.contacto)} title="Renombrar en todas las cotizaciones">✏️</button>
+								<button class="btn btn-sm btn-secondary" on:click={() => empezarRenombre(c.contacto)} title="Renombrar en todas las cotizaciones"><Pencil size={16} /></button>
 							{/if}
 						</div>
 					{/each}

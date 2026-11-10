@@ -1,5 +1,5 @@
 <script>
-	import { Download, Eye, Save, Trash2, Upload , Skull , X } from 'lucide-svelte';
+	import { Download, Eye, Save, Trash2, Upload , Skull , X , ArrowLeft, Clock, Pencil, Recycle } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -368,11 +368,11 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/registro_reportes')} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/registro_reportes')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>📋 {reporte.Folio || 'Cargando…'}</h1>
 		<div style="flex:1"></div>
 		{#if !editando && !loading}
-			<button class="btn btn-sm btn-primary" onclick={empezarEdicion}>✏️ Editar</button>
+			<button class="btn btn-sm btn-primary" onclick={empezarEdicion}><Pencil size={16} /> Editar</button>
 		{/if}
 	</div>
 
@@ -537,10 +537,10 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 		<div class="card">
 			<div class="grid-2" style="gap: 0.5rem;">
 				<button class="btn btn-primary" onclick={descargarPDF} disabled={pdfLoading} style="flex: 1;">
-					{pdfLoading ? '⏳ Cargando…' : '<Download size={16} /> Descargar PDF'}
+					{pdfLoading ? '<Clock size={16} /> Cargando…' : '<Download size={16} /> Descargar PDF'}
 				</button>
 				<button class="btn btn-info" onclick={abrirPreview} disabled={pdfLoading} style="flex: 1;">
-					<Eye size={16} />️ Previsualizar
+					<Eye size={16} /> Previsualizar
 				</button>
 			</div>
 			<div class="grid-2" style="margin-top: 0.5rem; gap: 0.5rem;">
@@ -549,11 +549,11 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 				</button>
 				{#if reporte.Eliminado === 1 || reporte.Eliminado === true}
 					<button class="btn btn-success" onclick={restaurar} disabled={busy} style="flex: 1;">
-						♻️ Restaurar
+						<Recycle size={16} /> Restaurar
 					</button>
 				{:else}
 					<button class="btn btn-danger" onclick={moverAPapelera} disabled={busy} style="flex: 1;">
-						<Trash2 size={16} />️ Mover a papelera
+						<Trash2 size={16} /> Mover a papelera
 					</button>
 				{/if}
 			</div>

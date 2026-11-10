@@ -1,5 +1,5 @@
 <script>
-	import { BarChart3, RefreshCw, Trash2 , Circle , X } from 'lucide-svelte';
+	import { BarChart3, RefreshCw, Trash2 , Circle , X , ArrowLeft, Clock , ArrowDown } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -290,7 +290,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>📋 Registro de Reportes</h1>
 		<p class="subtitle">Visualización global de reportes de servicio técnico de todos los ingenieros.</p>
 		<div style="flex:1"></div>
@@ -325,7 +325,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 			on:click={() => cambiarTab('papelera')}
 			style="padding: 0.5rem 1rem; border: none; background: transparent; color: var(--color-text); font-weight: 600; border-bottom: 2px solid transparent; cursor: pointer;"
 		>
-			<Trash2 size={16} />️ Papelera ({papelera.length})
+			<Trash2 size={16} /> Papelera ({papelera.length})
 		</button>
 	</div>
 
@@ -348,7 +348,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 				on:click={descargarExcel}
 				disabled={busyExcel || seleccion.length === 0}
 			>
-				{busyExcel ? '⏳ Generando…' : `⬇️ Descargar Excel${seleccion.length ? ` (${seleccion.length})` : ''}`}
+				{busyExcel ? '<Clock size={16} /> Generando…' : `<ArrowDown size={16} /> Descargar Excel${seleccion.length ? ` (${seleccion.length})` : ''}`}
 			</button>
 		</div>
 		<p class="excel-hint">

@@ -16,7 +16,7 @@
 		bind:value
 	/>
 	<button type="button" class="pw-toggle" on:click={() => (show = !show)} title={show ? 'Ocultar contraseña' : 'Mostrar contraseña'}>
-		{show ? '<Eye size={16} />' : '<Eye size={16} />️'}
+		{show ? '<Eye size={16} />' : '<Eye size={16} />'}
 	</button>
 </div>
 

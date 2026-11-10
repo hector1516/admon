@@ -1,5 +1,5 @@
 <script>
-	import { Smartphone, Trash2 } from 'lucide-svelte';
+	import { Smartphone, Trash2 , ArrowLeft, ArrowRight } from 'lucide-svelte';
 
 	import { onMount, tick } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -235,7 +235,7 @@ function formatearFecha(fecha) {
 <div class="chat-page">
 	<!-- Header del chat (estilo app de mensajería) -->
 	<header class="chat-header">
-		<button class="btn-icon" on:click={() => navigate('/')} title="Volver">⬅️</button>
+		<button class="btn-icon" on:click={() => navigate('/')} title="Volver"><ArrowLeft size={16} /></button>
 		<div class="chat-title">
 			<div class="chat-avatar wobnimo-avatar" bind:this={mascotContainer}>
 			<span class="mascot-fallback">🤖</span>
@@ -245,7 +245,7 @@ function formatearFecha(fecha) {
 				<span class="chat-status">🟢 En línea · asistente de ECCSA Automation</span>
 			</div>
 		</div>
-		<button class="btn-icon" on:click={borrarConversacion} title="Borrar la conversación"><Trash2 size={16} />️</button>
+		<button class="btn-icon" on:click={borrarConversacion} title="Borrar la conversación"><Trash2 size={16} /></button>
 	</header>
 
 	{#if error}
@@ -329,7 +329,7 @@ function formatearFecha(fecha) {
 					}}
 					disabled={enviando || !conversacion}
 				></textarea>
-				<button type="submit" class="btn-send" disabled={!nuevoMensaje.trim() || enviando || !conversacion} title="Enviar">➤</button>
+				<button type="submit" class="btn-send" disabled={!nuevoMensaje.trim() || enviando || !conversacion} title="Enviar"><ArrowRight size={16} /></button>
 			</div>
 		</form>
 		<div class="input-hint">ECCSA IA puede cometer errores; verifica los datos importantes.</div>

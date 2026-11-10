@@ -1,5 +1,5 @@
 <script>
-	import { Save , Bot, Package, Receipt , X } from 'lucide-svelte';
+	import { Save , Bot, Package, Receipt , X , ArrowLeft, Clock } from 'lucide-svelte';
 import HoldButton from '$lib/components/HoldButton.svelte';
 
 	import { onMount } from 'svelte';
@@ -211,7 +211,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate(`/cotizaciones/${clave}`)} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate(`/cotizaciones/${clave}`)} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>📋 Partidas {h ? folioFmt(h.folio ?? h.idLocal) : ''}</h1>
 	</div>
 
@@ -239,11 +239,11 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 							<div style="flex: 1; min-width: 0; text-align: left;">
 								<div style="font-size: 0.75rem; color: var(--color-text-muted);">
 									#{p.partida} · cant. {p.cantidad}
-									{#if !p.synced}<span class="badge badge-warning" style="font-size: 0.6rem;">⏳</span>{/if}
+									{#if !p.synced}<span class="badge badge-warning" style="font-size: 0.6rem;"><Clock size={16} /></span>{/if}
 								</div>
 								<div style="font-size: 0.9rem; font-weight: 600;">{p.descripcion}</div>
 								<div style="font-size: 0.75rem; color: var(--color-text-muted);">
-									${Number(p.precio_compra).toFixed(2)} × (1+{p.factor}){p.flete ? ` + flete $${Number(p.flete).toFixed(2)}` : ''}
+									${Number(p.precio_compra).toFixed(2)} <X size={16} /> (1+{p.factor}){p.flete ? ` + flete $${Number(p.flete).toFixed(2)}` : ''}
 								</div>
 								{#if p.articulo_generico}
 									<div style="font-size: 0.7rem; color: var(--color-text-muted);"><Package size={16} /> {p.articulo_generico}</div>

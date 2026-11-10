@@ -1,5 +1,5 @@
 <script>
-	import { Check, ClipboardList, Save, Siren, Trash2 } from 'lucide-svelte';
+	import { Check, ClipboardList, Save, Siren, Trash2 , ArrowLeft } from 'lucide-svelte';
 
 	import { onMount, onDestroy } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -369,7 +369,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/usuarios')} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/usuarios')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>✏️ {nombre || 'Usuario'}</h1>
 	</div>
 
@@ -409,7 +409,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 						disabled={busyFoto}
 						style="margin-top: 0.5rem;"
 					>
-							{busyFoto ? 'Quitando…' : '<Trash2 size={16} />️ Quitar foto'}
+							{busyFoto ? 'Quitando…' : '<Trash2 size={16} /> Quitar foto'}
 						</button>
 					{/if}
 				</div>

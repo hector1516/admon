@@ -1,5 +1,5 @@
 <script>
-	import { Save, Trash2, Upload , Brush, FileText , X } from 'lucide-svelte';
+	import { Save, Trash2, Upload , Brush, FileText , X , ArrowLeft, Pencil } from 'lucide-svelte';
 import HoldButton from '$lib/components/HoldButton.svelte';
 
 	import { onMount } from 'svelte';
@@ -312,7 +312,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/reportes')} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/reportes')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>📋 {reporte.Folio || 'Cargando…'}</h1>
 		<div style="flex:1"></div>
 		{#if reporte.Folio}
@@ -451,7 +451,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 					<div style="white-space: pre-wrap; margin-top: 0.25rem; color: var(--color-text-muted);">{reporte.Notas || '-'}</div>
 				</div>
 				<div class="grid-3" style="margin-top: 0.75rem;">
-					<button class="btn btn-primary btn-sm" on:click={() => { editForm = { ...editForm }; editando = true; }}>✏️ Editar</button>
+					<button class="btn btn-primary btn-sm" on:click={() => { editForm = { ...editForm }; editando = true; }}><Pencil size={16} /> Editar</button>
 					<button class="btn btn-secondary btn-sm" on:click={abrirPDF}><FileText size={16} /> Ver PDF</button>
 					<HoldButton label="Eliminar" onConfirm={eliminar} disabled={busy} size="sm" />
 				</div>
@@ -497,7 +497,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 					{#each fotos as f}
 						<div style="position: relative; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden;">
 							<img src="data:image/jpeg;base64,{f.base64}" alt="Foto {f.orden}" style="width: 100%; aspect-ratio: 4/3; object-fit: cover;" />
-							<button class="btn btn-sm btn-danger" style="position: absolute; top: 4px; right: 4px; padding: 0.2rem 0.4rem; font-size: 0.7rem;" on:click={() => borrarFoto(f.id)}><Trash2 size={16} />️</button>
+							<button class="btn btn-sm btn-danger" style="position: absolute; top: 4px; right: 4px; padding: 0.2rem 0.4rem; font-size: 0.7rem;" on:click={() => borrarFoto(f.id)}><Trash2 size={16} /></button>
 						</div>
 					{/each}
 				</div>
@@ -517,7 +517,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 			{:else if reporte.FirmaConformidad}
 				<img src="data:image/png;base64,{reporte.FirmaConformidad}" alt="Firma" style="max-width: 100%; border: 1px solid var(--color-border); border-radius: 8px;" />
 			{:else}
-				<button class="btn btn-primary btn-block" on:click={startFirma} disabled={busy}>✍️ Firmar ahora</button>
+				<button class="btn btn-primary btn-block" on:click={startFirma} disabled={busy}><Pencil size={16} /> Firmar ahora</button>
 			{/if}
 		</div>
 

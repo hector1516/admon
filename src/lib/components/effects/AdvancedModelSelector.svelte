@@ -1,5 +1,6 @@
 <!-- AdvancedModelSelector.svelte — Selector informado con búsqueda y filtrado -->
 <script lang="ts">
+	import { ChevronDown } from 'lucide-svelte';
   interface Option {
     id: string;
     label: string;
@@ -73,7 +74,7 @@
         <span class="selector-placeholder">{placeholder}</span>
       {/if}
     </span>
-    <span class="selector-arrow" class:open={isOpen}>▾</span>
+    <span class="selector-arrow" class:open={isOpen}><ChevronDown size={16} /></span>
   </button>
 
   {#if isOpen}

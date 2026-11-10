@@ -1,5 +1,5 @@
 <script>
-	import { Trash2 , Copy, Download, Eye, FileEdit, FileText, Mail, Plus, Save, Settings, UserPlus , X } from 'lucide-svelte';
+	import { Trash2 , Copy, Download, Eye, FileEdit, FileText, Mail, Plus, Save, Settings, UserPlus , X , Pencil } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -401,7 +401,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 									<div style="display: flex; gap: 0.35rem; flex-shrink: 0; align-items: flex-start;">
 										<button class="btn btn-sm btn-secondary" on:click={() => descargarRemisionPdf(r)} disabled={remBusy} title="Descargar PDF"><Download size={16} /></button>
 										<button class="btn btn-sm btn-secondary" on:click={() => abrirAsignar(r)} disabled={remBusy} title="Asignar usuario para firmar en Field"><UserPlus size={16} /></button>
-										<button class="btn btn-sm btn-danger" on:click={() => borrarRemision(r)} disabled={remBusy} title="Eliminar remisión"><Trash2 size={16} />️</button>
+										<button class="btn btn-sm btn-danger" on:click={() => borrarRemision(r)} disabled={remBusy} title="Eliminar remisión"><Trash2 size={16} /></button>
 									</div>
 								</div>
 								{#if asignandoId === r.id}
@@ -447,7 +447,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 		</div>
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
 			<button class="btn btn-primary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/partidas`)} disabled={bloqueado || busy}><FileText size={18} /> Partidas</button>
-			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/editar`)} disabled={bloqueado || busy}>✏️ Modificar</button>
+			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/editar`)} disabled={bloqueado || busy}><Pencil size={16} /> Modificar</button>
 		</div>
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
 			<button class="btn btn-secondary btn-block" on:click={() => navigate(`/cotizaciones/${clave}/nota`)} disabled={busy}><FileEdit size={18} /> Nota</button>

@@ -1,5 +1,5 @@
 <script>
-	import { Key, Lock } from 'lucide-svelte';
+	import { Key, Lock , ArrowLeft } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -192,7 +192,7 @@ import TextGenerate from '$lib/components/effects/TextGenerate.svelte';
 					</button>
 				</div>
 				<button type="button" class="btn btn-secondary btn-block" style="margin-top:0.5rem" on:click={limpiar}>
-					⬅️ Limpiar
+					<ArrowLeft size={16} /> Limpiar
 				</button>
 			</form>
 		{/if}

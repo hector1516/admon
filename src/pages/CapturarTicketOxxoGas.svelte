@@ -1,5 +1,5 @@
 <script>
-	import { Brain, Save , X } from 'lucide-svelte';
+	import { Brain, Save , X , ArrowLeft, Clock } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -170,7 +170,7 @@
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/tickets_oxxogas')} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/tickets_oxxogas')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>🎫 Capturar Ticket OxxoGas</h1>
 	</div>
 
@@ -235,7 +235,7 @@
 			<div class="folio-row">
 				<input class="input" placeholder="Ej. 1234567890" bind:value={form.folio_ticket} />
 				<button class="btn btn-sm btn-info" onclick={extraerFolioConIA} disabled={ocrLoading || !fotoFile}>
-					{ocrLoading ? '⏳' : '<Brain size={16} />'} IA
+					{ocrLoading ? '<Clock size={16} />' : '<Brain size={16} />'} IA
 				</button>
 			</div>
 		</div>

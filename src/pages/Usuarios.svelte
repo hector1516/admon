@@ -1,5 +1,5 @@
 <script>
-	import { Briefcase , Radio } from 'lucide-svelte';
+	import { Briefcase , Radio , ArrowLeft, ArrowRight } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -89,7 +89,7 @@ usuarios = Array.isArray(res) ? res : (res.items || []);
 <div class:page={!embebido}>
 	{#if !embebido}
 		<div class="header">
-			<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver">⬅️</button>
+			<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
 			<h1>👥 Administrador de usuarios</h1>
 		</div>
 	{:else}
@@ -141,7 +141,7 @@ usuarios = Array.isArray(res) ? res : (res.items || []);
 							{/if}
 						</div>
 					</div>
-					<span class="flecha">›</span>
+					<span class="flecha"><ArrowRight size={16} /></span>
 				</button>
 			{/each}
 		</div>

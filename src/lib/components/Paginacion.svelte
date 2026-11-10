@@ -1,4 +1,6 @@
 <script>
+	import { ArrowLeft, Play, SkipBack, SkipForward } from 'lucide-svelte';
+
 	// Paginación para los listados de Admon.
 	//
 	// Antes cada pantalla pintaba TODOS los registros de una vez: el listado de
@@ -51,16 +53,16 @@
 
 		<div class="botones">
 			<button class="btn-sm" onclick={() => (pagina = 1)} disabled={pagina === 1}
-				title="Primera página" aria-label="Primera página">⏮</button>
+				title="Primera página" aria-label="Primera página"><SkipBack size={16} /></button>
 			<button class="btn-sm" onclick={() => (pagina -= 1)} disabled={pagina === 1}
-				onkeydown={alTeclado} title="Anterior" aria-label="Página anterior">◀ Anterior</button>
+				onkeydown={alTeclado} title="Anterior" aria-label="Página anterior"><ArrowLeft size={16} /> Anterior</button>
 
 			<span class="folio">Página <b>{pagina}</b> de <b>{totalPaginas}</b></span>
 
 			<button class="btn-sm" onclick={() => (pagina += 1)} disabled={pagina === totalPaginas}
-				onkeydown={alTeclado} title="Siguiente" aria-label="Página siguiente">Siguiente ▶</button>
+				onkeydown={alTeclado} title="Siguiente" aria-label="Página siguiente">Siguiente <Play size={16} /></button>
 			<button class="btn-sm" onclick={() => (pagina = totalPaginas)} disabled={pagina === totalPaginas}
-				title="Última página" aria-label="Última página">⏭</button>
+				title="Última página" aria-label="Última página"><SkipForward size={16} /></button>
 		</div>
 
 		{#if totalPaginas > 2}

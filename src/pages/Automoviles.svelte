@@ -1,5 +1,5 @@
 <script>
-	import { Hammer, Unlock, Wrench , Ruler , ArrowLeft, X } from 'lucide-svelte';
+	import { Hammer, Unlock, Wrench , Ruler , ArrowLeft, X , Pencil } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -239,7 +239,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 						{/if}
 					</div>
 					<div class="auto-actions">
-						<button class="btn btn-sm btn-secondary" on:click|stopPropagation={() => abrirEditar(a)}>✏️ Editar</button>
+						<button class="btn btn-sm btn-secondary" on:click|stopPropagation={() => abrirEditar(a)}><Pencil size={16} /> Editar</button>
 						<label class="btn btn-sm btn-secondary" style="cursor: pointer;" on:click|stopPropagation>
 							📷 Imagen
 							<input type="file" accept="image/*" style="display: none;" on:change={(e) => subirImagen(a.id, e.target.files[0])} />

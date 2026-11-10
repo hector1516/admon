@@ -1,4 +1,6 @@
 <script>
+	import { ArrowLeft } from 'lucide-svelte';
+
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
@@ -64,7 +66,7 @@
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/kilometros')} title="Volver al módulo">⬅️</button>
+		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/kilometros')} title="Volver al módulo"><ArrowLeft size={16} /></button>
 		<h1>🛞 {d ? d.vehiculo.placas || 'SIN PLACAS' : 'Detalle del vehículo'}</h1>
 		<div style="flex:1"></div>
 		{#if d}<span class="count">{d.vehiculo.marca_modelo || '—'}</span>{/if}
@@ -124,7 +126,7 @@
 			</div>
 		{/if}
 
-		<button class="btn btn-secondary btn-back" onclick={() => navigate('/kilometros')}>⬅️ Volver al módulo de Kilómetros</button>
+		<button class="btn btn-secondary btn-back" onclick={() => navigate('/kilometros')}><ArrowLeft size={16} /> Volver al módulo de Kilómetros</button>
 	{/if}
 </div>
 

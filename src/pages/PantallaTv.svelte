@@ -1,5 +1,5 @@
 <script>
-	import { Upload } from 'lucide-svelte';
+	import { Upload , Clock, Play, Recycle, SkipForward } from 'lucide-svelte';
 
 	import { onMount, onDestroy } from 'svelte';
 	import { auth } from '$lib/stores/auth.js';
@@ -210,10 +210,10 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 			     congelaría la pantalla y en una TV eso parece una falla. -->
 			<div class="acciones">
 				<button class="btn btn-sm btn-primary" disabled={mandando} onclick={() => mandar('avanzar')}>
-					⏭️ Avanzar
+					<SkipForward size={16} /> Avanzar
 				</button>
 				<button class="btn btn-sm btn-secondary" disabled={mandando} onclick={() => mandar('seguir')}>
-					▶️ Seguir rotando
+					<Play size={16} /> Seguir rotando
 				</button>
 			</div>
 
@@ -286,7 +286,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 			disabled={!archivo || subiendo}
 			onclick={subirPortada}
 		>
-			{subiendo ? (leyendoArchivo ? '⏳ Subiendo…' : '⏳ Preparando…') : '<Upload size={16} /> Subir a la pantalla'}
+			{subiendo ? (leyendoArchivo ? '<Clock size={16} /> Subiendo…' : '<Clock size={16} /> Preparando…') : '<Upload size={16} /> Subir a la pantalla'}
 		</button>
 
 		{#if historial.length > 1}
@@ -299,7 +299,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 						{#if h.activo}
 							<span class="chip chip-ok">en pantalla</span>
 						{:else}
-							<button class="btn-icon" onclick={() => restaurar(h.id)} title="Volver a ponerla">♻️</button>
+							<button class="btn-icon" onclick={() => restaurar(h.id)} title="Volver a ponerla"><Recycle size={16} /></button>
 							<HoldButton label="Borrar" onConfirm={() => borrarImagen(h.id)} size="sm" />
 						{/if}
 					</div>

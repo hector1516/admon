@@ -1,5 +1,5 @@
 <script>
-	import { Download, Upload } from 'lucide-svelte';
+	import { Download, Upload , ArrowLeft } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -126,7 +126,7 @@
 
 <div class="page" style="padding: 0; display: flex; flex-direction: column; height: 100dvh;">
 	<div class="header" style="flex-shrink: 0; padding: 0.5rem 1rem 0;">
-		<button class="btn btn-sm btn-secondary" on:click={() => navigate(`/cotizaciones/${clave}`)} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" on:click={() => navigate(`/cotizaciones/${clave}`)} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>📄 {folio ? folioFmt(folio) : 'PDF'}</h1>
 	</div>
 
@@ -135,7 +135,7 @@
 	{:else if error && !pdfOk}
 		<div class="empty" style="margin: 1rem;">{error}</div>
 		<div style="text-align: center; padding: 1rem;">
-			<button class="btn btn-secondary" on:click={() => navigate(`/cotizaciones/${clave}`)}>⬅️ Volver</button>
+			<button class="btn btn-secondary" on:click={() => navigate(`/cotizaciones/${clave}`)}><ArrowLeft size={16} /> Volver</button>
 		</div>
 	{:else}
 		<div style="display: flex; gap: 0.5rem; padding: 0.5rem 1rem; flex-shrink: 0;">

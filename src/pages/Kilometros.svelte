@@ -1,5 +1,5 @@
 <script>
-	import { BarChart3, Save, User, Wrench , ArrowUp, Fuel, Ticket , ArrowDown, ArrowRight } from 'lucide-svelte';
+	import { BarChart3, Save, User, Wrench , ArrowUp, Fuel, Ticket , ArrowDown, ArrowRight , ArrowLeft, Minus, Pencil, Play , ArrowLeftRight } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -190,7 +190,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver">⬅️</button>
+		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
 		<h1>🛣️ Kilómetros</h1>
 		<div style="flex:1"></div>
 		<span class="count">{consumo ? consumo.vehiculos.length : 0} vehículos</span>
@@ -200,7 +200,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 
 	<div class="tabs">
 		<button class="tab" class:active={tab === 'consumo'} onclick={() => (tab = 'consumo')}><BarChart3 size={16} /> Consumo semanal</button>
-		<button class="tab" class:active={tab === 'captura'} onclick={() => (tab = 'captura')}>✍️ Capturar kilómetros</button>
+		<button class="tab" class:active={tab === 'captura'} onclick={() => (tab = 'captura')}><Pencil size={16} /> Capturar kilómetros</button>
 	</div>
 
 	{#if error}<div class="msg err">⚠️ {error}</div>{/if}
@@ -215,12 +215,12 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 		{:else}
 			{@const r = consumo.resumen}
 			<div class="semana-bar">
-				<button class="btn btn-sm btn-secondary" onclick={() => moverSemana(-1)} disabled={busy} title="Semana anterior">◀</button>
+				<button class="btn btn-sm btn-secondary" onclick={() => moverSemana(-1)} disabled={busy} title="Semana anterior"><ArrowLeft size={16} /></button>
 				<div class="semana-txt">
 					<div class="semana-lbl">Semana {consumo.semana.num} del {consumo.semana.anio}</div>
 					<div class="semana-rango">{consumo.semana.etiqueta}</div>
 				</div>
-				<button class="btn btn-sm btn-secondary" onclick={() => moverSemana(1)} disabled={busy} title="Semana siguiente">▶</button>
+				<button class="btn btn-sm btn-secondary" onclick={() => moverSemana(1)} disabled={busy} title="Semana siguiente"><Play size={16} /></button>
 				<button class="btn btn-sm btn-ghost" onclick={volverACurrent} disabled={busy}>Esta semana</button>
 			</div>
 
@@ -267,13 +267,13 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 								</div>
 							{/if}
 							<div class="folio">{v.placas || 'SIN PLACAS'}</div>
-							<div class="fecha">{v.marca_modelo || '—'}</div>
+							<div class="fecha">{v.marca_modelo || '<Minus size={16} />'}</div>
 
 							<div class="consumo">
 								{#if v.comparable}
 									<span class="consumo-num">{fmtNum(v.consumo_km)}</span><span class="consumo-unit">km esta semana</span>
 								{:else}
-									<span class="consumo-num apagado">—</span><span class="consumo-unit">sin lectura esta semana</span>
+									<span class="consumo-num apagado"><Minus size={16} /></span><span class="consumo-unit">sin lectura esta semana</span>
 								{/if}
 							</div>
 
@@ -297,7 +297,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 							{#if v.conductor}<div class="row"><User size={16} /> {v.conductor}</div>{/if}
 							<div class="row"><Fuel size={16} /> Odómetro: {fmtNum(v.km_actuales)} km</div>
 							{#if v.comparable}
-								<div class="row">↔️ {fmtNum(v.ultimo_km_pasada)} <ArrowRight size={16} /> {fmtNum(v.ultimo_km)} (sem. pasada <ArrowRight size={16} /> esta)</div>
+								<div class="row"><ArrowLeftRight size={16} /> {fmtNum(v.ultimo_km_pasada)} <ArrowRight size={16} /> {fmtNum(v.ultimo_km)} (sem. pasada <ArrowRight size={16} /> esta)</div>
 							{/if}
 							{#if v.kms_desde_servicio !== null}
 								<div class="row"><Wrench size={16} /> {fmtNum(v.kms_desde_servicio)} km desde el último servicio</div>

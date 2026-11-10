@@ -1,5 +1,5 @@
 <script>
-	import { Save , Plus } from 'lucide-svelte';
+	import { Save , Plus , ArrowLeft, Clock, Pencil } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -150,7 +150,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 <div class:page={!embebido}>
 	{#if !embebido}
 		<div class="header">
-			<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver">⬅️</button>
+			<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
 			<h1>📝 Notas</h1>
 			<div style="flex:1"></div>
 			<button class="btn btn-sm btn-primary" onclick={abrirNueva}><Plus size={16} /> Nueva nota</button>
@@ -201,7 +201,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 			</div>
 			<div class="editor-acciones">
 				<button class="btn btn-sm btn-primary" onclick={guardar} disabled={guardando || !formTitulo.trim() || !formContenido.trim()}>
-					{guardando ? '⏳ Guardando…' : '<Save size={16} /> Guardar'}
+					{guardando ? '<Clock size={16} /> Guardando…' : '<Save size={16} /> Guardar'}
 				</button>
 				<button class="btn btn-sm btn-secondary" onclick={cancelarEditor} disabled={guardando}>Cancelar</button>
 			</div>
@@ -221,7 +221,7 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 					<div class="nota-head">
 						<h2 class="nota-titulo">{#if n.fija}<span class="nota-fija">📌 fija</span>{/if}{n.titulo}</h2>
 						<div class="nota-acciones">
-							<button class="btn-icon" onclick={() => abrirEditar(n)} title="Editar">✏️</button>
+							<button class="btn-icon" onclick={() => abrirEditar(n)} title="Editar"><Pencil size={16} /></button>
 							<HoldButton label="Borrar" onConfirm={() => borrar(n)} size="sm" />
 						</div>
 					</div>
