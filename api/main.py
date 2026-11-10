@@ -43,8 +43,34 @@ if not DB_PASSWORD:
 DB_DATABASE = os.getenv("HUB_DB_DATABASE", "ECCSA_Admon")
 
 
+import threading
+_thread_local = threading.local()
+
 def get_connection():
+    """Devuelve una conexión reutilizable por thread (evita overhead de conexión por request)."""
+    conn = getattr(_thread_local, 'conn', None)
+    if conn is not None:
+        try:
+            # Verificar que la conexión sigue viva
+            cur = conn.cursor()
+            cur.execute("SELECT 1")
+            cur.fetchone()
+            cur.close()
+            return conn
+        except Exception:
+            try:
+                conn.close()
+            except Exception:
+                pass
+            conn = None
+            _thread_local.conn = None
     conn = pymssql.connect(server=DB_SERVER, user=DB_USER, password=DB_PASSWORD, database=DB_DATABASE, autocommit=True)
+    # Hacer close() un no-op para reutilizar la conexion (pool por thread)
+    _original_close = conn.close
+    def _noop_close():
+        pass
+    conn.close = _noop_close
+    _thread_local.conn = conn
     return conn
 
 
