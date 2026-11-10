@@ -1,5 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
+import { ArrowLeft, Plus } from 'lucide-svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { online } from '$lib/stores/online.js';
