@@ -60,7 +60,7 @@
 	let papelera = $derived(filtrados.filter(r => r.Eliminado === 1 || r.Eliminado === true));
 
 	// Lista visible: la pestaña Excel exporta los MISMOS reportes firmados,
-	// así que reutiliza la lista de la pestaña <Circle size={16} /> Firmados.
+	// así que reutiliza la lista de la pestaña 🟢 Firmados.
 	let listaTab = $derived(tab === 'papelera' ? papelera : firmados);
 
 	const POR_PAGINA = 100;
@@ -210,7 +210,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 		const v = String(est || 'Borrador');
 		if (v === 'Borrador') return `<span class="badge" style="background:#475569;">📝 Borrador</span>`;
 		if (v === 'Completado') return `<span class="badge" style="background:#0EA5E9;">🔵 Completado</span>`;
-		if (v === 'Firmado') return `<span class="badge" style="background:#10B981;"><Circle size={16} /> Firmado</span>`;
+		if (v === 'Firmado') return `<span class="badge" style="background:#10B981;">🟢 Firmado</span>`;
 		if (v === 'Cancelado') return `<span class="badge" style="background:#EF4444;">🔴 Cancelado</span>`;
 		return `<span class="badge">${v}</span>`;
 	}
@@ -309,7 +309,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 			on:click={() => cambiarTab('firmados')}
 			style="padding: 0.5rem 1rem; border: none; background: transparent; color: var(--color-text); font-weight: 600; border-bottom: 2px solid transparent; cursor: pointer;"
 		>
-			<Circle size={16} /> Firmados ({firmados.length})
+			🟢 Firmados ({firmados.length})
 		</button>
 		<button 
 			class="tab-btn" 
@@ -348,11 +348,15 @@ lista = Array.isArray(res) ? res : (res.items || []);
 				on:click={descargarExcel}
 				disabled={busyExcel || seleccion.length === 0}
 			>
-				{busyExcel ? '<Clock size={16} /> Generando…' : `<ArrowDown size={16} /> Descargar Excel${seleccion.length ? ` (${seleccion.length})` : ''}`}
+{#if busyExcel}
+			<Clock size={16} /> Generando.
+{:else}
+			<ArrowDown size={16} /> Descargar Excel{seleccion.length ? ` ({seleccion.length})` : ''}
+{/if}
 			</button>
 		</div>
 		<p class="excel-hint">
-			Selecciona reportes del <strong>mismo cliente</strong> (solo <Circle size={16} /> Firmados): cada uno se exporta en una
+			Selecciona reportes del <strong>mismo cliente</strong> (solo 🟢 Firmados): cada uno se exporta en una
 			fila con su consecutivo, horas totales (fin − inicio + traslado) y la descripción del servicio.
 		</p>
 	{/if}
