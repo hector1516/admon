@@ -30,6 +30,7 @@ import Automoviles from './pages/Automoviles.svelte';
 	import RegistroReportePreview from './pages/RegistroReportePreview.svelte';
 	import EccsaIa from './pages/EccsaIa.svelte';
 	import Config from './pages/Config.svelte';
+import Panel from './pages/Panel.svelte';
 	import Legends from './pages/Legends.svelte';
 	import TicketsOxxoGas from './pages/TicketsOxxoGas.svelte';
 	import Kilometros from './pages/Kilometros.svelte';
