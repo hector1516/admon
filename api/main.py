@@ -56,10 +56,18 @@ def get_connection():
             cur.execute("SELECT 1")
             cur.fetchone()
             cur.close()
+            if not hasattr(conn, '_real_close'):
+                conn._real_close = conn.close
+                def _noop_close():
+                    pass
+                conn.close = _noop_close
             return conn
         except Exception:
             try:
-                conn.close()
+                if hasattr(conn, '_real_close'):
+                    conn._real_close()
+                else:
+                    conn.close()
             except Exception:
                 pass
             conn = None
