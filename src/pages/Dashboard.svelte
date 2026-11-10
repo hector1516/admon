@@ -34,7 +34,6 @@
 	}
 
 	function go(mod) {
-		console.log('go called with', mod.path);
 		navigate(mod.path);
 	}
 
