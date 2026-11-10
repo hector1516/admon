@@ -105,4 +105,38 @@ button, a, input, select, textarea {
     .grid-4 { grid-template-columns: repeat(2, 1fr); }
 }
 
+/* Desktop: reduce tap target size */
+@media (min-width: 1025px) {
+    :root { --tap: 36px; }
+    .btn { min-height: 36px; padding: 0.5rem 1rem; }
+}
+
 /* UNIQUE_MARKER_RESPONSIVE_CSS */
+
+
+/* �� Estándar universal de botones �� */
+.btn {
+    max-width: 280px;
+}
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    min-height: 36px;
+}
+.btn-md, .btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    min-height: 40px;
+}
+.btn-lg {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    min-height: 44px;
+}
+@media (max-width: 767px) {
+    .btn-block {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+/* UNIQUE_MARKER_BTN_STANDARD */
