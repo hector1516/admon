@@ -119,7 +119,16 @@ export async function listar({ pagina = 1, porPagina = 100, q = '' } = {}) {
 			// sin red: se sirve de la caché local
 		}
 	}
-	const all = await db.cotizaciones.toArray();
+	let all;
+	if (foliosDeLaPagina) {
+		const t0 = performance.now();
+		all = await db.cotizaciones.where('idLocal').anyOf([...foliosDeLaPagina]).toArray();
+		console.log("filtered toArray took", (performance.now() - t0).toFixed(0), "ms, records:", all.length);
+	} else {
+		const t0 = performance.now();
+		all = await db.cotizaciones.toArray();
+		console.log("full toArray took", (performance.now() - t0).toFixed(0), "ms, records:", all.length);
+	}
 	all.sort((a, b) => {
 		if (a.folio == null && b.folio == null) return 0;
 		if (a.folio == null) return -1;
