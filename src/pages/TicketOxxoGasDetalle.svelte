@@ -187,7 +187,7 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/tickets_oxxogas')} title="Volver al listado"><ArrowLeft size={16} /></button>
+		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/tickets_oxxogas')} title="Volver al listado"><ArrowLeft size={16} /> Volver</button>
 		<h1>🎫 Ticket {t ? `#${t.folio}` : ''}</h1>
 		<div style="flex:1"></div>
 		{#if t}

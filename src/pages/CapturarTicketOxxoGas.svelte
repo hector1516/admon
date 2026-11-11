@@ -170,7 +170,7 @@
 
 <div class="page">
 	<div class="header">
-		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/tickets_oxxogas')} title="Volver"><ArrowLeft size={16} /></button>
+		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/tickets_oxxogas')} title="Volver"><ArrowLeft size={16} /> Volver</button>
 		<h1>🎫 Capturar Ticket OxxoGas</h1>
 	</div>
 
