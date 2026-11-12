@@ -21,10 +21,12 @@ def __getattr__(name):
     return getattr(_m, name)
 
 import json as _json
+import base64
 import urllib.request as _urlreq
 import urllib.error as _urlerr
 
 import json as _json
+import base64
 import urllib.request as _urlreq
 import urllib.error as _urlerr
 
