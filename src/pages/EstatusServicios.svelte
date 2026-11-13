@@ -115,7 +115,10 @@
 
 <div class="page">
 	<div class="header">
-		<div class="brand-col">
+		<div class="brand-col" style="display: flex; align-items: center; gap: 0.5rem;">
+			<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver">
+				Volver
+			</button>
 			<h1 class="brand">📊 Estatus de Servicios</h1>
 		</div>
 		<ActionsBar onlogout={onSalir} />
