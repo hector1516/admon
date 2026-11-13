@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import { api } from '$lib/api.js';
 	import { auth } from '$lib/stores/auth.js';
-	// Admon no tiene toasts store; se usa alert()
 	import { navigate } from '$lib/router.js';
 	import ActionsBar from '$lib/components/ActionsBar.svelte';
 
@@ -26,10 +25,10 @@
 	};
 
 	const ICONOS_ESTATUS = {
-		verde: '🟢',
-		amarillo: '🟡',
-		rojo: '🔴',
-		gris: '⚪',
+		verde: 'OK',
+		amarillo: 'DEG',
+		rojo: 'DOWN',
+		gris: 'N/A',
 	};
 
 	onMount(async () => {
@@ -82,7 +81,7 @@
 			if (servicioSeleccionado && detalle) {
 				detalle = await api.get(`/estatus-servicios/${servicioSeleccionado.id}`);
 			}
-			alert('Verificación completada');
+			alert('Verificacion completada');
 		} catch (e) {
 			alert(e.message || 'Error');
 		}
@@ -107,7 +106,7 @@
 	}
 
 	function formatearTiempo(ms) {
-		if (ms == null) return '—';
+		if (ms == null) return '-';
 		if (ms < 1000) return `${ms}ms`;
 		return `${(ms / 1000).toFixed(1)}s`;
 	}
@@ -119,7 +118,7 @@
 			<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver">
 				Volver
 			</button>
-			<h1 class="brand">📊 Estatus de Servicios</h1>
+			<h1 class="brand">Estatus de Servicios</h1>
 		</div>
 		<ActionsBar onlogout={onSalir} />
 	</div>
@@ -131,7 +130,6 @@
 		</div>
 	{/if}
 
-	<!-- Resumen global -->
 	{#if resumenData}
 		<div class="resumen-bar">
 			<div class="resumen-item" style="color: {COLORES.verde}">
@@ -144,7 +142,7 @@
 			</div>
 			<div class="resumen-item" style="color: {COLORES.rojo}">
 				<span class="resumen-num">{resumenData.rojos}</span>
-				<span class="resumen-label">Caídos</span>
+				<span class="resumen-label">Caidos</span>
 			</div>
 			<div class="resumen-item" style="color: {COLORES.gris}">
 				<span class="resumen-num">{resumenData.grises}</span>
@@ -152,7 +150,7 @@
 			</div>
 			<div class="resumen-actions">
 				<button class="btn btn-sm btn-primary" onclick={verificarAhora} disabled={cargando}>
-					{cargando ? 'Verificando...' : '🔄 Verificar todo'}
+					{cargando ? 'Verificando...' : 'Verificar todo'}
 				</button>
 				<label class="toggle-auto">
 					<input type="checkbox" bind:checked={autoRefresh} />
@@ -168,14 +166,13 @@
 			<p>Cargando servicios...</p>
 		</div>
 	{:else}
-		<!-- Grid de tarjetas -->
 		<div class="servicios-grid">
 			{#each servicios as svc (svc.id)}
 				<button class="servicio-card" onclick={() => verDetalle(svc)}
 					style="border-left: 4px solid {COLORES[svc.estatus] || COLORES.gris}">
 					<div class="svc-header">
-						<span class="svc-icono">{svc.icono || '🔧'}</span>
-						<span class="svc-estatus">{ICONOS_ESTATUS[svc.estatus] || '⚪'}</span>
+						<span class="svc-icono">{svc.icono || ''}</span>
+						<span class="svc-estatus">{ICONOS_ESTATUS[svc.estatus] || 'N/A'}</span>
 					</div>
 					<div class="svc-nombre">{svc.nombre}</div>
 					<div class="svc-detalle">{svc.detalle || 'Sin datos'}</div>
@@ -190,13 +187,12 @@
 		</div>
 	{/if}
 
-	<!-- Modal de detalle -->
 	{#if servicioSeleccionado}
 		<div class="modal-overlay" onclick={cerrarDetalle}>
 			<div class="modal-card" onclick={(e) => e.stopPropagation()}>
 				<div class="modal-header">
 					<h2>{servicioSeleccionado.icono} {servicioSeleccionado.nombre}</h2>
-					<button class="btn-close" onclick={cerrarDetalle}>✕</button>
+					<button class="btn-close" onclick={cerrarDetalle}>X</button>
 				</div>
 
 				{#if cargandoDetalle}
@@ -205,47 +201,43 @@
 						<p>Cargando detalle...</p>
 					</div>
 				{:else if detalle}
-					<!-- Estatus actual -->
 					<div class="detalle-estatus" style="background: {COLORES[detalle.estatus]}20; border: 1px solid {COLORES[detalle.estatus]}">
 						<span class="detalle-icono">{ICONOS_ESTATUS[detalle.estatus]}</span>
 						<div>
 							<div class="detalle-label">{detalle.estatus.toUpperCase()}</div>
 							<div class="detalle-texto">{detalle.detalle}</div>
 							<div class="detalle-meta">
-								Último check: {detalle.ultimo_check || 'Nunca'} · 
+								Ultimo check: {detalle.ultimo_check || 'Nunca'} |
 								Tiempo: {formatearTiempo(detalle.tiempo_respuesta_ms)}
 							</div>
 						</div>
 					</div>
 
-					<!-- Botón verificar -->
 					<div style="margin: 0.75rem 0;">
 						<button class="btn btn-sm btn-primary" onclick={() => verificarUno(detalle.id)}>
-							🔄 Verificar ahora
+							Verificar ahora
 						</button>
 						{#if detalle.url_status}
 							<a class="btn btn-sm btn-secondary" href={detalle.url_status} target="_blank" rel="noopener">
-								🔗 Página de status
+								Pagina de status
 							</a>
 						{/if}
 					</div>
 
-					<!-- Incidencias activas -->
 					{#if detalle.incidencias.filter(i => i.estatus === 'activa').length > 0}
-						<h3 class="section-title">⚠️ Incidencias activas</h3>
+						<h3 class="section-title">Incidencias activas</h3>
 						{#each detalle.incidencias.filter(i => i.estatus === 'activa') as inc}
 							<div class="incidencia-card incidencia-activa">
 								<div class="inc-titulo">{inc.titulo}</div>
 								<div class="inc-desc">{inc.descripcion}</div>
 								<div class="inc-meta">
-									Inicio: {inc.fecha_inicio} · Fuente: {inc.fuente}
+									Inicio: {inc.fecha_inicio} | Fuente: {inc.fuente}
 								</div>
 							</div>
 						{/each}
 					{/if}
 
-					<!-- Historial de checks -->
-					<h3 class="section-title">📋 Historial (últimas 24h)</h3>
+					<h3 class="section-title">Historial (ultimas 24h)</h3>
 					<div class="historial-list">
 						{#each detalle.historial.slice(0, 20) as h}
 							<div class="historial-row">
@@ -256,19 +248,18 @@
 							</div>
 						{/each}
 						{#if detalle.historial.length === 0}
-							<p class="empty-text">Sin historial todavía</p>
+							<p class="empty-text">Sin historial todavia</p>
 						{/if}
 					</div>
 
-					<!-- Incidencias resueltas -->
 					{#if detalle.incidencias.filter(i => i.estatus === 'resuelta').length > 0}
-						<h3 class="section-title">✅ Incidencias resueltas</h3>
+						<h3 class="section-title">Incidencias resueltas</h3>
 						{#each detalle.incidencias.filter(i => i.estatus === 'resuelta').slice(0, 10) as inc}
 							<div class="incidencia-card incidencia-resuelta">
 								<div class="inc-titulo">{inc.titulo}</div>
 								<div class="inc-desc">{inc.descripcion}</div>
 								<div class="inc-meta">
-									Inicio: {inc.fecha_inicio} → Resuelta: {inc.fecha_resolucion}
+									Inicio: {inc.fecha_inicio} a Resuelta: {inc.fecha_resolucion}
 								</div>
 							</div>
 						{/each}
