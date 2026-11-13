@@ -260,7 +260,7 @@ def _verificar_todos():
 @router.get("/api/estatus-servicios")
 def listar_servicios(usuario=Depends(get_current_user)):
     """Lista todos los servicios con su estatus actual."""
-    if not usuario.get("AccesoMailbox") and not usuario.get("AccesoUsuarios"):
+    if not usuario.get("acceso_mailbox") and not usuario.get("acceso_usuarios"):
         raise HTTPException(status_code=403, detail="Sin acceso")
     conn = get_connection()
     cur = conn.cursor(as_dict=True)
@@ -293,7 +293,7 @@ def listar_servicios(usuario=Depends(get_current_user)):
 @router.get("/api/estatus-servicios/resumen")
 def resumen(usuario=Depends(get_current_user)):
     """Resumen global de estatus."""
-    if not usuario.get("AccesoMailbox") and not usuario.get("AccesoUsuarios"):
+    if not usuario.get("acceso_mailbox") and not usuario.get("acceso_usuarios"):
         raise HTTPException(status_code=403, detail="Sin acceso")
     conn = get_connection()
     cur = conn.cursor(as_dict=True)
@@ -332,7 +332,7 @@ def resumen(usuario=Depends(get_current_user)):
 @router.get("/api/estatus-servicios/{servicio_id}")
 def detalle_servicio(servicio_id: int, usuario=Depends(get_current_user)):
     """Detalle de un servicio con historial reciente."""
-    if not usuario.get("AccesoMailbox") and not usuario.get("AccesoUsuarios"):
+    if not usuario.get("acceso_mailbox") and not usuario.get("acceso_usuarios"):
         raise HTTPException(status_code=403, detail="Sin acceso")
     conn = get_connection()
     cur = conn.cursor(as_dict=True)
@@ -405,7 +405,7 @@ def detalle_servicio(servicio_id: int, usuario=Depends(get_current_user)):
 @router.get("/api/estatus-servicios/{servicio_id}/historial")
 def historial_servicio(servicio_id: int, horas: int = 24, usuario=Depends(get_current_user)):
     """Historial de checks de un servicio."""
-    if not usuario.get("AccesoMailbox") and not usuario.get("AccesoUsuarios"):
+    if not usuario.get("acceso_mailbox") and not usuario.get("acceso_usuarios"):
         raise HTTPException(status_code=403, detail="Sin acceso")
     conn = get_connection()
     cur = conn.cursor(as_dict=True)
@@ -432,7 +432,7 @@ def historial_servicio(servicio_id: int, horas: int = 24, usuario=Depends(get_cu
 @router.post("/api/estatus-servicios/verificar")
 def verificar_todos(usuario=Depends(get_current_user)):
     """Fuerza verificación de todos los servicios."""
-    if not usuario.get("AccesoMailbox") and not usuario.get("AccesoUsuarios"):
+    if not usuario.get("acceso_mailbox") and not usuario.get("acceso_usuarios"):
         raise HTTPException(status_code=403, detail="Sin acceso")
     _verificar_todos()
     return {"ok": True, "mensaje": "Verificación completada"}
@@ -441,7 +441,7 @@ def verificar_todos(usuario=Depends(get_current_user)):
 @router.post("/api/estatus-servicios/verificar/{servicio_id}")
 def verificar_uno(servicio_id: int, usuario=Depends(get_current_user)):
     """Fuerza verificación de un servicio."""
-    if not usuario.get("AccesoMailbox") and not usuario.get("AccesoUsuarios"):
+    if not usuario.get("acceso_mailbox") and not usuario.get("acceso_usuarios"):
         raise HTTPException(status_code=403, detail="Sin acceso")
     conn = get_connection()
     cur = conn.cursor(as_dict=True)
