@@ -239,6 +239,8 @@ from api.routers import asistencia as asistencia_router
 app.include_router(asistencia_router.router)
 from api.routers import automoviles as automoviles_router
 app.include_router(automoviles_router.router)
+from api.routers import estatus_servicios as estatus_servicios_router
+app.include_router(estatus_servicios_router.router)
 from api.routers.pdf import ReporteCreate, ReporteUpdate, ReporteFotosSave, ReporteTecnicosSave, ReporteSignatureSave
 # Re-exportar modelos que quedaron en el router pero se usan en main.py
 from api.routers.clientes import SyncPushRequest

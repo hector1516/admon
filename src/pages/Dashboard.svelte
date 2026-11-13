@@ -3,7 +3,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import ActionsBar from '$lib/components/ActionsBar.svelte';
-	import { Bot, ChartBar, Package, ClipboardList, Wrench, Contact, Fuel, Route, Trophy, Car } from 'lucide-svelte';
+	import { Bot, ChartBar, Package, ClipboardList, Wrench, Contact, Fuel, Route, Trophy, Car, Activity } from 'lucide-svelte';
 
 	// Menú de módulos estilo home de Field: icon/title/desc/path/perm.
 	// Solo módulos funcionales; cada tarjeta requiere su permiso activo.
@@ -24,7 +24,8 @@
 		// Legends: visible para todos los usuarios logueados (en Field la gatea el
 		// permiso de kilómetros; aquí los datos son de la empresa y el ranking lo
 		// calcula el worker de workersadmon para las dos apps).
-		{ Icon: Trophy, color: '#F59E0B', title: 'ECCSA Legends', desc: 'Ranking y puntos', path: '/legends' }
+		{ Icon: Trophy, color: '#F59E0B', title: 'ECCSA Legends', desc: 'Ranking y puntos', path: '/legends' },
+		{ Icon: Activity, color: '#22C55E', title: 'Estatus de Servicios', desc: 'Monitoreo de servicios', path: '/estatus_servicios' }
 	];
 
 	let user = $state(null);

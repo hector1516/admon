@@ -37,6 +37,7 @@ import Panel from './pages/Panel.svelte';
 	import KilometroVehiculo from './pages/KilometroVehiculo.svelte';
 	import TicketOxxoGasDetalle from './pages/TicketOxxoGasDetalle.svelte';
 import CapturarTicketOxxoGas from './pages/CapturarTicketOxxoGas.svelte';
+import EstatusServicios from './pages/EstatusServicios.svelte';
 
 	let ready = $state(false);
 	let splashDone = $state(false);
@@ -213,6 +214,8 @@ import CapturarTicketOxxoGas from './pages/CapturarTicketOxxoGas.svelte';
 				<Config />
 			{:else if $path === '/legends'}
 				<Legends />
+			{:else if $path === '/estatus_servicios'}
+				<EstatusServicios onSalir={cerrarSesion} />
 			{:else if $path === '/kilometros'}
 				<Kilometros />
 			{:else if $path.startsWith('/kilometros/vehiculo/')}
