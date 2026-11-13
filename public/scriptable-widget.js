@@ -1,9 +1,6 @@
-// Scriptable Widget: Estatus de Servicios ECCSA
-// Colocar en la app Scriptable de iPhone
-// URL de la API
+// Scriptable Widget: Estatus de Servicios ECCSA (compacto)
 const API_URL = "https://admon.ecc-sa.com.mx/api/estatus-servicios/api/v1/widget";
 
-// Colores por estatus
 const COLORES = {
     verde: "#22c55e",
     amarillo: "#eab308",
@@ -11,27 +8,11 @@ const COLORES = {
     gris: "#6b7280"
 };
 
-// SF Symbols para cada estatus
 const SF_SYMBOLS = {
     verde: "checkmark.circle.fill",
     amarillo: "exclamationmark.triangle.fill",
     rojo: "xmark.circle.fill",
     gris: "questionmark.circle.fill"
-};
-
-// SF Symbols para servicios
-const SF_SERVICIO = {
-    "Microsoft 365": "envelope.fill",
-    "GoDaddy": "globe",
-    "Cloudflare": "cloud.fill",
-    "Admon": "list.bullet.clipboard.fill",
-    "Field": "iphone",
-    "Dashboard": "chart.bar.fill",
-    "Mailbox": "tray.fill",
-    "Colaboradores": "person.2.fill",
-    "WorkersAdmon": "gearshape.2.fill",
-    "SQL Server": "cylinder.split.1x2.fill",
-    "WebbApps Server": "server.rack"
 };
 
 async function fetchData() {
@@ -44,126 +25,144 @@ async function fetchData() {
     }
 }
 
-function crearWidget(data, widgetSize) {
+function crearWidget(data) {
     const widget = new ListWidget();
     widget.backgroundColor = new Color("#0f172a");
-    widget.setPadding(8, 10, 8, 10);
+    widget.setPadding(6, 8, 6, 8);
 
     if (!data) {
         const icon = widget.addImage(SFSymbol.named("wifi.slash").image);
         icon.tintColor = Color.white();
-        icon.imageSize = new Size(24, 24);
+        icon.imageSize = new Size(20, 20);
         const text = widget.addText("Sin conexion");
         text.textColor = Color.white();
-        text.font = Font.systemFont(12);
+        text.font = Font.systemFont(10);
         return widget;
     }
 
-    const isSmall = widgetSize === "small";
-    const isMedium = widgetSize === "medium";
-    const isLarge = widgetSize === "large";
+    const hasRed = data.rojos > 0;
+    const hasYellow = data.amarillos > 0;
+    const allGreen = data.rojos === 0 && data.amarillos === 0;
 
-    // Header
+    // Color de fondo segun estatus global
+    if (hasRed) {
+        widget.backgroundColor = new Color("#1a0a0a");
+    } else if (hasYellow) {
+        widget.backgroundColor = new Color("#1a1a0a");
+    } else {
+        widget.backgroundColor = new Color("#0a1a0a");
+    }
+
+    // Header compacto
     const header = widget.addStack();
     header.layoutHorizontally();
     header.centerAlignContent();
 
     const title = header.addText("Estatus");
     title.textColor = Color.white();
-    title.font = Font.boldSystemFont(isSmall ? 11 : 13);
+    title.font = Font.boldSystemFont(11);
     header.addSpacer();
 
-    const globalStack = header.addStack();
-    globalStack.layoutVertically();
-    globalStack.centerAlignContent();
-    const globalIcon = globalStack.addImage(SFSymbol.named(SF_SYMBOLS[data.global] || "questionmark.circle.fill").image);
+    const globalIcon = header.addImage(SFSymbol.named(SF_SYMBOLS[data.global] || "questionmark.circle.fill").image);
     globalIcon.tintColor = new Color(COLORES[data.global] || "#6b7280");
-    globalIcon.imageSize = new Size(isSmall ? 14 : 18, isSmall ? 14 : 18);
-    const globalLabel = globalStack.addText(data.global.toUpperCase());
-    globalLabel.textColor = new Color(COLORES[data.global] || "#6b7280");
-    globalLabel.font = Font.boldSystemFont(7);
+    globalIcon.imageSize = new Size(14, 14);
 
-    widget.addSpacer(4);
+    widget.addSpacer(3);
 
-    // Resumen en barra visual
-    const resumenStack = widget.addStack();
-    resumenStack.layoutHorizontally();
-    resumenStack.centerAlignContent();
+    // Resumen visual compacto: 3 numeros con iconos
+    const resumen = widget.addStack();
+    resumen.layoutHorizontally();
+    resumen.centerAlignContent();
 
     // Verde
-    const vStack = resumenStack.addStack();
-    vStack.layoutVertically();
+    const vStack = resumen.addStack();
+    vStack.layoutHorizontally();
     vStack.centerAlignContent();
     const vIcon = vStack.addImage(SFSymbol.named("checkmark.circle.fill").image);
     vIcon.tintColor = new Color("#22c55e");
-    vIcon.imageSize = new Size(12, 12);
+    vIcon.imageSize = new Size(10, 10);
+    vStack.addSpacer(2);
     const vNum = vStack.addText(String(data.verdes));
     vNum.textColor = new Color("#22c55e");
-    vNum.font = Font.boldSystemFont(isSmall ? 10 : 12);
+    vNum.font = Font.boldSystemFont(12);
 
-    resumenStack.addSpacer(6);
+    resumen.addSpacer(8);
 
     // Amarillo
-    const aStack = resumenStack.addStack();
-    aStack.layoutVertically();
+    const aStack = resumen.addStack();
+    aStack.layoutHorizontally();
     aStack.centerAlignContent();
     const aIcon = aStack.addImage(SFSymbol.named("exclamationmark.triangle.fill").image);
     aIcon.tintColor = new Color("#eab308");
-    aIcon.imageSize = new Size(12, 12);
+    aIcon.imageSize = new Size(10, 10);
+    aStack.addSpacer(2);
     const aNum = aStack.addText(String(data.amarillos));
     aNum.textColor = new Color("#eab308");
-    aNum.font = Font.boldSystemFont(isSmall ? 10 : 12);
+    aNum.font = Font.boldSystemFont(12);
 
-    resumenStack.addSpacer(6);
+    resumen.addSpacer(8);
 
     // Rojo
-    const rStack = resumenStack.addStack();
-    rStack.layoutVertically();
+    const rStack = resumen.addStack();
+    rStack.layoutHorizontally();
     rStack.centerAlignContent();
     const rIcon = rStack.addImage(SFSymbol.named("xmark.circle.fill").image);
     rIcon.tintColor = new Color("#ef4444");
-    rIcon.imageSize = new Size(12, 12);
+    rIcon.imageSize = new Size(10, 10);
+    rStack.addSpacer(2);
     const rNum = rStack.addText(String(data.rojos));
     rNum.textColor = new Color("#ef4444");
-    rNum.font = Font.boldSystemFont(isSmall ? 10 : 12);
-
-    // Total
-    resumenStack.addSpacer(8);
-    const totalStack = resumenStack.addStack();
-    totalStack.layoutVertically();
-    totalStack.centerAlignContent();
-    const totalNum = totalStack.addText(String(data.total));
-    totalNum.textColor = Color.white();
-    totalNum.font = Font.boldSystemFont(isSmall ? 10 : 12);
-    const totalLabel = totalStack.addText("total");
-    totalLabel.textColor = new Color("#6b7280");
-    totalLabel.font = Font.systemFont(7);
+    rNum.font = Font.boldSystemFont(12);
 
     widget.addSpacer(4);
 
     // Separador
     const sep = widget.addStack();
-    sep.backgroundColor = new Color("#334155");
-    sep.size = new Size(0, 1);
+    sep.backgroundColor = new Color(hasRed ? "#ef4444" : hasYellow ? "#eab308" : "#22c55e");
+    sep.size = new Size(0, 2);
 
     widget.addSpacer(3);
 
-    // Lista de servicios
-    const maxServicios = isSmall ? 4 : isMedium ? 6 : 10;
-    const servicios = (data.servicios || []).slice(0, maxServicios);
+    // Si hay rojos, mostrar solo los rojos primero (enfoque en problemas)
+    // Si no, mostrar todos
+    let serviciosMostrar = data.servicios || [];
+    if (hasRed) {
+        // Mostrar rojos primero, luego amarillos, luego verdes
+        const rojos = serviciosMostrar.filter(s => s.estatus === "rojo");
+        const amarillos = serviciosMostrar.filter(s => s.estatus === "amarillo");
+        const verdes = serviciosMostrar.filter(s => s.estatus === "verde");
+        serviciosMostrar = [...rojos, ...amarillos, ...verdes];
+    }
+
+    // Lista compacta: icono + nombre + estatus (sin texto de detalle)
+    const maxServicios = 6;
+    const servicios = serviciosMostrar.slice(0, maxServicios);
     for (const svc of servicios) {
         const row = widget.addStack();
         row.layoutHorizontally();
         row.centerAlignContent();
 
-        const icon = row.addImage(SFSymbol.named(SF_SERVICIO[svc.nombre] || "circle.fill").image);
+        const icon = row.addImage(SFSymbol.named(
+            svc.nombre === "Microsoft 365" ? "envelope.fill" :
+            svc.nombre === "GoDaddy" ? "globe" :
+            svc.nombre === "Cloudflare" ? "cloud.fill" :
+            svc.nombre === "Admon" ? "list.bullet.clipboard.fill" :
+            svc.nombre === "Field" ? "iphone" :
+            svc.nombre === "Dashboard" ? "chart.bar.fill" :
+            svc.nombre === "Mailbox" ? "tray.fill" :
+            svc.nombre === "Colaboradores" ? "person.2.fill" :
+            svc.nombre === "WorkersAdmon" ? "gearshape.2.fill" :
+            svc.nombre === "SQL Server" ? "cylinder.split.1x2.fill" :
+            svc.nombre === "WebbApps Server" ? "server.rack" :
+            "circle.fill"
+        ).image);
         icon.tintColor = new Color(COLORES[svc.estatus] || "#6b7280");
         icon.imageSize = new Size(10, 10);
         row.addSpacer(3);
 
         const name = row.addText(svc.nombre);
         name.textColor = Color.white();
-        name.font = Font.systemFont(isSmall ? 9 : 10);
+        name.font = Font.systemFont(9);
         name.lineLimit = 1;
         row.addSpacer();
 
@@ -171,13 +170,20 @@ function crearWidget(data, widgetSize) {
         status.tintColor = new Color(COLORES[svc.estatus] || "#6b7280");
         status.imageSize = new Size(10, 10);
 
-        widget.addSpacer(2);
+        widget.addSpacer(1);
     }
 
-    widget.addSpacer(3);
+    // Si hay mas servicios de los mostrados
+    if (serviciosMostrar.length > maxServicios) {
+        const more = widget.addText("+" + (serviciosMostrar.length - maxServicios) + " mas");
+        more.textColor = new Color("#6b7280");
+        more.font = Font.systemFont(8);
+    }
 
-    // Footer
-    const footer = widget.addText("Act: " + (data.actualizado || "\u{2014}"));
+    widget.addSpacer(2);
+
+    // Footer minimalista
+    const footer = widget.addText(data.actualizado || "\u{2014}");
     footer.textColor = new Color("#6b7280");
     footer.font = Font.systemFont(7);
 
@@ -186,9 +192,8 @@ function crearWidget(data, widgetSize) {
 
 const data = await fetchData();
 
-// Detectar tamaño del widget
-let widgetSize = "medium";
-if (config.widgetFamily === "small") widgetSize = "small";
+let widgetSize = "small";
+if (config.widgetFamily === "medium") widgetSize = "medium";
 else if (config.widgetFamily === "large") widgetSize = "large";
 
 const widget = crearWidget(data, widgetSize);
@@ -196,7 +201,7 @@ const widget = crearWidget(data, widgetSize);
 if (config.runsInWidget) {
     Script.setWidget(widget);
 } else {
-    widget.presentMedium();
+    widget.presentSmall();
 }
 
 Script.complete();
