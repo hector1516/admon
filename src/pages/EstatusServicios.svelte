@@ -82,7 +82,7 @@
 			if (servicioSeleccionado && detalle) {
 				detalle = await api.get(`/estatus-servicios/${servicioSeleccionado.id}`);
 			}
-			avisar('Verificación completada', 'success');
+			alert('Verificación completada');
 		} catch (e) {
 			alert(e.message || 'Error');
 		}
