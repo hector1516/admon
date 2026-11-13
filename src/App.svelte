@@ -215,7 +215,7 @@ import EstatusServicios from './pages/EstatusServicios.svelte';
 			{:else if $path === '/legends'}
 				<Legends />
 			{:else if $path === '/estatus_servicios'}
-				<EstatusServicios onSalir={cerrarSesion} />
+				<EstatusServicios />
 			{:else if $path === '/kilometros'}
 				<Kilometros />
 			{:else if $path.startsWith('/kilometros/vehiculo/')}
