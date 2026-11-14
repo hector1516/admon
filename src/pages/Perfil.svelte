@@ -107,9 +107,19 @@
 		try {
 			const formData = new FormData();
 			formData.append('foto', file);
-			const res = await api.put('/perfil/foto', formData);
-			if (res.foto) {
-				fotoPreview = res.foto;
+			const token = localStorage.getItem('admon_token');
+			const res = await fetch('/api/perfil/foto', {
+				method: 'PUT',
+				headers: token ? { Authorization: `Bearer ${token}` } : {},
+				body: formData,
+			});
+			if (!res.ok) {
+				const err = await res.json().catch(() => ({}));
+				throw new Error(err.detail || 'Error al subir foto');
+			}
+			const data = await res.json();
+			if (data.foto) {
+				fotoPreview = data.foto;
 				mensaje = 'Foto actualizada.';
 				mensajeTipo = 'success';
 			}
