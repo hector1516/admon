@@ -1,6 +1,10 @@
 <!-- SyncHeader — skin: ingram (rediseñado, incluye bottom nav) -->
 <script>
-  // --- Nombre del módulo actual (derivado de la URL) ---
+  import { onMount } from 'svelte';
+
+  let { usuario = '', appVersion = '', shellVersion = '', fetcher = null, onsync = null } = $props();
+
+  // --- Nombre del módulo actual ---
   function getModuleName() {
     if (typeof window === 'undefined') return 'App';
     const p = window.location.pathname;
@@ -30,11 +34,6 @@
   let lastScrollY = 0;
   let ticking = false;
 
-  // Actualizar nombre del módulo al cambiar de ruta
-  function updateModule() {
-    nombreModulo = getModuleName();
-  }
-
   function handleScroll() {
     if (!ticking) {
       requestAnimationFrame(() => {
@@ -51,19 +50,9 @@
     }
   }
 
-  import { onMount, onDestroy } from 'svelte';
   onMount(() => {
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // Detectar cambios de ruta (SPA navigation)
-    const observer = new MutationObserver(updateModule);
-    observer.observe(document.body, { childList: true, subtree: true });
-    // También escuchar popstate
-    window.addEventListener('popstate', updateModule);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('popstate', updateModule);
-      observer.disconnect();
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   });
 
   async function copiarUrl() {
@@ -97,7 +86,7 @@
     { action: () => navigate('/perfil') },
   ];
 
-  function isActiveNav(item, index) {
+  function isActiveNav(index) {
     const p = typeof window !== 'undefined' ? window.location.pathname : '';
     if (index === 1) return p === '/dashboard' || p === '/' || p === '';
     if (index === 3) return p === '/legends';
@@ -126,7 +115,7 @@
 <!-- Barra inferior -->
 <nav class="bottom-nav" class:hidden={!navVisible}>
   {#each navItems as item, i}
-    <button class="nav-item" class:active={isActiveNav(item, i)} onclick={item.action} aria-label={item.label}>
+    <button class="nav-item" class:active={isActiveNav(i)} onclick={item.action} aria-label="nav">
       {#if i === 0}
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
       {:else if i === 1}
