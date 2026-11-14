@@ -1,10 +1,8 @@
 <script>
-	import { ClipboardList, Users, Settings, DoorOpen } from 'lucide-svelte';
-
 	/* ECCSA-Shell · barra de acciones (referencia Svelte). ESTÁNDAR.
 	   ------------------------------------------------------------------
-	   Los botones de siempre: <Users size={16} /> usuarios en línea · 📋 novedades ·
-	   <Settings size={16} /> configuración · <DoorOpen size={16} /> salir. Nació del header de Field
+	   Los botones de siempre: 👥 usuarios en línea · 📋 novedades ·
+	   ⚙️ configuración · 🚪 salir. Nació del header de Field
 	   (src/routes/+page.svelte), que los tenía copiados en el <style> de esa
 	   sola página — por eso no había forma de salir desde /reportes.
 
@@ -25,11 +23,11 @@
 	   Props:
 	     enLinea        number   cuántos usuarios hay en línea
 	     notificaciones number   (deprecada: ya no se pinta)
-	     ononline       () => any   <Users size={16} />  (null = no se pinta)
+	     ononline       () => any   👥  (null = no se pinta)
 	     onnotif        () => any   🔔  (deprecada: ya no se pinta)
 	     onchangelog    () => any   📋  (por defecto abre el popup de novedades)
-	     onconfig       () => any   <Settings size={16} />  (null = no se pinta)
-	     onlogout       () => any   <DoorOpen size={16} />  (null = no se pinta)
+	     onconfig       () => any   ⚙️  (null = no se pinta)
+	     onlogout       () => any   🚪  (null = no se pinta)
 	*/
 	import { abrirChangelog } from '$lib/changelog.js';
 
@@ -49,16 +47,16 @@
 <div class="shell-actions">
 	{#if ononline}
 		<button class="btn btn-sm btn-secondary act-btn" onclick={ononline} title="Usuarios en línea">
-			<Users size={16} />{#if enLinea > 0}<span class="act-badge">{enLinea}</span>{/if}
+			👥{#if enLinea > 0}<span class="act-badge">{enLinea}</span>{/if}
 		</button>
 	{/if}
 	{#if onchangelog}
-		<button class="btn btn-sm btn-secondary" onclick={onchangelog} title="Novedades"><ClipboardList size={16} /></button>
+		<button class="btn btn-sm btn-secondary" onclick={onchangelog} title="Novedades">📋</button>
 	{/if}
 	{#if onconfig}
-		<button class="btn btn-sm btn-secondary" onclick={onconfig} title="Configuración"><Settings size={16} /></button>
+		<button class="btn btn-sm btn-secondary" onclick={onconfig} title="Configuración">⚙️</button>
 	{/if}
 	{#if onlogout}
-		<button class="btn btn-sm btn-secondary" onclick={onlogout} title="Cerrar sesión"><DoorOpen size={16} /> Salir</button>
+		<button class="btn btn-sm btn-secondary" onclick={onlogout} title="Cerrar sesión">🚪 Salir</button>
 	{/if}
 </div>
