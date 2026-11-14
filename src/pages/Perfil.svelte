@@ -22,13 +22,45 @@
 	let fotoPreview = $state(null);
 	let subiendoFoto = $state(false);
 
+	// Skin selector
+	let skins = $state([]);
+	let skinActivo = $state('default');
+	let cambiandoSkin = $state(false);
+
 	onMount(async () => {
 		if (!auth.isLoggedIn()) {
 			navigate('/login', { replace: true });
 			return;
 		}
 		await cargarPerfil();
+		await cargarSkin();
 	});
+
+	async function cargarSkin() {
+		try {
+			const r = await api.get('/skin');
+			skins = r.skins || [];
+			skinActivo = r.activo || 'default';
+			// Aplicar skin al root
+			document.documentElement.setAttribute('data-skin', skinActivo);
+		} catch (e) {
+			// Silencioso
+		}
+	}
+
+	async function cambiarSkin(skinId) {
+		if (skinId === skinActivo) return;
+		cambiandoSkin = true;
+		try {
+			await api.put('/skin', { skin: skinId });
+			skinActivo = skinId;
+			document.documentElement.setAttribute('data-skin', skinId);
+		} catch (e) {
+			alert(e.message || 'Error al cambiar skin.');
+		} finally {
+			cambiandoSkin = false;
+		}
+	}
 
 	async function cargarPerfil() {
 		cargando = true;
@@ -234,6 +266,29 @@
 			</div>
 		</div>
 
+		<!-- Apariencia / Skin selector -->
+		<div class="card">
+			<h3 class="section-title">Apariencia</h3>
+			<p style="font-size: 0.8rem; color: var(--color-text-muted); margin: 0 0 0.75rem;">
+				Selecciona el diseño de la app. El cambio aplica a todos los usuarios.
+			</p>
+			<div class="skins-grid">
+				{#each skins as skin (skin.id)}
+					<button
+						class="skin-card {skinActivo === skin.id ? 'skin-activo' : ''}"
+						onclick={() => cambiarSkin(skin.id)}
+						disabled={cambiandoSkin}
+					>
+						<div class="skin-nombre">{skin.nombre}</div>
+						<div class="skin-desc">{skin.descripcion}</div>
+						{#if skinActivo === skin.id}
+							<span class="skin-check">✓</span>
+						{/if}
+					</button>
+				{/each}
+			</div>
+		</div>
+
 		<!-- Cerrar sesión -->
 		<div class="card">
 			<button class="btn btn-danger btn-block" onclick={cerrarSesion}>
@@ -296,6 +351,21 @@
 	.permiso-nombre { text-transform: capitalize; }
 
 	.version-info { text-align: center; font-size: 0.7rem; color: var(--color-text-muted); margin-top: 1rem; }
+
+	.skins-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.5rem; }
+	.skin-card {
+		background: var(--color-surface-2, #334155); border-radius: 8px; padding: 0.75rem;
+		text-align: left; cursor: pointer; border: 2px solid transparent;
+		transition: border-color 0.15s, transform 0.15s; position: relative;
+	}
+	.skin-card:hover { transform: translateY(-1px); }
+	.skin-card.skin-activo { border-color: var(--color-primary, #3b82f6); }
+	.skin-nombre { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.2rem; }
+	.skin-desc { font-size: 0.75rem; color: var(--color-text-muted); }
+	.skin-check {
+		position: absolute; top: 0.5rem; right: 0.5rem;
+		color: var(--color-primary, #3b82f6); font-weight: 700; font-size: 1rem;
+	}
 
 	.empty { text-align: center; padding: 2rem; color: var(--color-text-muted); }
 </style>
