@@ -3,6 +3,7 @@
 	import { api, isNetworkError } from '$lib/api.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { navigate } from '$lib/router.js';
+	import { APP_VERSION, SHELL_VERSION } from '$lib/shell.js';
 	import ActionsBar from '$lib/components/ActionsBar.svelte';
 
 	let { onSalir = null } = $props();
