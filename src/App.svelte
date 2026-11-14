@@ -38,6 +38,7 @@ import Panel from './pages/Panel.svelte';
 	import TicketOxxoGasDetalle from './pages/TicketOxxoGasDetalle.svelte';
 import CapturarTicketOxxoGas from './pages/CapturarTicketOxxoGas.svelte';
 import Perfil from './pages/Perfil.svelte';
+import BusquedaGlobal from './pages/BusquedaGlobal.svelte';
 import EstatusServicios from './pages/EstatusServicios.svelte';
 
 	let ready = $state(false);
@@ -217,6 +218,8 @@ import EstatusServicios from './pages/EstatusServicios.svelte';
 				<Legends />
 			{:else if $path === '/perfil'}
 				<Perfil />
+			{:else if $path === '/busqueda'}
+				<BusquedaGlobal />
 			{:else if $path === '/estatus_servicios'}
 				<EstatusServicios />
 			{:else if $path === '/kilometros'}
