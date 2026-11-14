@@ -54,12 +54,12 @@ def set_skin(body: dict, current_user: dict = Depends(get_current_user)):
 
     conn = get_connection()
     cur = conn.cursor()
-    cur.execute(
-        "MERGE HUB_Config AS target USING (SELECT %s AS Clave) AS source ON target.Clave = source.Clave "
-        "WHEN MATCHED THEN UPDATE SET Valor = %s, Actualizado = GETDATE() "
-        "WHEN NOT MATCHED THEN INSERT (Clave, Valor, Actualizado) VALUES (%s, %s, GETDATE());",
-        ("active_skin", skin_id, "active_skin", skin_id),
-    )
+    # Usar INSERT/UPDATE en vez de MERGE (mas compatible)
+    cur.execute("SELECT 1 FROM HUB_Config WHERE Clave = %s", ("active_skin",))
+    if cur.fetchone():
+        cur.execute("UPDATE HUB_Config SET Valor = %s, Actualizado = GETDATE() WHERE Clave = %s", (skin_id, "active_skin"))
+    else:
+        cur.execute("INSERT INTO HUB_Config (Clave, Valor, Actualizado) VALUES (%s, %s, GETDATE())", ("active_skin", skin_id))
     conn.commit()
     cur.close()
     conn.close()
