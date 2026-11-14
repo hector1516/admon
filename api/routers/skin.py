@@ -57,7 +57,7 @@ def set_skin(body: dict, current_user: dict = Depends(get_current_user)):
     cur.execute(
         "MERGE HUB_Config AS target USING (SELECT %s AS Clave) AS source ON target.Clave = source.Clave "
         "WHEN MATCHED THEN UPDATE SET Valor = %s, Actualizado = GETDATE() "
-        "WHEN NOT MATCHED THEN INSERT (Clave, Valor, Creado) VALUES (%s, %s, GETDATE());",
+        "WHEN NOT MATCHED THEN INSERT (Clave, Valor, Actualizado) VALUES (%s, %s, GETDATE());",
         ("active_skin", skin_id, "active_skin", skin_id),
     )
     conn.commit()
