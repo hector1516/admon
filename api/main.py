@@ -245,6 +245,10 @@ from api.routers import busqueda as busqueda_router
 app.include_router(busqueda_router.router)
 from api.routers import skin as skin_router
 app.include_router(skin_router.router)
+from api.routers import debug as debug_router
+app.include_router(debug_router.router)
+from api.routers import audit as audit_router
+app.include_router(audit_router.router)
 from api.routers import estatus_servicios as estatus_servicios_router
 app.include_router(estatus_servicios_router.router)
 from api.routers.pdf import ReporteCreate, ReporteUpdate, ReporteFotosSave, ReporteTecnicosSave, ReporteSignatureSave
@@ -1479,7 +1483,7 @@ try:
     _has_spa = _dist.is_dir() and (_dist / "index.html").exists()
     _NO_STORE = {"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0"}
     _NO_STORE_FILES = {"index.html"}
-    _SPA_ROUTES = {"login", "dashboard", "cotizaciones", "cotizaciones_materiales", "usuarios", "admin", "config", "clientes", "registro_reportes", "registro_reportes/", "ia", "legends", "tickets_oxxogas", "kilometros", "notas", "panel", "pantalla_tv", "perfil", "busqueda", "estatus_servicios"}
+    _SPA_ROUTES = {"login", "dashboard", "cotizaciones", "cotizaciones_materiales", "usuarios", "admin", "config", "clientes", "registro_reportes", "registro_reportes/", "ia", "legends", "tickets_oxxogas", "kilometros", "notas", "panel", "pantalla_tv", "perfil", "busqueda", "estatus_servicios", "bitacora"}
 
     def _spa_file(name: str):
         return FileResponse(str(_dist / name))

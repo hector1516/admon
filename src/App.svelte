@@ -39,6 +39,7 @@ import Panel from './pages/Panel.svelte';
 import CapturarTicketOxxoGas from './pages/CapturarTicketOxxoGas.svelte';
 import Perfil from './pages/Perfil.svelte';
 import BusquedaGlobal from './pages/BusquedaGlobal.svelte';
+import Bitacora from './pages/Bitacora.svelte';
 import EstatusServicios from './pages/EstatusServicios.svelte';
 
 	let ready = $state(false);
@@ -220,6 +221,8 @@ import EstatusServicios from './pages/EstatusServicios.svelte';
 				<Perfil />
 			{:else if $path === '/busqueda'}
 				<BusquedaGlobal />
+			{:else if $path === '/bitacora'}
+				<Bitacora />
 			{:else if $path === '/estatus_servicios'}
 				<EstatusServicios />
 			{:else if $path === '/kilometros'}
