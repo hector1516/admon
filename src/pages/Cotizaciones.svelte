@@ -7,6 +7,12 @@ import { ArrowLeft, Plus , Clock, Minus , Scale } from 'lucide-svelte';
 	import { listar } from '$lib/cotizacionesApi.js';
 	import { mapEstatus, fmtMXN, folioFmt } from '$lib/cotizaciones.js';
 	import Paginacion from '$lib/components/Paginacion.svelte';
+	import EmptyState from '$lib/components/EmptyState.svelte';
+	import LoadingState from '$lib/components/LoadingState.svelte';
+	import ErrorState from '$lib/components/ErrorState.svelte';
+	import { logError, logClick, ERROR_CODES } from '$lib/debug.js';
+	import { logAction } from '$lib/audit.js';
+	import { cacheGet, cacheSet, TTL } from '$lib/cache.js';
 
 	let cotizaciones = $state([]);
 	let pagina = $state(1);
@@ -121,11 +127,16 @@ import { ArrowLeft, Plus , Clock, Minus , Scale } from 'lucide-svelte';
 	</p>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando cotizaciones..." />
 	{:else if error}
-		<div class="card"><p style="color: var(--color-danger); margin: 0;">{error}</p></div>
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if filtradas.length === 0}
-		<div class="empty">No hay cotizaciones registradas.</div>
+		<EmptyState
+			title="No hay cotizaciones registradas"
+			description="Crea tu primera cotizacion para empezar"
+			actionLabel="Nueva cotizacion"
+			action={() => navigate('/cotizaciones/nueva')}
+		/>
 	{:else}
 		<div class="grid">
 			{#each pagActual as c (c.idLocal)}
