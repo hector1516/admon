@@ -6,7 +6,12 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { clientes } from '$lib/cotizacionesApi.js';
 	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
-import HoldButton from '$lib/components/HoldButton.svelte';
+	import HoldButton from '$lib/components/HoldButton.svelte';
+	import EmptyState from '$lib/components/EmptyState.svelte';
+	import LoadingState from '$lib/components/LoadingState.svelte';
+	import ErrorState from '$lib/components/ErrorState.svelte';
+	import { logError, ERROR_CODES } from '$lib/debug.js';
+	import { logClick } from '$lib/audit.js';
 
 	let lista = $state([]);
 	let totalClientes = $state(0);
@@ -244,8 +249,14 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 	{/if}
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando clientes..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if filtrados.length === 0}
+		<EmptyState
+			title="No hay clientes registrados"
+			description="Los clientes se agregan desde el panel de administracion"
+		/>
 		<div class="empty">No hay clientes registrados.</div>
 	{:else}
 		<div class="grid">
