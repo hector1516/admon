@@ -9,7 +9,7 @@
 	import EmptyState from '$lib/components/EmptyState.svelte';
 	import LoadingState from '$lib/components/LoadingState.svelte';
 	import ErrorState from '$lib/components/ErrorState.svelte';
-	import { logError, ERROR_CODES } from '$lib/debug.js';
+	import { logError, ERROR_CODES } from '$lib/audit.js';
 	import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 
 	// Tickets de OxxoGas: lectura de HUB_OxxoGasTickets (captura en Field/HUB)

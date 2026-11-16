@@ -5,7 +5,7 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { crear, clienteNombre, clienteContactos } from '$lib/cotizacionesApi.js';
-	import { logError, ERROR_CODES } from '$lib/debug.js';
+	import { logError, ERROR_CODES } from '$lib/audit.js';
 	import { logClick } from '$lib/audit.js';
 
 	let idCliente = $state('');

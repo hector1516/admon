@@ -10,7 +10,7 @@ import { ArrowLeft, Plus , Clock, Minus , Scale } from 'lucide-svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
 	import LoadingState from '$lib/components/LoadingState.svelte';
 	import ErrorState from '$lib/components/ErrorState.svelte';
-	import { logError, logClick, ERROR_CODES } from '$lib/debug.js';
+	import { logError, logClick, ERROR_CODES } from '$lib/audit.js';
 	import { logAction } from '$lib/audit.js';
 	import { cacheGet, cacheSet, TTL } from '$lib/cache.js';
 
