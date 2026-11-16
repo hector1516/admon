@@ -4,6 +4,11 @@
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
+import { logError, ERROR_CODES } from '$lib/debug.js';
+import { logClick } from '$lib/audit.js';
 	import { header, actualizar, clienteNombre, clienteContactos } from '$lib/cotizacionesApi.js';
 	import { COLOR_LABEL, folioFmt } from '$lib/cotizaciones.js';
 
@@ -56,6 +61,7 @@
 			await lookup(false);
 			if (contactoSel && !contactos.includes(contactoSel)) contactos = [contactoSel, ...contactos];
 		} catch (e) {
+			logError(ERROR_CODES.COT_UPDATE, 'Error al editar cotizacion', { error: e.message });
 			error = e.message === 'Sesión expirada' ? e.message : `No se pudo cargar (${e.message || 'sin conexión'}).`;
 		} finally {
 			loading = false;
@@ -119,7 +125,9 @@
 	</div>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando cotizacion..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else}
 		<div class="card">
 			<div class="field">
