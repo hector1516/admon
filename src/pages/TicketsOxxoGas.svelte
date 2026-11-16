@@ -97,6 +97,7 @@
 				if (typeof s.monto_por_vale === 'number') montoVale = s.monto_por_vale;
 			}
 		} catch (e) {
+			try { logError(ERROR_CODES.API_ERROR, 'tickets-oxxogas', 'Error al cargar tickets OxxoGas', { error: String(e && e.message || e) }); } catch {}
 			error = e.message === 'Sesión expirada' ? e.message : e.message || 'No se pudo cargar.';
 		} finally {
 			loading = false;

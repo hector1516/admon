@@ -60,6 +60,7 @@ import { ArrowLeft, Plus , Clock, Minus , Scale } from 'lucide-svelte';
 			total = r.total;
 		} catch (e) {
 			console.error('Error cargando cotizaciones:', e);
+			try { logError(ERROR_CODES.API_ERROR, 'cotizaciones', 'Error al cargar cotizaciones', { error: String(e?.message || e) }); } catch {}
 			error = e.message === 'Sesión expirada' ? e.message : 'No se pudo cargar. Revisa tu conexión.';
 		} finally {
 			loading = false;

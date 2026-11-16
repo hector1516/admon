@@ -62,6 +62,7 @@
 			lista = Array.isArray(res) ? res : (res.items || []);
 			totalClientes = Array.isArray(res) ? res.length : (res.total || 0);
 		} catch (e) {
+			try { logError(ERROR_CODES.API_ERROR, 'clientes', 'Error al cargar clientes', { error: String(e?.message || e) }); } catch {}
 			error = e.message === 'Sesión expirada' ? e.message : 'No se pudo cargar. Revisa tu conexión.';
 		} finally {
 			loading = false;
@@ -113,6 +114,7 @@
 			selId = null;
 			await cargar();
 		} catch (e) {
+			try { logError(ERROR_CODES.API_ERROR, 'clientes', 'Error al actualizar cliente', { error: String(e?.message || e) }); } catch {}
 			error = e.message || 'Error al actualizar.';
 		} finally {
 			busy = false;
@@ -133,6 +135,7 @@
 			selId = null;
 			await cargar();
 		} catch (e) {
+			try { logError(ERROR_CODES.API_ERROR, 'clientes', 'Error al eliminar cliente', { error: String(e?.message || e) }); } catch {}
 			error = e.message || 'Error al eliminar.';
 		} finally {
 			busy = false;
@@ -163,6 +166,7 @@
 			newDias = 30;
 			await cargar();
 		} catch (e) {
+			try { logError(ERROR_CODES.API_ERROR, 'clientes', 'Error al registrar cliente', { error: String(e?.message || e) }); } catch {}
 			error = e.message || 'Error al registrar.';
 		} finally {
 			busy = false;

@@ -111,6 +111,7 @@ import { logClick } from '$lib/audit.js';
 			});
 			msg = r.pendiente ? '⏳ Cambios guardados offline. Se sincronizarán.' : '✅ Cotización actualizada.';
 		} catch (e) {
+			try { logError(ERROR_CODES.COT_UPDATE, 'cotizacion-editar', 'Error al guardar cotizacion', { error: String(e?.message || e) }); } catch {}
 			error = e.message || 'No se pudo guardar.';
 		} finally {
 			busy = false;

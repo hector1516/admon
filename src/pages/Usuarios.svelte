@@ -77,6 +77,7 @@
 			const res = await api.get('/users');
 usuarios = Array.isArray(res) ? res : (res.items || []);
 		} catch (e) {
+			try { logError(ERROR_CODES.API_ERROR, 'usuarios', 'Error al cargar usuarios', { error: String(e?.message || e) }); } catch {}
 			if (e.message === 'Sesión expirada') {
 				error = e.message;
 			} else {
