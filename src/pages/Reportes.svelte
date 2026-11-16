@@ -5,6 +5,11 @@ import { Phone , ArrowLeft, Plus , Timer } from 'lucide-svelte';
 	import { auth } from '$lib/stores/auth.js';
 	import { online } from '$lib/stores/online.js';
 	import Paginacion from '$lib/components/Paginacion.svelte';
+	import EmptyState from '$lib/components/EmptyState.svelte';
+	import LoadingState from '$lib/components/LoadingState.svelte';
+	import ErrorState from '$lib/components/ErrorState.svelte';
+	import { logError, ERROR_CODES } from '$lib/debug.js';
+	import { logClick } from '$lib/audit.js';
 
 	// Lista de reportes como el HUB: buscar, filtrar por tǸcnico, crear nuevo.
 
@@ -61,6 +66,7 @@ import { Phone , ArrowLeft, Plus , Timer } from 'lucide-svelte';
 			lista = data || [];
 		} catch (e) {
 			error = e.message === 'Sesión expirada' ? e.message : 'No se pudo cargar. Revisa tu conexión.';
+			logError(ERROR_CODES.REP_LIST_LOAD, 'Error al cargar reportes', { error: e.message });
 		} finally {
 			loading = false;
 		}
@@ -127,8 +133,16 @@ import { Phone , ArrowLeft, Plus , Timer } from 'lucide-svelte';
 	<p style="color: var(--color-text-muted); font-size: 0.8rem;">Mostrando {filtrados.length} de {lista.length} reportes.</p>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando reportes..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if filtrados.length === 0}
+		<EmptyState
+			title="No hay reportes registrados"
+			description="Crea tu primer reporte para empezar"
+			actionLabel="Nuevo reporte"
+			action={() => navigate('/reporte_nuevo')}
+		/>
 		<div class="empty">No hay reportes registrados.</div>
 	{:else}
 		<div class="grid">
