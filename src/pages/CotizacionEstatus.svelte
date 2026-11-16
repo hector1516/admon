@@ -7,6 +7,9 @@
 	import { header, actualizar } from '$lib/cotizacionesApi.js';
 	import { COLOR_LABEL, folioFmt } from '$lib/cotizaciones.js';
 	import Paginacion from '$lib/components/Paginacion.svelte';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Cambio rápido de estatus (los 3 colores del HUB).
 
@@ -90,7 +93,9 @@
 	</div>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando estatus..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if error && !h}
 		<div class="card"><p style="color: var(--color-danger); margin: 0;">{error}</p></div>
 	{:else if h}

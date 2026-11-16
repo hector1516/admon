@@ -5,6 +5,9 @@ import { Send , ArrowLeft } from 'lucide-svelte';
 	import { auth } from '$lib/stores/auth.js';
 	import { header, partidas } from '$lib/cotizacionesApi.js';
 	import { folioFmt } from '$lib/cotizaciones.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Enviar cotización por correo como el HUB (PDF adjunto + copia al remitente).
 
@@ -103,7 +106,9 @@ import { Send , ArrowLeft } from 'lucide-svelte';
 	</div>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando envio..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if error && !subject}
 		<div class="card"><p style="color: var(--color-danger); margin: 0;">{error}</p></div>
 	{:else}

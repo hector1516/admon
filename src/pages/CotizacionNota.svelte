@@ -6,6 +6,9 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { header, guardarNota } from '$lib/cotizacionesApi.js';
 	import { folioFmt } from '$lib/cotizaciones.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	let { clave } = $props();
 
@@ -67,7 +70,9 @@
 	</div>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando nota..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else}
 		<div class="card">
 			<div class="field">
