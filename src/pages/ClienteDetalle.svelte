@@ -7,6 +7,9 @@
 	import { clientes } from '$lib/cotizacionesApi.js';
 	import { api } from '$lib/api.js';
 	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Detalle de cliente como el HUB + administración de sus contactos.
 	// Los contactos se muestran con su origen: catálogo (HUB_ContactosClientes,
@@ -196,7 +199,9 @@
 	</div>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else}
 		<OfflineNotice compacto />
 		<div class="card" style="margin-bottom: 0.75rem;">

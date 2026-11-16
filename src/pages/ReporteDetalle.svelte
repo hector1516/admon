@@ -6,6 +6,9 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { online } from '$lib/stores/online.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Detalle completo: editar, fotos (cámara/archivo), firma, técnicos, PDF, email, eliminar.
 
@@ -326,7 +329,9 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 	</div>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else}
 		{#if error}
 			<div class="msg err">{error}</div>

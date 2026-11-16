@@ -4,6 +4,9 @@
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Crear reporte como el HUB: datos generales + técnicos adicionales.
 
@@ -115,7 +118,9 @@
 	</div>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else}
 		<div class="card">
 			<div class="card-title">Datos del reporte</div>

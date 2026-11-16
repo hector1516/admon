@@ -7,6 +7,9 @@
 	import { api } from '$lib/api.js';
 import HoldButton from '$lib/components/HoldButton.svelte';
 	import PasswordInput from '$lib/components/PasswordInput.svelte';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// id viene de la ruta /usuarios/:id (micro-router, modo runes -> $props)
 	let { id } = $props();
@@ -374,7 +377,9 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 	</div>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if error && !nombre}
 		<div class="card"><p style="color: var(--color-danger); margin: 0;">{error}</p></div>
 	{:else}

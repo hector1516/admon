@@ -7,6 +7,9 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 	import { auth } from '$lib/stores/auth.js';
 	import { header, partidas, partidaAdd, partidaUpdate, partidaDelete, satSugerir } from '$lib/cotizacionesApi.js';
 	import { fmtMXN, ventaUnit, totales, folioFmt } from '$lib/cotizaciones.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	let { clave } = $props();
 
@@ -216,7 +219,9 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 	</div>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if error && !h}
 		<div class="card"><p style="color: var(--color-danger); margin: 0;">{error}</p></div>
 	{:else if h}
