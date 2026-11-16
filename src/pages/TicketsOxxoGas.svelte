@@ -6,6 +6,10 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
 	import Paginacion from '$lib/components/Paginacion.svelte';
+	import EmptyState from '$lib/components/EmptyState.svelte';
+	import LoadingState from '$lib/components/LoadingState.svelte';
+	import ErrorState from '$lib/components/ErrorState.svelte';
+	import { logError, ERROR_CODES } from '$lib/debug.js';
 	import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 
 	// Tickets de OxxoGas: lectura de HUB_OxxoGasTickets (captura en Field/HUB)
@@ -152,8 +156,9 @@
 	<p class="hint">Tickets capturados desde Field/HUB · orden por fecha y hora de captura (más reciente arriba) · escribe <strong>pendiente</strong> para filtrar los que faltan</p>
 
 	{#if loading}
-		<div class="state">⏳ Cargando tickets…</div>
+		<LoadingState message="Cargando tickets..." />
 	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 		<div class="state err">⚠️ {error}</div>
 	{:else if filtrados.length === 0}
 		<div class="state"><Ticket size={16} /> No hay tickets{busqueda.trim() ? ` que coincidan con “${busqueda.trim()}”` : ''}.</div>
