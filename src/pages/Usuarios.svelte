@@ -6,6 +6,11 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
 	import Paginacion from '$lib/components/Paginacion.svelte';
+	import EmptyState from '$lib/components/EmptyState.svelte';
+	import LoadingState from '$lib/components/LoadingState.svelte';
+	import ErrorState from '$lib/components/ErrorState.svelte';
+	import { logError, ERROR_CODES } from '$lib/debug.js';
+	import { logClick } from '$lib/audit.js';
 
 	// Modo pestaña: lo usa src/pages/Admin.svelte, que pone el encabezado y la
 	// barra de pestañas del módulo. Así acá no se vuelve a pintar el .page ni el
@@ -106,10 +111,14 @@ usuarios = Array.isArray(res) ? res : (res.items || []);
 	</div>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando usuarios..." />
 	{:else if error}
-		<div class="card"><p style="color: var(--color-danger); margin: 0;">{error}</p></div>
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if usuarios.length === 0}
+		<EmptyState
+			title="No hay usuarios registrados"
+			description="Los usuarios se agregan desde el panel de administracion"
+		/>
 		<div class="empty">No hay usuarios registrados.</div>
 	{:else}
 		<div class="list">
