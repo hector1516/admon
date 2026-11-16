@@ -8,6 +8,9 @@
 import HoldButton from '$lib/components/HoldButton.svelte';
 	import { passkeySupported, registerPasskey, randomDeviceName } from '$lib/passkey.js';
 	import { estado as pushEstadoActual, activar as pushActivar, desactivar as pushDesactivar, dispositivos as pushDispositivosList, enviarPrueba as pushEnviarPrueba } from '$lib/push.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// --- Passkeys (estilo Field) ---
 	let pkSupported = $state(false);

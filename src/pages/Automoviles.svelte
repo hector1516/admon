@@ -6,6 +6,9 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
 import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	let autos = $state([]);
 	let usuarios = $state([]);
@@ -212,7 +215,9 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 	{/if}
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if autos.length === 0}
 		<div class="empty">No hay automóviles registrados.</div>
 	{:else}

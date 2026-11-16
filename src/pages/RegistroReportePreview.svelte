@@ -5,6 +5,9 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Página completa de previsualización PDF (pantalla completa, sin header extra)
 	let { id } = $props();
@@ -106,7 +109,9 @@
 	</header>
 
 	{#if loading}
-		<div class="preview-loading">Cargando PDF…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if error}
 		<div class="preview-error">
 			<p>{error}</p>

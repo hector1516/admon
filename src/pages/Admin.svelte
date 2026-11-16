@@ -24,6 +24,9 @@
 	import { auth } from '$lib/stores/auth.js';
 	import Asistencia from './AsistenciaAdmin.svelte';
 	import Usuarios from './Usuarios.svelte';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	const TABS = [
 		{ id: 'asistencia', icon: '🕘', label: 'Asistencia', path: '/admin' },

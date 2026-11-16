@@ -6,6 +6,9 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
 import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Detalle de un ticket de OxxoGas como PÁGINA COMPLETA
 	// (ruta /tickets_oxxogas/:id, deep-link soportado por el fallback SPA).
@@ -197,7 +200,9 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 	</div>
 
 	{#if loading}
-		<div class="state">⏳ Cargando ticket…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if error}
 		<div class="state err">⚠️ {error}</div>
 	{:else if t}

@@ -7,6 +7,9 @@
 	import { api } from '$lib/api.js';
 import HoldButton from '$lib/components/HoldButton.svelte';
 	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Detalle completo de reporte (pantalla completa, sin modales)
 	// Permiso: acceso_registro_reportes
@@ -377,7 +380,9 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 	</div>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else}
 		<OfflineNotice compacto />
 		{#if error}

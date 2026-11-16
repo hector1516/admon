@@ -7,6 +7,9 @@
 	import { api } from '$lib/api.js';
 import HoldButton from '$lib/components/HoldButton.svelte';
 	import Paginacion from '$lib/components/Paginacion.svelte';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Notas del equipo → tabla HUB_DashboardNotas, la MISMA que lee la pantalla
 	// 📌 del Dashboard de la oficina (kiosco, dashboard.ecc-sa.com.mx:8101).
@@ -211,7 +214,9 @@ import HoldButton from '$lib/components/HoldButton.svelte';
 	<p class="hint">Notas del equipo · cada nota muestra su autor · salen también en la pantalla 📌 del Dashboard de la oficina (solo se muestran las 3 primeras, las fijas van arriba)</p>
 
 	{#if loading}
-		<div class="state">⏳ Cargando notas…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if notas.length === 0}
 		<div class="state">📝 No hay notas todavía. ¡Crea la primera con “➕ Nueva nota”!</div>
 	{:else}

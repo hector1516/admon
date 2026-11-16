@@ -5,6 +5,9 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
 import HoldButton from '$lib/components/HoldButton.svelte';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Pestaña "Pantalla de la TV" del módulo Notas.
 	//

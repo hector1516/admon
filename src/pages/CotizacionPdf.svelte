@@ -5,6 +5,9 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { folioFmt } from '$lib/cotizaciones.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Vista previa del PDF como Field (iframe full-screen + Compartir/Descargar).
 	// El PDF se pide con ?token= en la URL (el iframe no puede mandar headers).
@@ -131,7 +134,9 @@
 	</div>
 
 	{#if loading}
-		<p style="color: var(--color-text-muted); text-align: center; padding: 2rem;">Generando PDF…</p>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if error && !pdfOk}
 		<div class="empty" style="margin: 1rem;">{error}</div>
 		<div style="text-align: center; padding: 1rem;">

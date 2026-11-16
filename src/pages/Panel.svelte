@@ -6,6 +6,9 @@
 	import { auth } from '$lib/stores/auth.js';
 	import Notas from './Notas.svelte';
 	import PantallaTv from './PantallaTv.svelte';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// 📊 Dashboard (el botón del menú): página contenedora de PESTAÑAS con
 	// las funciones nuevas de la app. Hoy vive aquí la pantalla de la TV

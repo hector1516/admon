@@ -6,6 +6,9 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
 	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Detalle de un vehículo como PÁGINA COMPLETA (ruta /kilometros/vehiculo/:id),
 	// en lugar de un popup/overlay: patrón igual que TicketOxxoGasDetalle.
@@ -75,7 +78,9 @@
 	<OfflineNotice />
 
 	{#if loading}
-		<div class="state">⏳ Cargando detalle…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if error}
 		<div class="state err">⚠️ {error}</div>
 	{:else if d}

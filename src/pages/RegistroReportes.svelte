@@ -7,6 +7,9 @@
 	import { api } from '$lib/api.js';
 	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
 	import Paginacion from '$lib/components/Paginacion.svelte';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// REGISTRO DE REPORTES (Admin) — clon del HUB views/registro_reportes.py
 	// Lista global con pestañas: Firmados / 📊 Excel (exportación) / Papelera
@@ -362,7 +365,9 @@ lista = Array.isArray(res) ? res : (res.items || []);
 	{/if}
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if listaTab.length === 0}
 		<div class="empty">
 			{#if tab === 'papelera'}

@@ -7,6 +7,9 @@
 	import { api } from '$lib/api.js';
 import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 	import OfflineNotice from '$lib/components/OfflineNotice.svelte';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Módulo Kilómetros — dos pestañas:
 	//  1) Consumo: por automóvil, km de la semana (último registro − primero) y
@@ -207,7 +210,9 @@ import { getAutoImage, autoImageExists } from '$lib/autoImage.js';
 	{#if msg}<div class="msg ok">{msg}</div>{/if}
 
 	{#if loading}
-		<div class="state">⏳ Cargando…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if tab === 'consumo'}
 		<!-- ═══ CONSUMO ═══ -->
 		{#if !consumo}

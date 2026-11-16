@@ -6,6 +6,9 @@
 	import { auth } from '$lib/stores/auth.js';
 	import { api } from '$lib/api.js';
 	import { marked } from 'marked';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// ECCSA IA — chat de UNA SOLA conversación por usuario (estilo ChatGPT).
 	// Wobnimo: mascota 3D (Volt, robot LED) que reacciona al estado del chat.
@@ -255,8 +258,10 @@ function formatearFecha(fecha) {
 	<!-- Mensajes -->
 	<div class="chat-messages" bind:this={messagesContainer}>
 		{#if loading}
-			<div class="chat-loading">⏳ Abriendo conversación…</div>
-		{:else if mensajes.length === 0}
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
+	{:else if mensajes.length === 0}
 			<div class="message assistant">
 				<div class="message-bubble">
 					<div class="msg-avatar">🤖</div>

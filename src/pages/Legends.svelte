@@ -7,6 +7,9 @@
 	import { auth } from '$lib/stores/auth';
 	import { online } from '$lib/stores/online';
 	import db from '$lib/db/admonDb.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	const user = $derived($auth.user);
 
@@ -379,12 +382,9 @@
 	<canvas bind:this={canvas} class="particles-canvas"></canvas>
 
 	{#if loading}
-		<div class="loading">
-			<div class="loading-ring">
-				<div class="ring-inner"><Trophy size={16} /></div>
-			</div>
-			<span class="loading-text">Cargando leyendas...</span>
-		</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else}
 		<!-- HEADER -->
 		<div class="legends-header" style="animation: slide-up 0.5s ease-out">

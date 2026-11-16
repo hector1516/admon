@@ -5,6 +5,9 @@ import { ArrowLeft } from 'lucide-svelte';
 	import { auth } from '$lib/stores/auth.js';
 	import { listar } from '$lib/cotizacionesApi.js';
 	import { mapEstatus, fmtMXN, folioFmt } from '$lib/cotizaciones.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	let cotizaciones = $state([]);
 	let seleccionadas = $state([]);
@@ -64,7 +67,9 @@ import { ArrowLeft } from 'lucide-svelte';
 	</p>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
 	{:else if error}
 		<div class="card"><p style="color: var(--color-danger); margin: 0;">{error}</p></div>
 	{:else}

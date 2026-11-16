@@ -21,6 +21,9 @@
 
 	import { onMount, onDestroy } from 'svelte';
 	import { auth } from '$lib/stores/auth.js';
+import EmptyState from '$lib/components/EmptyState.svelte';
+import LoadingState from '$lib/components/LoadingState.svelte';
+import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Cada cuánto se refresca solo. La pantalla del kiosco lo hace su worker
 	// cada 2 min; acá basta un minuto y no depende de ningún otro proceso.
@@ -204,8 +207,10 @@
 {/if}
 
 {#if loading}
-	<div class="empty">Cargando asistencia…</div>
-{:else if error}
+		<LoadingState message="Cargando..." />
+	{:else if error}
+		<ErrorState message={error} onRetry={cargar} />
+	{:else if error}
 	<div class="card"><p class="err">{error}</p></div>
 {:else if datos.estado === 'sin_datos'}
 	<div class="empty">
