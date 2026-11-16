@@ -1,7 +1,7 @@
 /* ECCSA-Shell — audit.js — Bitácora de actividad (audit trail) */
 /* Uso: import { logAction, logError, logClick, logNavigation } from '$lib/audit.js' */
 
-const APP_PREFIX = 'FLD';
+const APP_PREFIX = 'ADM';
 
 function getUser() {
     try {
@@ -57,18 +57,18 @@ export function logClick(modulo, boton, datos = {}) {
 }
 
 export const ERROR_CODES = {
-    AUTH_LOGIN_FAIL: 'FLD-AUTH-001',
-    AUTH_SESSION_EXPIRED: 'FLD-AUTH-002',
-    TKT_LIST_LOAD: 'FLD-TKT-LST-001',
-    TKT_CREATE: 'FLD-TKT-NEW-001',
-    TKT_OCR: 'FLD-TKT-OCR-001',
-    VAL_LIST_LOAD: 'FLD-VAL-LST-001',
-    VAL_CREATE: 'FLD-VAL-NEW-001',
-    REP_LIST_LOAD: 'FLD-REP-LST-001',
-    REP_CREATE: 'FLD-REP-NEW-001',
-    KM_LIST_LOAD: 'FLD-KM-LST-001',
-    KM_CREATE: 'FLD-KM-NEW-001',
-    NET_ERROR: 'FLD-NET-001',
-    API_ERROR: 'FLD-API-001',
-    UI_ERROR: 'FLD-UI-001',
+    AUTH_LOGIN_FAIL: 'ADM-AUTH-001',
+    AUTH_SESSION_EXPIRED: 'ADM-AUTH-002',
+    TKT_LIST_LOAD: 'ADM-TKT-LST-001',
+    TKT_CREATE: 'ADM-TKT-NEW-001',
+    TKT_OCR: 'ADM-TKT-OCR-001',
+    VAL_LIST_LOAD: 'ADM-VAL-LST-001',
+    VAL_CREATE: 'ADM-VAL-NEW-001',
+    REP_LIST_LOAD: 'ADM-REP-LST-001',
+    REP_CREATE: 'ADM-REP-NEW-001',
+    KM_LIST_LOAD: 'ADM-KM-LST-001',
+    KM_CREATE: 'ADM-KM-NEW-001',
+    NET_ERROR: 'ADM-NET-001',
+    API_ERROR: 'ADM-API-001',
+    UI_ERROR: 'ADM-UI-001',
 };

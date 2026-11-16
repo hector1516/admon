@@ -9,6 +9,7 @@
 	import { syncPull, syncPush, pendingCount, syncing, refreshPending } from '$lib/sync.js';
 	import { prefetchOffline } from '$lib/offlinePrefetch.js';
 	import { APP_VERSION, SHELL_VERSION } from '$lib/shell.js';
+	import { logError, ERROR_CODES } from '$lib/audit.js';
 	import Login from './pages/Login.svelte';
 	import Dashboard from './pages/Dashboard.svelte';
 	import Cotizaciones from './pages/Cotizaciones.svelte';
@@ -58,9 +59,8 @@ import EstatusServicios from './pages/EstatusServicios.svelte';
 	];
 
 	onMount(async () => {
-	window.addEventListener("error", (e) => console.error("GLOBAL ERROR:", e.error || e.message));
-	window.addEventListener("error", (e) => console.error("GLOBAL ERROR:", e.error || e.message));
-	window.addEventListener("error", (e) => console.error("GLOBAL ERROR:", e.error || e.message));
+	window.addEventListener("error", (e) => { console.error("GLOBAL ERROR:", e.error || e.message); try { logError(ERROR_CODES.UI_ERROR, 'app', e.error?.message || e.message || 'window error', { filename: e.filename, lineno: e.lineno }); } catch {} });
+	window.addEventListener("unhandledrejection", (e) => { console.error("UNHANDLED:", e.reason); try { logError(ERROR_CODES.NET_ERROR, 'app', String(e.reason?.message || e.reason || 'unhandled rejection'), { reason: String(e.reason) }); } catch {} });
 		// Splash corto con logo Admon
 		const msgs = [...splashMessages].sort(() => Math.random() - 0.5).slice(0, 2);
 		for (let i = 0; i < msgs.length; i++) {
