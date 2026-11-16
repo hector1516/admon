@@ -5,6 +5,11 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import HoldButton from '$lib/components/HoldButton.svelte';
+	import EmptyState from '$lib/components/EmptyState.svelte';
+	import LoadingState from '$lib/components/LoadingState.svelte';
+	import ErrorState from '$lib/components/ErrorState.svelte';
+	import { logError, ERROR_CODES } from '$lib/debug.js';
+	import { logClick } from '$lib/audit.js';
 import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBorrar, remisionAsignar, remisionUsuarios, remisionPdfDownload } from '$lib/cotizacionesApi.js';
 	import { folioFmt, fmtMXN, totales, mapEstatus, COLOR_LABEL } from '$lib/cotizaciones.js';
 
@@ -289,8 +294,9 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 	</div>
 
 	{#if loading}
-		<div class="empty">Cargando…</div>
+		<LoadingState message="Cargando detalle..." />
 	{:else if error && !h}
+		<ErrorState message={error} onRetry={cargar} />
 		<div class="card"><p style="color: var(--color-danger); margin: 0;">{error}</p></div>
 	{:else if h}
 		<div class="card" style="margin-bottom: 0.75rem;">

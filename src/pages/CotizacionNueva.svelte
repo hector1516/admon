@@ -5,6 +5,8 @@
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { crear, clienteNombre, clienteContactos } from '$lib/cotizacionesApi.js';
+	import { logError, ERROR_CODES } from '$lib/debug.js';
+	import { logClick } from '$lib/audit.js';
 
 	let idCliente = $state('');
 	let nombreCliente = $state(null);
@@ -49,6 +51,7 @@
 			}
 			contactoSel = '';
 		} catch (e) {
+			logError(ERROR_CODES.COT_CREATE, 'Error al crear cotizacion', { error: e.message });
 			error = e.message === 'Sesión expirada' ? e.message : '';
 		} finally {
 			buscando = false;
