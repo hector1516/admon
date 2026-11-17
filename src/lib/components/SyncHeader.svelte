@@ -2,7 +2,7 @@
 <script>
   import { onMount } from 'svelte';
 
-  let { usuario = '', appVersion = '', shellVersion = '', fetcher = null, onsync = null } = $props();
+  let { usuario = '', appVersion = '', shellVersion = '', fetcher = null, onsync = null, navItems = null } = $props();
 
   // --- Nombre del módulo actual ---
   function getModuleName() {
@@ -18,6 +18,7 @@
       '/busqueda': 'Búsqueda', '/notas': 'Notas', '/firmas': 'Firmas',
       '/reglas': 'Reglas', '/redactar': 'Redactar', '/notificaciones': 'Notificaciones',
       '/tickets': 'Tickets', '/vales': 'Vales', '/reportes': 'Reportes',
+      '/': 'Home', '/tickets': 'Tickets', '/kilometros': 'Kilometros', '/configuracion': 'Configuracion', '/conocimiento': 'Conocimiento', '/vm': 'VM', '/repositorio': 'Repositorio', '/remisiones': 'Remisiones',
     };
     if (NOMBRES[p]) return NOMBRES[p];
     if (p.startsWith('/cotizaciones/')) return 'Detalle Cotización';
@@ -78,20 +79,24 @@
     }
   }
 
-  const navItems = [
-    { action: () => { if (window.history.length > 1) window.history.back(); else navigate('/dashboard'); } },
-    { action: () => navigate('/dashboard') },
-    { action: () => navigate('/busqueda') },
-    { action: () => navigate('/legends') },
-    { action: () => navigate('/perfil') },
+  const _navRoutes = (Array.isArray(navItems) && navItems.length >= 4)
+    ? navItems
+    : ['/dashboard', '/busqueda', '/legends', '/perfil'];
+  const _navItems = [
+    { action: () => { if (window.history.length > 1) window.history.back(); else navigate(_navRoutes[0] || '/'); } },
+    { action: () => navigate(_navRoutes[0] || '/') },
+    { action: () => navigate(_navRoutes[1] || '/') },
+    { action: () => navigate(_navRoutes[2] || '/') },
+    { action: () => navigate(_navRoutes[3] || '/') },
   ];
 
   function isActiveNav(index) {
     const p = typeof window !== 'undefined' ? window.location.pathname : '';
-    if (index === 1) return p === '/dashboard' || p === '/' || p === '';
-    if (index === 3) return p === '/legends';
-    if (index === 2) return p === '/busqueda';
-    if (index === 4) return p === '/perfil';
+    if (index === 0) return false;
+    if (index === 1) return p === (_navRoutes[0] || '/') || p === '/' || p === '';
+    if (index === 2) return p === (_navRoutes[1] || '/');
+    if (index === 3) return p === (_navRoutes[2] || '/');
+    if (index === 4) return p === (_navRoutes[3] || '/');
     return false;
   }
 </script>
@@ -114,7 +119,7 @@
 
 <!-- Barra inferior -->
 <nav class="bottom-nav" class:hidden={!navVisible}>
-  {#each navItems as item, i}
+  {#each _navItems as item, i}
     <button class="nav-item" class:active={isActiveNav(i)} onclick={item.action} aria-label="nav">
       {#if i === 0}
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
@@ -142,6 +147,7 @@
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform;
   }
   .sync-header.hidden {
     transform: translateY(-100%);
@@ -174,6 +180,7 @@
     padding: 0.4rem 0;
     padding-bottom: max(0.4rem, env(safe-area-inset-bottom));
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform;
   }
   .bottom-nav.hidden {
     transform: translateY(100%);
