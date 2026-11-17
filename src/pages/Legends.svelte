@@ -19,6 +19,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	let weeklyWinner = $state<any>(null);
 	let winners = $state<any[]>([]);
 	let loading = $state(true);
+	let error = $state('');
 	let tab = $state<'ranking' | 'historial' | 'rivales' | 'mis_puntos'>('ranking');
 	let canvas: HTMLCanvasElement | null = $state(null);
 	let shareLoading = $state(false);
