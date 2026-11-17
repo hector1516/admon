@@ -22,7 +22,7 @@
 			navigate('/login', { replace: true });
 			return;
 		}
-		const user = auth.getUser();
+		const user = JSON.parse(localStorage.getItem('admon_user') || 'null');
 		if (!user?.acceso_usuarios) {
 			navigate('/dashboard', { replace: true });
 			return;
