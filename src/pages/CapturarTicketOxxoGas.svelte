@@ -227,7 +227,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 			</div>
 			{#if fotoPreview}
 				<div class="foto-preview">
-					<img src={fotoPreview} alt="Ticket" />
+					<img src={fotoPreview} alt="Ticket" loading="lazy" />
 					<button class="photo-remove" onclick={removeFoto}><X size={16} /></button>
 				</div>
 			{/if}

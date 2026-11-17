@@ -141,7 +141,7 @@ import EstatusServicios from './pages/EstatusServicios.svelte';
 
 {#if !splashDone}
 	<div class="splash">
-		<img class="splash-logo-img" src="/admon_logo.png" alt="Admon ECCSA" />
+		<img class="splash-logo-img" src="/admon_logo.png" alt="Admon ECCSA" loading="eager" />
 		<div class="splash-title">Admon</div>
 		<div class="splash-msg">{splashMsg}</div>
 		<div class="splash-bar">
@@ -253,7 +253,7 @@ import EstatusServicios from './pages/EstatusServicios.svelte';
 	</div>
 {:else}
 	<div class="splash">
-		<img class="splash-logo-img" src="/admon_logo.png" alt="Admon ECCSA" />
+		<img class="splash-logo-img" src="/admon_logo.png" alt="Admon ECCSA" loading="eager" />
 		<div class="splash-title">Admon</div>
 	</div>
 {/if}

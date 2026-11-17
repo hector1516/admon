@@ -212,13 +212,13 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					<!--
 					  La foto va DENTRO de un <button>: da área táctil completa,
 					  resuelve el teclado (Enter/Espacio) y evita el aviso a11y de
-					  "click sobre <img>". El <Search size={16} /> pasa a span para no anidar botones.
+					  "click sobre <img loading="lazy">". El <Search size={16} /> pasa a span para no anidar botones.
 					-->
 					<button class="img-zoom-trigger" type="button" onclick={abrirZoom} aria-label="Ampliar la foto del ticket {t.folio}">
 						<img
 							src={imgUrl(t, 0)}
 							alt="Ticket {t.folio}"
-							onerror={() => (imgError = true)}
+							onerror={() => (imgError = true)} loading="lazy"
 						/>
 						<span class="zoom-fab" aria-hidden="true"><Search size={16} /></span>
 						<span class="zoom-hint">Toca para ampliar</span>
@@ -268,7 +268,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					{/if}
 					{#if t.marca_modelo && autoImageExists(t.marca_modelo)}
 					<div class="auto-detail-img">
-						<img src={getAutoImage(t.marca_modelo)} alt={t.marca_modelo} onerror={(e) => { e.target.style.display = 'none'; }} />
+						<img src={getAutoImage(t.marca_modelo)} alt={t.marca_modelo} onerror={(e) => { e.target.style.display = 'none'; }} loading="lazy" />
 					</div>
 				{/if}
 				<div class="info-line"><span>🚗 Auto</span><strong>{[t.marca_modelo, t.placas].filter(Boolean).join(' · ') || '—'}</strong></div>
@@ -330,7 +330,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 				alt=""
 				style="transform: translate({panX}px, {panY}px) scale({zoom})"
 				draggable="false"
-			/>
+			loading="lazy" />
 		</div>
 
 		<div class="lb-foot">Arrastra para mover · − / ＋ para el tamaño · toca la foto o pulsa ✕ para cerrar</div>

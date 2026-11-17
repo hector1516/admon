@@ -79,7 +79,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	let isSelf = $state(false);
 
 	// 📷 Fotografía (HUB_UsuariosFotos, tabla aparte). `fotoUrl` es un blob URL
-	// local: la foto pesa, y meterla en el <img src> como base64 atascaría la
+	// local: la foto pesa, y meterla en el <img src loading="lazy"> como base64 atascaría la
 	// ficha; por eso se pide al backend por HTTP y serevoca al salir.
 	let fotoUrl = $state('');
 	let tieneFoto = $state(false);
@@ -388,7 +388,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 			<div class="foto-row">
 				<div class="avatar">
 					{#if fotoUrl}
-						<img src={fotoUrl} alt="Foto de {nombre}" />
+						<img src={fotoUrl} alt="Foto de {nombre}" loading="lazy" />
 					{:else}
 						<span>{iniciales(nombre) || '👤'}</span>
 					{/if}

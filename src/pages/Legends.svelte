@@ -408,10 +408,10 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 		<!-- HERO CARD 9:16 — White, avatar gigante, overlay -->
 		<div class="hero-card-916" style="animation: slide-up 0.7s ease-out">
-			<img src="/engrane.png" alt="" class="hero-bg-engrane" />
+			<img src="/engrane.png" alt="" class="hero-bg-engrane" loading="lazy" />
 
 			{#if avatar?.avatar}
-				<img src="data:image/png;base64,{avatar.avatar}" alt="Avatar" class="hero-avatar-img-full" />
+				<img src="data:image/png;base64,{avatar.avatar}" alt="Avatar" class="hero-avatar-img-full" loading="lazy" />
 			{:else}
 				<div class="hero-avatar-placeholder-full">👤</div>
 			{/if}
@@ -488,7 +488,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 								</div>
 								<div class="rank-avatar" style="box-shadow: {r.posicion <= 3 ? '0 0 12px ' + nivelColor(r.nivel) : 'none'}">
 									{#if r.avatar}
-										<img src="data:image/png;base64,{r.avatar}" alt="" class="rank-avatar-img" />
+										<img src="data:image/png;base64,{r.avatar}" alt="" class="rank-avatar-img" loading="lazy" />
 									{:else}
 										<div class="rank-avatar-placeholder">👤</div>
 									{/if}
@@ -535,7 +535,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 										</div>
 										<div class="card-avatar-wrapper" style="box-shadow: 0 0 20px {nivelColor(r.nivel)};">
 											{#if r.avatar}
-												<img src="data:image/png;base64,{r.avatar}" alt="" class="card-avatar-img" />
+												<img src="data:image/png;base64,{r.avatar}" alt="" class="card-avatar-img" loading="lazy" />
 											{:else}
 												<div class="card-avatar-placeholder">👤</div>
 											{/if}

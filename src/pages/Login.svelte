@@ -120,7 +120,7 @@ import TextGenerate from '$lib/components/effects/TextGenerate.svelte';
 <AuroraBackground class="login-page">
 	<div class="login-page-inner">
 	<div class="login-card">
-		<img class="logo-img" src="/admon_logo.png" alt="Admon ECCSA" />
+		<img class="logo-img" src="/admon_logo.png" alt="Admon ECCSA" loading="lazy" />
 		<h1><TextGenerate text="ADMON" /></h1>
 		<p class="subtitle">ECCSA AUTOMATION</p>
 

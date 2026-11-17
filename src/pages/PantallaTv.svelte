@@ -249,7 +249,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		{#if portada}
 			<div class="preview">
 				{#if portada.base64}
-					<img src="data:{portada.contenttype};base64,{portada.base64}" alt="Portada actual" />
+					<img src="data:{portada.contenttype};base64,{portada.base64}" alt="Portada actual" loading="lazy" />
 				{/if}
 				<div class="preview-meta">
 					<strong>{portada.titulo || 'Sin título'}</strong>

@@ -226,7 +226,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 				<div class="card-auto" style="cursor: pointer;" on:click={() => verDetalle(a.id)}>
 					{#if a.imagen || autoImageExists(a.marca_modelo)}
 						<div class="auto-img">
-							<img src={a.imagen || getAutoImage(a.marca_modelo)} alt={a.marca_modelo} on:error={(e) => { e.target.style.display = 'none'; }} />
+							<img src={a.imagen || getAutoImage(a.marca_modelo)} alt={a.marca_modelo} on:error={(e) => { e.target.style.display = 'none'; }} loading="lazy" />
 						</div>
 					{/if}
 					<div class="auto-header">
@@ -275,7 +275,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 				{#if detalle.imagen || autoImageExists(detalle.marca_modelo)}
 					<div class="auto-img" style="margin-bottom: 1rem;">
-						<img src={detalle.imagen || getAutoImage(detalle.marca_modelo)} alt={detalle.marca_modelo} on:error={(e) => { e.target.style.display = 'none'; }} />
+						<img src={detalle.imagen || getAutoImage(detalle.marca_modelo)} alt={detalle.marca_modelo} on:error={(e) => { e.target.style.display = 'none'; }} loading="lazy" />
 					</div>
 				{/if}
 

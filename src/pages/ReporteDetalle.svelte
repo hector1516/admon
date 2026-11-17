@@ -492,7 +492,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 			</div>
 			{#if nuevaFotoPreview}
 				<div style="margin-bottom: 0.5rem;">
-					<img src={nuevaFotoPreview} alt="Preview" style="max-width: 200px; border-radius: 8px; border: 1px solid var(--color-border);" />
+					<img src={nuevaFotoPreview} alt="Preview" style="max-width: 200px; border-radius: 8px; border: 1px solid var(--color-border);" loading="lazy" />
 				</div>
 			{/if}
 			{#if fotos.length === 0}
@@ -501,7 +501,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 				<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.5rem;">
 					{#each fotos as f}
 						<div style="position: relative; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden;">
-							<img src="data:image/jpeg;base64,{f.base64}" alt="Foto {f.orden}" style="width: 100%; aspect-ratio: 4/3; object-fit: cover;" />
+							<img src="data:image/jpeg;base64,{f.base64}" alt="Foto {f.orden}" style="width: 100%; aspect-ratio: 4/3; object-fit: cover;" loading="lazy" />
 							<button class="btn btn-sm btn-danger" style="position: absolute; top: 4px; right: 4px; padding: 0.2rem 0.4rem; font-size: 0.7rem;" on:click={() => borrarFoto(f.id)}><Trash2 size={16} /></button>
 						</div>
 					{/each}
@@ -520,7 +520,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					<button class="btn btn-primary btn-sm" on:click={guardarFirma} disabled={busy}><Save size={16} /> Guardar firma</button>
 				</div>
 			{:else if reporte.FirmaConformidad}
-				<img src="data:image/png;base64,{reporte.FirmaConformidad}" alt="Firma" style="max-width: 100%; border: 1px solid var(--color-border); border-radius: 8px;" />
+				<img src="data:image/png;base64,{reporte.FirmaConformidad}" alt="Firma" style="max-width: 100%; border: 1px solid var(--color-border); border-radius: 8px;" loading="lazy" />
 			{:else}
 				<button class="btn btn-primary btn-block" on:click={startFirma} disabled={busy}><Pencil size={16} /> Firmar ahora</button>
 			{/if}

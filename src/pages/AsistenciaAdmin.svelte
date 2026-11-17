@@ -252,7 +252,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					<div class="cabeza">
 						<div class="avatar">
 							{#if avatares[p.id_usuario]}
-								<img src={avatares[p.id_usuario]} alt="Foto de {p.nombre}" />
+								<img src={avatares[p.id_usuario]} alt="Foto de {p.nombre}" loading="lazy" />
 							{:else}
 								<span>{iniciales(p.nombre)}</span>
 							{/if}

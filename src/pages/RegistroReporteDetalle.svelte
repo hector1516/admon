@@ -503,7 +503,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 				{#if reporte.FirmaConformidad}
 					<div style="margin-top: 0.75rem;"><strong>✍️ Firma de Conformidad:</strong></div>
-					<img src={reporte.FirmaConformidad} alt="Firma" style="margin-top: 0.25rem; max-width: 280px; border: 1px solid var(--color-border); border-radius: 8px;" />
+					<img src={reporte.FirmaConformidad} alt="Firma" style="margin-top: 0.25rem; max-width: 280px; border: 1px solid var(--color-border); border-radius: 8px;" loading="lazy" />
 				{/if}
 			{/if}
 		</div>
@@ -517,7 +517,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 				{#if fotosPreview.length > 0}
 					<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
 						{#each fotosPreview as p}
-							<img src={p} alt="Preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--color-border);" />
+							<img src={p} alt="Preview" style="width: 100px; height: 100px; object-fit: cover; border-radius: 8px; border: 1px solid var(--color-border);" loading="lazy" />
 						{/each}
 					</div>
 					<button class="btn btn-primary btn-sm" onclick={guardarFotos} disabled={busy}><Save size={16} /> Guardar Fotos</button>
@@ -530,7 +530,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 				<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.5rem; margin-top: 0.5rem;">
 					{#each reporte._fotos as f}
 						<div style="position: relative; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden;">
-							<img src="data:image/jpeg;base64,{f.base64}" alt="Foto {f.orden}" style="width: 100%; aspect-ratio: 4/3; object-fit: cover;" />
+							<img src="data:image/jpeg;base64,{f.base64}" alt="Foto {f.orden}" style="width: 100%; aspect-ratio: 4/3; object-fit: cover;" loading="lazy" />
 							<span class="badge" style="position: absolute; top: 4px; left: 4px; font-size: 0.7rem;">#{f.orden}</span>
 						</div>
 					{/each}

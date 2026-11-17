@@ -127,7 +127,7 @@ usuarios = Array.isArray(res) ? res : (res.items || []);
 				<button class="list-card" on:click={() => navigate(`/usuarios/${u.id}`)}>
 					<div class="avatar" class:mini={u.activo === false}>
 						{#if avatares[u.id]}
-							<img src={avatares[u.id]} alt="Foto de {u.nombre}" />
+							<img src={avatares[u.id]} alt="Foto de {u.nombre}" loading="lazy" />
 						{:else}
 							<span>{iniciales(u.nombre)}</span>
 						{/if}

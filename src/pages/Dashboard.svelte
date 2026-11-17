@@ -60,7 +60,7 @@
 <div class="page">
 	<div class="header">
 		<div class="brand-col">
-			<h1 class="brand"><img class="brand-logo" src="/admon_logo.png" alt="Admon" /> Admon</h1>
+			<h1 class="brand"><img class="brand-logo" src="/admon_logo.png" alt="Admon" loading="lazy" /> Admon</h1>
 		</div>
 		<!-- Barra de acciones del shell (⚙️ config · 🚪 salir). Admon no pasa
 		     onnotif/ononline: no tiene cola de avisos ni usuarios en línea.

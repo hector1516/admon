@@ -195,7 +195,7 @@
 		<div class="card perfil-foto-card">
 			<div class="foto-container">
 				{#if fotoPreview}
-					<img src={fotoPreview} alt="Foto de perfil" class="foto-preview" />
+					<img src={fotoPreview} alt="Foto de perfil" class="foto-preview" loading="lazy" />
 				{:else}
 					<div class="foto-placeholder">
 						{perfil.nombre?.charAt(0)?.toUpperCase() || '?'}

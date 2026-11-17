@@ -15,6 +15,15 @@ import { api } from './api.js';
 //   de forma oportunista la primera vez que el usuario abre un detalle.
 
 const LIMIT = 10;
+
+function withTimeout(promise, ms) {
+	return Promise.race([
+		promise,
+		new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+	]);
+}
+
+
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const MODULES = [
@@ -87,19 +96,21 @@ export async function prefetchOffline({ force = false } = {}) {
 			// Si la sesión expiró en medio del prefetch, detenerse.
 			if (!localStorage.getItem('admon_token')) break;
 			try {
-				const list = await api.get(mod.list); // la lista ya queda cacheada
+				// Timeout de 5s por módulo para no bloquear la carga de la página
+				// si un endpoint está frío (p.ej. COUNT(*) sobre tabla grande).
+				const list = await withTimeout(api.get(mod.list), 5000);
 				const details = mod.details ? mod.details(list).slice(0, LIMIT * 3) : [];
 				for (const p of details) {
 					if (!localStorage.getItem('admon_token')) break;
 					try {
-						await api.get(p);
+						await withTimeout(api.get(p), 5000);
 					} catch {
-						// 403 sin permiso o detalle inexistente: seguir
+						// 403 sin permiso, timeout o detalle inexistente: seguir
 					}
 					await sleep(60); // no saturar la red ni al backend
 				}
 			} catch {
-				// lista sin permiso (403) u offline: siguiente módulo
+				// lista sin permiso (403), timeout u offline: siguiente módulo
 			}
 			await sleep(120);
 		}

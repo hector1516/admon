@@ -268,7 +268,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 						<div class="body">
 							{#if autoImageExists(v.marca_modelo)}
 								<div class="auto-thumb-km">
-									<img src={getAutoImage(v.marca_modelo)} alt={v.marca_modelo} onerror={(e) => { e.target.style.display = 'none'; }} />
+									<img src={getAutoImage(v.marca_modelo)} alt={v.marca_modelo} onerror={(e) => { e.target.style.display = 'none'; }} loading="lazy" />
 								</div>
 							{/if}
 							<div class="folio">{v.placas || 'SIN PLACAS'}</div>

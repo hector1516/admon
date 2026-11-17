@@ -173,7 +173,7 @@
 						{/if}
 						{#if t.marca_modelo && autoImageExists(t.marca_modelo)}
 							<div class="auto-thumb">
-								<img src={getAutoImage(t.marca_modelo)} alt={t.marca_modelo} onerror={(e) => { e.target.style.display = 'none'; }} />
+								<img src={getAutoImage(t.marca_modelo)} alt={t.marca_modelo} onerror={(e) => { e.target.style.display = 'none'; }} loading="lazy" />
 							</div>
 						{/if}
 						<div class="folio">{t.pendiente_ticket ? '<Ticket size={16} /> ' + t.vale : '#' + t.folio}</div>
