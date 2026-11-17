@@ -138,8 +138,10 @@
 
 <style>
   .sync-header {
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: var(--z-nav, 100);
     padding: 0.5rem 1rem;
     background: rgba(15, 23, 42, 0.85);
