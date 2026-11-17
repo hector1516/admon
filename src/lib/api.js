@@ -21,7 +21,7 @@ async function request(path, options = {}) {
 	}
 	let res;
 	try {
-		res = await fetch(`${BASE}${path}`, { ...options, headers });
+		res = await fetch(`${BASE}${path}`, { ...options, headers, signal: options.signal });
 	} catch {
 		// fetch falló a nivel de conexión (offline/DNS/timeout): no es un
 		// error HTTP de la API. Se tipa para que los helpers decidan fallback.
@@ -49,9 +49,9 @@ export const api = {
 	// GET con caché offline: red primero; si no hay red, caché local.
 	// La llave de caché es el path COMPLETO incluyendo '/api' (consistente
 	// con lo que cachean cotizacionesApi.js y el prefetch).
-	get: async (path) => {
+	get: async (path, options = {}) => {
 		try {
-			const data = await request(path);
+			const data = await request(path, options);
 			await cachePut(BASE + path, data);
 			servingFromCache.set(false);
 			return data;

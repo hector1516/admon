@@ -96,18 +96,30 @@ export async function prefetchOffline({ force = false } = {}) {
 			// Si la sesión expiró en medio del prefetch, detenerse.
 			if (!localStorage.getItem('admon_token')) break;
 			try {
-				// Timeout de 5s por módulo para no bloquear la carga de la página
-				// si un endpoint está frío (p.ej. COUNT(*) sobre tabla grande).
-				const list = await withTimeout(api.get(mod.list), 5000);
-				const details = mod.details ? mod.details(list).slice(0, LIMIT * 3) : [];
-				for (const p of details) {
-					if (!localStorage.getItem('admon_token')) break;
-					try {
-						await withTimeout(api.get(p), 5000);
-					} catch {
-						// 403 sin permiso, timeout o detalle inexistente: seguir
+				// Timeout real (AbortController) para no dejar requests colgados
+				// que bloqueen networkidle. Antes el Promise.race solo abandonaba
+				// la promesa pero el fetch seguía vivo en el navegador.
+				const ac = new AbortController();
+				const timer = setTimeout(() => ac.abort(), 5000);
+				try {
+					const list = await api.get(mod.list, { signal: ac.signal });
+					clearTimeout(timer);
+					const details = mod.details ? mod.details(list).slice(0, LIMIT * 3) : [];
+					for (const p of details) {
+						if (!localStorage.getItem('admon_token')) break;
+						const ac2 = new AbortController();
+						const t2 = setTimeout(() => ac2.abort(), 5000);
+						try {
+							await api.get(p, { signal: ac2.signal });
+						} catch {
+							// 403 sin permiso, timeout o detalle inexistente: seguir
+						} finally {
+							clearTimeout(t2);
+						}
+						await sleep(60); // no saturar la red ni al backend
 					}
-					await sleep(60); // no saturar la red ni al backend
+				} finally {
+					clearTimeout(timer);
 				}
 			} catch {
 				// lista sin permiso (403), timeout u offline: siguiente módulo
