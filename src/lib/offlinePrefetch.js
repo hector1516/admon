@@ -40,7 +40,7 @@ const MODULES = [
 	// vez que el usuario abre el detalle (vía api.get), así que un reporte ya
 	// visto sí muestra sus fotos sin red.
 	{
-		list: '/reportes?',
+		list: '/reportes?limit=10',
 		details: (l) =>
 			(l || []).slice(0, LIMIT).flatMap((r) => [`/reportes/${r.IdReporte}`, `/reportes/${r.IdReporte}/tecnicos`])
 	},
