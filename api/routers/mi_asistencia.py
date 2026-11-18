@@ -41,7 +41,7 @@ class GenerarReporteReq(BaseModel):
     notas: Optional[str] = None
 
 
-@router.post("/api/mi-asistencia/marcar")
+@router.post("/marcar")
 def marcar_asistencia(req: MarcarReq, current_user: dict = Depends(get_current_user)):
     """Marca entrada o salida del empleado (self-service)."""
     if req.tipo not in ('Entrada', 'Salida'):
@@ -74,7 +74,7 @@ def marcar_asistencia(req: MarcarReq, current_user: dict = Depends(get_current_u
         conn.close()
 
 
-@router.get("/api/mi-asistencia/historial")
+@router.get("/historial")
 def historial_asistencia(dias: int = 30, current_user: dict = Depends(get_current_user)):
     """Historial de marcados del empleado."""
     user_id = current_user.get("id") or current_user.get("Id")
@@ -98,7 +98,7 @@ def historial_asistencia(dias: int = 30, current_user: dict = Depends(get_curren
         conn.close()
 
 
-@router.get("/api/mi-asistencia/horas-extras")
+@router.get("/horas-extras")
 def horas_extras_pendientes(current_user: dict = Depends(get_current_user)):
     """Horas extras acumuladas (pendientes de reporte) del empleado."""
     user_id = current_user.get("id") or current_user.get("Id")
@@ -122,7 +122,7 @@ def horas_extras_pendientes(current_user: dict = Depends(get_current_user)):
         conn.close()
 
 
-@router.get("/api/mi-asistencia/horas-extras/calculo")
+@router.get("/horas-extras/calculo")
 def calculo_horas_extras(current_user: dict = Depends(get_current_user)):
     """Calculo informativo de horas extras segun LFT vigente."""
     user_id = current_user.get("id") or current_user.get("Id")
@@ -203,7 +203,7 @@ def calculo_horas_extras(current_user: dict = Depends(get_current_user)):
         conn.close()
 
 
-@router.post("/api/mi-asistencia/horas-extras/generar-reporte")
+@router.post("/horas-extras/generar-reporte")
 def generar_reporte_horas_extras(req: GenerarReporteReq, current_user: dict = Depends(get_current_user)):
     """Genera un reporte de horas extras (quema las horas pendientes)."""
     user_id = current_user.get("id") or current_user.get("Id")
@@ -290,7 +290,7 @@ def generar_reporte_horas_extras(req: GenerarReporteReq, current_user: dict = De
         conn.close()
 
 
-@router.get("/api/mi-asistencia/horas-extras/reportes")
+@router.get("/horas-extras/reportes")
 def reportes_horas_extras(current_user: dict = Depends(get_current_user)):
     """Historial de reportes de horas extras del empleado."""
     user_id = current_user.get("id") or current_user.get("Id")
@@ -316,7 +316,7 @@ def reportes_horas_extras(current_user: dict = Depends(get_current_user)):
 from fastapi.responses import Response
 import io
 
-@router.get("/api/mi-asistencia/horas-extras/reporte/{id_reporte}/pdf")
+@router.get("/horas-extras/reporte/{id_reporte}/pdf")
 def pdf_horas_extras(id_reporte: int, current_user: dict = Depends(get_current_user)):
     """Genera PDF del reporte de horas extras."""
     conn = get_connection()
@@ -389,6 +389,120 @@ def pdf_horas_extras(id_reporte: int, current_user: dict = Depends(get_current_u
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generando PDF: {str(e)}")
+    finally:
+        cur.close()
+        conn.close()
+
+
+@router.get("/admin/reportes")
+def admin_reportes_horas_extras(current_user: dict = Depends(get_current_user)):
+    """Lista todos los reportes de horas extras (admin)."""
+    # Check admin permission
+    if not (current_user.get("acceso_usuarios") or current_user.get("acceso_reportes")):
+        raise HTTPException(status_code=403, detail="Sin permiso")
+    conn = get_connection()
+    cur = conn.cursor(as_dict=True)
+    try:
+        cur.execute("""
+            SELECT r.Id, r.IdUsuario, u.Nombre, r.Folio, r.FechaGeneracion,
+                   r.PeriodoInicio, r.PeriodoFin, r.TotalHorasExtras, r.TotalMonto,
+                   r.Estatus, r.Notas
+            FROM HUB_HorasExtrasReportes r
+            LEFT JOIN HUB_Users u ON u.Id = r.IdUsuario
+            ORDER BY r.FechaGeneracion DESC
+        """)
+        rows = cur.fetchall()
+        return {"reportes": rows, "total": len(rows)}
+    finally:
+        cur.close()
+        conn.close()
+
+
+@router.get("/admin/config-lft")
+def admin_config_lft(current_user: dict = Depends(get_current_user)):
+    """Obtiene la configuracion LFT vigente."""
+    if not (current_user.get("acceso_usuarios") or current_user.get("acceso_reportes")):
+        raise HTTPException(status_code=403, detail="Sin permiso")
+    conn = get_connection()
+    cur = conn.cursor(as_dict=True)
+    try:
+        cur.execute("SELECT * FROM HUB_AsistenciaConfigLFT WHERE Activo = 1 ORDER BY Anio DESC")
+        rows = cur.fetchall()
+        return {"configs": rows, "total": len(rows)}
+    finally:
+        cur.close()
+        conn.close()
+
+
+class FacialRegistroReq(BaseModel):
+    foto_base64: str
+    content_type: str = "image/jpeg"
+
+class FacialVerificarReq(BaseModel):
+    foto_base64: str
+    content_type: str = "image/jpeg"
+
+@router.post("/facial/registrar")
+def registrar_facial(req: FacialRegistroReq, current_user: dict = Depends(get_current_user)):
+    """Registra la foto de referencia facial del usuario."""
+    user_id = current_user.get("id") or current_user.get("Id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Usuario no identificado")
+    try:
+        import base64
+        foto_data = req.foto_base64.split(',')[1] if ',' in req.foto_base64 else req.foto_base64
+        foto_bytes = base64.b64decode(foto_data)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Foto base64 invalida")
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("""
+            IF EXISTS (SELECT 1 FROM HUB_UsuariosFaciales WHERE IdUsuario = %s)
+                UPDATE HUB_UsuariosFaciales SET FotoReferencia = %s, ContentType = %s, FechaActualizacion = GETDATE() WHERE IdUsuario = %s
+            ELSE
+                INSERT INTO HUB_UsuariosFaciales (IdUsuario, FotoReferencia, ContentType, FechaRegistro) VALUES (%s, %s, %s, GETDATE())
+        """, (user_id, foto_bytes, req.content_type, user_id, user_id, foto_bytes, req.content_type))
+        conn.commit()
+        return {"ok": True, "mensaje": "Foto de referencia registrada"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        cur.close()
+        conn.close()
+
+@router.get("/facial/estado")
+def estado_facial(current_user: dict = Depends(get_current_user)):
+    """Verifica si el usuario tiene foto de referencia facial."""
+    user_id = current_user.get("id") or current_user.get("Id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Usuario no identificado")
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT 1 FROM HUB_UsuariosFaciales WHERE IdUsuario = %s AND FotoReferencia IS NOT NULL", (user_id,))
+        tiene = cur.fetchone() is not None
+        return {"tiene_referencia": tiene}
+    finally:
+        cur.close()
+        conn.close()
+
+@router.post("/facial/verificar")
+def verificar_facial(req: FacialVerificarReq, current_user: dict = Depends(get_current_user)):
+    """Verifica la foto capturada contra la referencia. Simplificado: acepta si tiene referencia."""
+    user_id = current_user.get("id") or current_user.get("Id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Usuario no identificado")
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        cur.execute("SELECT 1 FROM HUB_UsuariosFaciales WHERE IdUsuario = %s AND FotoReferencia IS NOT NULL", (user_id,))
+        tiene = cur.fetchone() is not None
+        if not tiene:
+            return {"verificado": False, "mensaje": "No tiene foto de referencia registrada"}
+        # Verificacion simplificada: acepta la foto (la comparacion real se hace con MediaPipe en el frontend)
+        return {"verificado": True, "mensaje": "Verificacion facial exitosa"}
     finally:
         cur.close()
         conn.close()
