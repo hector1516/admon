@@ -236,7 +236,9 @@ app.include_router(dashboard_router.router)
 from api.routers import pdf as pdf_router
 app.include_router(pdf_router.router)
 from api.routers import asistencia as asistencia_router
+from api.routers import mi_asistencia as mi_asistencia_router
 app.include_router(asistencia_router.router)
+app.include_router(mi_asistencia_router.router)
 from api.routers import automoviles as automoviles_router
 app.include_router(automoviles_router.router)
 from api.routers import perfil as perfil_router
