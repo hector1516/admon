@@ -311,3 +311,84 @@ def reportes_horas_extras(current_user: dict = Depends(get_current_user)):
     finally:
         cur.close()
         conn.close()
+
+
+from fastapi.responses import Response
+import io
+
+@router.get("/api/mi-asistencia/horas-extras/reporte/{id_reporte}/pdf")
+def pdf_horas_extras(id_reporte: int, current_user: dict = Depends(get_current_user)):
+    """Genera PDF del reporte de horas extras."""
+    conn = get_connection()
+    cur = conn.cursor()
+    try:
+        # Obtener reporte
+        cur.execute("""
+            SELECT r.Id, r.IdUsuario, r.Folio, r.FechaGeneracion, r.PeriodoInicio, r.PeriodoFin,
+                   r.TotalHorasExtras, r.TotalMonto, r.SueldoSemana, r.Estatus, r.Notas,
+                   u.Nombre
+            FROM HUB_HorasExtrasReportes r
+            LEFT JOIN HUB_Users u ON u.Id = r.IdUsuario
+            WHERE r.Id = %s
+        """, (id_reporte,))
+        row = cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Reporte no encontrado")
+
+        # Obtener registros
+        cur.execute("""
+            SELECT Fecha, HoraEntrada, HoraSalida, HorasComida, HorasTraslado,
+                   HorasExtrasCalculadas, Descripcion, Cliente, Calificacion, Nota
+            FROM HUB_HorasExtrasRegistros
+            WHERE IdReporte = %s
+            ORDER BY Fecha ASC
+        """, (id_reporte,))
+        reg_rows = cur.fetchall()
+
+        registros = []
+        for r in reg_rows:
+            registros.append({
+                'Fecha': r[0],
+                'HoraEntrada': r[1],
+                'HoraSalida': r[2],
+                'HorasComida': r[3],
+                'HorasTraslado': r[4],
+                'HorasExtrasCalculadas': r[5],
+                'Descripcion': r[6],
+                'Cliente': r[7],
+                'Calificacion': r[8],
+                'Nota': r[9],
+            })
+
+        nombre = row[11] or 'Empleado'
+        total_horas = float(row[6] or 0)
+        sueldo_semana = float(row[8] or 0)
+        periodo_inicio = row[4]
+        periodo_fin = row[5]
+        notas = row[10]
+        folio = row[2]
+
+        from api.pdf_reporte import generate_horas_extras_reporte_pdf
+        pdf_bytes = generate_horas_extras_reporte_pdf(
+            nombre=nombre,
+            registros=registros,
+            total_horas=total_horas,
+            sueldo_semana=sueldo_semana,
+            periodo_inicio=periodo_inicio,
+            periodo_fin=periodo_fin,
+            notas=notas,
+            folio=folio
+        )
+
+        if not pdf_bytes:
+            raise HTTPException(status_code=500, detail="Error generando PDF")
+
+        return Response(content=pdf_bytes, media_type="application/pdf",
+                        headers={"Content-Disposition": f'inline; filename="{folio or "reporte_horas_extras"}.pdf"'})
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generando PDF: {str(e)}")
+    finally:
+        cur.close()
+        conn.close()
