@@ -17,7 +17,7 @@
 		{ Icon: Package, color: '#F97316', title: 'Cotizaciones Materiales', desc: 'Crear y gestionar', path: '/cotizaciones_materiales', perm: 'acceso_cotizaciones' },
 		{ Icon: ClipboardList, color: '#10B981', title: 'Registro de Reportes', desc: 'Visualización global admin', path: '/registro_reportes', perm: 'acceso_registro_reportes' },
 		{ Icon: Wrench, color: '#64748B', title: 'Administración', desc: 'Asistencia y usuarios', path: '/admin', perm: 'acceso_usuarios' },
-{ Icon: Clock, color: '#22C55E', title: 'Asistencia Horas Extras', desc: 'Reportes y config LFT', path: '/asistencia_horas_extras', perm: 'acceso_usuarios' },
+{ Icon: Clock, color: '#22C55E', title: 'Asistencia Horas Extras', desc: 'Reportes y config LFT', path: '/asistencia_horas_extras' },
 		{ Icon: Contact, color: '#EC4899', title: 'Clientes', desc: 'Catálogo general', path: '/clientes', perm: 'acceso_cotizaciones' },
 		{ Icon: Car, color: '#06B6D4', title: 'Automóviles', desc: 'Asignación de vehículos', path: '/automoviles', perm: 'acceso_automoviles' },
 		{ Icon: Fuel, color: '#F59E0B', title: 'Tickets de OxxoGas', desc: 'Tickets y facturas', path: '/tickets_oxxogas', perm: 'acceso_vales_oxxogas' },
