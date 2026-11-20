@@ -24,6 +24,7 @@
 	import UsuarioDetalle from './pages/UsuarioDetalle.svelte';
 	import Admin from './pages/Admin.svelte';
 import AsistenciaHorasExtras from './pages/AsistenciaHorasExtras.svelte';
+import MiAsistencia from './pages/MiAsistencia.svelte';
 	import Clientes from './pages/Clientes.svelte';
 import Automoviles from './pages/Automoviles.svelte';
 	import ClienteDetalle from './pages/ClienteDetalle.svelte';
@@ -187,7 +188,9 @@ import EstatusServicios from './pages/EstatusServicios.svelte';
 				<CotizacionEstatus clave={$path.split('/')[2]} />
 			{:else if $path.startsWith('/cotizaciones/')}
 				<CotizacionDetalle clave={$path.split('/')[2]} />
-{:else if $path === '/asistencia_horas_extras'}
+{:else if $path === '/mi_asistencia'}
+			<MiAsistencia />
+		{:else if $path === '/asistencia_horas_extras'}
 			<AsistenciaHorasExtras />
 		{:else if $path === '/admin'}
 			<!-- Módulo Administración: pestañas 🕘 Asistencia + 👥 Administración.
