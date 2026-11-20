@@ -44,8 +44,20 @@ DB_DATABASE = os.getenv("HUB_DB_DATABASE", "ECCSA_Admon")
 
 
 def get_connection():
-    conn = pymssql.connect(server=DB_SERVER, user=DB_USER, password=DB_PASSWORD, database=DB_DATABASE, autocommit=True)
-    return conn
+    last_err = None
+    for intento in range(3):
+        try:
+            conn = pymssql.connect(server=DB_SERVER, user=DB_USER, password=DB_PASSWORD, database=DB_DATABASE, autocommit=True, login_timeout=15, timeout=30)
+            cur = conn.cursor()
+            cur.execute('SELECT 1')
+            cur.close()
+            return conn
+        except Exception as e:
+            last_err = e
+            if intento < 2:
+                import time
+                time.sleep(2 * (intento + 1))
+    raise last_err
 
 
 # --- Helper Functions (usados por IA Tools) ---
