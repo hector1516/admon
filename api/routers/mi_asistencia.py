@@ -59,7 +59,7 @@ def marcar_asistencia(req: MarcarReq, current_user: dict = Depends(get_current_u
              VerificacionFacial, IdFotoVerificacion, PasskeyCredentialId,
              Dispositivo, FechaRegistro, Estado)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """, (user_id, ahora.date(), req.tipo, ahora.time(),
+        """, (user_id, ahora.date(), req.tipo, ahora.strftime('%H:%M:%S'),
               req.latitud, req.longitud, req.precision,
               1 if req.verificacion_facial else 0, req.id_foto_verificacion,
               req.passkey_credential_id, req.dispositivo, ahora, 'Valido'))
@@ -92,6 +92,13 @@ def historial_asistencia(dias: int = 30, current_user: dict = Depends(get_curren
             ORDER BY Fecha DESC, Hora DESC
         """, (user_id, dias))
         rows = cur.fetchall()
+        for r in rows:
+            if r.get('Hora') is not None and hasattr(r['Hora'], 'strftime'):
+                r['Hora'] = r['Hora'].strftime('%H:%M:%S')
+            if r.get('Fecha') is not None and hasattr(r['Fecha'], 'strftime'):
+                r['Fecha'] = r['Fecha'].strftime('%Y-%m-%d')
+            if r.get('FechaRegistro') is not None and hasattr(r['FechaRegistro'], 'strftime'):
+                r['FechaRegistro'] = r['FechaRegistro'].strftime('%Y-%m-%d %H:%M:%S')
         return {"registros": rows, "total": len(rows)}
     finally:
         cur.close()
@@ -115,6 +122,13 @@ def horas_extras_pendientes(current_user: dict = Depends(get_current_user)):
             ORDER BY Fecha ASC
         """, (user_id,))
         rows = cur.fetchall()
+        for r in rows:
+            if r.get('HoraEntrada') is not None and hasattr(r['HoraEntrada'], 'strftime'):
+                r['HoraEntrada'] = r['HoraEntrada'].strftime('%H:%M')
+            if r.get('HoraSalida') is not None and hasattr(r['HoraSalida'], 'strftime'):
+                r['HoraSalida'] = r['HoraSalida'].strftime('%H:%M')
+            if r.get('Fecha') is not None and hasattr(r['Fecha'], 'strftime'):
+                r['Fecha'] = r['Fecha'].strftime('%Y-%m-%d')
         total_horas = sum(float(r.get('HorasExtrasCalculadas') or 0) for r in rows)
         return {"registros": rows, "total_horas": round(total_horas, 2), "total_registros": len(rows)}
     finally:
@@ -307,6 +321,10 @@ def reportes_horas_extras(current_user: dict = Depends(get_current_user)):
             ORDER BY FechaGeneracion DESC
         """, (user_id,))
         rows = cur.fetchall()
+        for r in rows:
+            for k in ['FechaGeneracion', 'PeriodoInicio', 'PeriodoFin']:
+                if r.get(k) is not None and hasattr(r[k], 'strftime'):
+                    r[k] = r[k].strftime('%Y-%m-%d')
         return {"reportes": rows, "total": len(rows)}
     finally:
         cur.close()
