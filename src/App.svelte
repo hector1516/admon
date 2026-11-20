@@ -190,7 +190,7 @@ import EstatusServicios from './pages/EstatusServicios.svelte';
 				<CotizacionDetalle clave={$path.split('/')[2]} />
 {:else if $path === '/mi_asistencia'}
 			<MiAsistencia />
-		{:else if $path === '/asistencia_horas_extras'}
+		{:else if $path === '/asistencia'}
 			<AsistenciaHorasExtras />
 		{:else if $path === '/admin'}
 			<!-- Módulo Administración: pestañas 🕘 Asistencia + 👥 Administración.
