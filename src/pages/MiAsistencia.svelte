@@ -1,31 +1,37 @@
-<script>
+<script lang="ts">
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
-	import { auth } from '$lib/stores/auth.js';
-	import { api } from '$lib/api.js';
-	import { Clock, MapPin, HelpCircle, FileText, ArrowLeft, CheckCircle, XCircle, Loader2, Timer } from 'lucide-svelte';
+	import { api } from '$lib/api';
+	import { auth } from '$lib/stores/auth';
+	let msg = $state('');
+	import { online } from '$lib/stores/online';
+	import { Clock, MapPin, HelpCircle, FileText, ArrowLeft, CheckCircle, XCircle, Loader2, Timer, Download } from 'lucide-svelte';
 
 	let loading = $state(true);
 	let marking = $state(false);
 	let showHelp = $state(false);
 	let error = $state('');
 
-	let marcados = $state([]);
-	let horasExtras = $state(null);
-	let calculo = $state(null);
+	let marcados = $state<any[]>([]);
+	let horasExtras = $state<any>(null);
+	let calculo = $state<any>(null);
 	let loadingCalculo = $state(false);
 	let generandoReporte = $state(false);
+	let showOvertimeTable = $state(false);
+	let showReportHistory = $state(false);
+	let reportesGenerados = $state<any[]>([]);
+	let loadingReportes = $state(false);
 
-	let gpsLat = $state(null);
-	let gpsLon = $state(null);
-	let gpsPrecision = $state(null);
+	let gpsLat = $state<number | null>(null);
+	let gpsLon = $state<number | null>(null);
+	let gpsPrecision = $state<number | null>(null);
 	let gpsError = $state('');
 
 	let timerActivo = $state(false);
-	let horaEntradaActual = $state(null);
+	let horaEntradaActual = $state<Date | null>(null);
 	let horasTrabajadas = $state('0.0');
 	let fraseActual = $state('');
-	let timerInterval = null;
+	let timerInterval: any;
 
 	const frases = [
 		{ min: 0, max: 1, text: 'Apenas calentando motores... ☕' },
@@ -42,7 +48,7 @@
 		{ min: 12, max: 24, text: 'Esto ya es heroico... o imprudente 🦸' },
 	];
 
-	function getFrase(horas) {
+	function getFrase(horas: number): string {
 		const h = frases.find(f => horas >= f.min && horas < f.max);
 		return h ? h.text : '¡Leyenda del trabajo! 🏆';
 	}
@@ -58,7 +64,7 @@
 	async function obtenerGPS() {
 		if (!navigator.geolocation) return;
 		try {
-			const pos = await new Promise((resolve, reject) => {
+			const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
 				navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
 			});
 			gpsLat = pos.coords.latitude;
@@ -71,7 +77,7 @@
 		loading = true;
 		error = '';
 		try {
-			const hist = await api.get('/mi-asistencia/historial?dias=7');
+			const hist = await api.get('/mi-asistencia/historial?dias=30');
 			marcados = hist.registros || [];
 			const he = await api.get('/mi-asistencia/horas-extras');
 			horasExtras = he;
@@ -82,10 +88,22 @@
 				actualizarTimer();
 				timerInterval = setInterval(actualizarTimer, 60000);
 			}
-		} catch (e) {
+		} catch (e: any) {
 			error = e.message || 'Error cargando datos';
 		} finally {
 			loading = false;
+		}
+	}
+
+	async function cargarReportes() {
+		loadingReportes = true;
+		try {
+			const res = await api.get('/mi-asistencia/horas-extras/reportes');
+			reportesGenerados = res.reportes || [];
+		} catch (e: any) {
+			// silently fail
+		} finally {
+			loadingReportes = false;
 		}
 	}
 
@@ -111,7 +129,7 @@
 				fraseActual = '';
 			}
 			await cargarDatos();
-		} catch (e) {
+		} catch (e: any) {
 			error = e.message || 'Error al marcar';
 		} finally {
 			marking = false;
@@ -122,7 +140,7 @@
 		loadingCalculo = true;
 		try {
 			calculo = await api.get('/mi-asistencia/horas-extras/calculo');
-		} catch (e) {
+		} catch (e: any) {
 			error = e.message || 'Error cargando cálculo';
 		} finally {
 			loadingCalculo = false;
@@ -144,18 +162,23 @@
 			});
 			msg = `Reporte ${res.folio} generado. ${res.total_horas} horas quemadas.`;
 			await cargarDatos();
-		} catch (e) {
+			await cargarReportes();
+		} catch (e: any) {
 			error = e.message || 'Error generando reporte';
 		} finally {
 			generandoReporte = false;
 		}
 	}
 
-	let msg = $state('');
+	function verPdf(reporteId: number) {
+		const token = (() => { try { return JSON.parse(localStorage.getItem('field_session') || '{}').token || ''; } catch { return ''; } })();
+		window.open(`/api/mi-asistencia/horas-extras/reporte/${reporteId}/pdf?token=${encodeURIComponent(token)}`, '_blank');
+	}
 
 	onMount(() => {
-		if (!$auth.user) { navigate('/login'); return; }
+		if (!$auth?.token) { navigate('/login'); return; }
 		cargarDatos();
+		cargarReportes();
 		obtenerGPS();
 		return () => { if (timerInterval) clearInterval(timerInterval); };
 	});
@@ -180,14 +203,11 @@
 	{/if}
 
 	{#if loading}
-		<p class="loading">Cargando...</p>
+		<div class="loading">Cargando...</div>
 	{:else}
+		<!-- Check-in button -->
 		<div class="checkin-section">
-			<button
-				class="checkin-btn {timerActivo ? 'checkout' : 'checkin'}"
-				onclick={marcar}
-				disabled={marking}
-			>
+			<button class="checkin-btn {timerActivo ? 'checkout' : 'checkin'}" onclick={marcar} disabled={marking}>
 				{#if marking}
 					<Loader2 size={32} class="spin" />
 				{:else if timerActivo}
@@ -198,7 +218,6 @@
 					<span class="btn-label">CHECK IN</span>
 				{/if}
 			</button>
-
 			{#if timerActivo}
 				<div class="timer-display">
 					<Timer size={24} />
@@ -207,41 +226,56 @@
 				</div>
 				<div class="frase">{fraseActual}</div>
 			{/if}
-
 			{#if gpsLat}
-				<div class="gps-info">
-					<MapPin size={14} />
-					<span>±{gpsPrecision}m</span>
-				</div>
+				<div class="gps-info"><MapPin size={14} /> <span>±{gpsPrecision}m</span></div>
 			{:else if gpsError}
-				<div class="gps-error">
-					<XCircle size={14} /> {gpsError}
-				</div>
+				<div class="gps-error"><XCircle size={14} /> {gpsError}</div>
 			{/if}
 		</div>
 
+		<!-- Overtime hours summary -->
 		{#if horasExtras && (horasExtras.total_horas || 0) > 0}
 			<div class="card">
 				<h2>Horas Extras Pendientes</h2>
-				<div class="stat-row">
-					<span class="stat-label">Total acumulado:</span>
-					<span class="stat-value">{horasExtras.total_horas} hrs</span>
-				</div>
-				<div class="stat-row">
-					<span class="stat-label">Registros pendientes:</span>
-					<span class="stat-value">{horasExtras.total_registros}</span>
-				</div>
+				<div class="stat-row"><span class="stat-label">Total acumulado:</span><span class="stat-value">{horasExtras.total_horas} hrs</span></div>
+				<div class="stat-row"><span class="stat-label">Registros pendientes:</span><span class="stat-value">{horasExtras.total_registros}</span></div>
 				<button class="btn btn-primary btn-sm" onclick={generarReporte} disabled={generandoReporte} style="margin-top: 0.75rem;">
-					{#if generandoReporte}
-						<Loader2 size={16} class="spin" />
-					{:else}
-						<FileText size={16} />
-					{/if}
+					{#if generandoReporte}<Loader2 size={16} class="spin" />{:else}<FileText size={16} />{/if}
 					Generar Reporte de Horas
 				</button>
 			</div>
 		{/if}
 
+		<!-- Overtime records table (all fields from Excel) -->
+		{#if horasExtras && horasExtras.registros && horasExtras.registros.length > 0}
+			<div class="card">
+				<h2>Horas Extras (Detalle)</h2>
+				<div class="table-wrapper">
+					<table class="he-table">
+						<thead>
+							<tr>
+								<th>Fecha</th><th>Entrada</th><th>Salida</th><th>Comida</th><th>Viaje</th><th>Hrs Extra</th><th>Cliente</th>
+							</tr>
+						</thead>
+						<tbody>
+							{#each horasExtras.registros as r}
+								<tr>
+									<td>{r.Fecha}</td>
+									<td>{r.HoraEntrada || '-'}</td>
+									<td>{r.HoraSalida || '-'}</td>
+									<td>{r.HorasComida ?? '-'}</td>
+									<td>{r.HorasTraslado ?? '-'}</td>
+									<td class="bold">{r.HorasExtrasCalculadas}</td>
+									<td>{r.Cliente || '-'}</td>
+								</tr>
+							{/each}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		{/if}
+
+		<!-- Recent markings -->
 		<div class="card">
 			<h2>Últimos Marcados</h2>
 			{#if marcados.length === 0}
@@ -253,16 +287,37 @@
 							<span class="marking-tipo {m.Tipo === 'Entrada' ? 'entrada' : 'salida'}">{m.Tipo}</span>
 							<span class="marking-fecha">{m.Fecha}</span>
 							<span class="marking-hora">{m.Hora}</span>
-							{#if m.Latitud}
-								<span class="marking-gps"><MapPin size={12} /></span>
-							{/if}
+							{#if m.Latitud}<span class="marking-gps"><MapPin size={12} /></span>{/if}
 						</div>
 					{/each}
 				</div>
 			{/if}
 		</div>
+
+		<!-- Generated reports history -->
+		{#if reportesGenerados.length > 0}
+			<div class="card">
+				<h2>Reportes Generados</h2>
+				<div class="reportes-list">
+					{#each reportesGenerados as r}
+						<div class="reporte-item">
+							<div class="reporte-info">
+								<strong>{r.Folio}</strong>
+								<span>{r.PeriodoInicio} - {r.PeriodoFin}</span>
+								<span>{r.TotalHorasExtras} hrs</span>
+								<span class="badge {r.Estatus}">{r.Estatus}</span>
+							</div>
+							<button class="btn btn-sm btn-secondary" onclick={() => verPdf(r.Id)}>
+								<Download size={14} /> PDF
+							</button>
+						</div>
+					{/each}
+				</div>
+			</div>
+		{/if}
 	{/if}
 
+	<!-- Help modal -->
 	{#if showHelp}
 		<div class="modal-overlay" onclick={() => showHelp = false}>
 			<div class="modal" onclick={(e) => e.stopPropagation()}>
@@ -359,4 +414,16 @@
 	.calc-section h3 { font-size: 0.875rem; font-weight: 600; color: #3b82f6; margin-bottom: 0.5rem; }
 	.calc-row { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 0.125rem 0; }
 	.calc-note { font-size: 0.75rem; color: #64748b; margin-top: 0.5rem; border-top: 1px solid #e2e8f0; padding-top: 0.5rem; }
+	.table-wrapper { overflow-x: auto; }
+	.he-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+	.he-table th, .he-table td { padding: 0.375rem 0.5rem; border-bottom: 1px solid #e2e8f0; text-align: left; white-space: nowrap; }
+	.he-table th { background: #f8fafc; font-weight: 600; color: #475569; }
+	.he-table .bold { font-weight: 600; }
+	.reportes-list { display: flex; flex-direction: column; gap: 0.5rem; }
+	.reporte-item { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; }
+	.reporte-info { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+	.badge { padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.7rem; font-weight: 600; }
+	.badge.Generado { background: #dbeafe; color: #1e40af; }
+	.badge.Pagado { background: #dcfce7; color: #166534; }
+	.badge.Cancelado { background: #fee2e2; color: #991b1b; }
 </style>
