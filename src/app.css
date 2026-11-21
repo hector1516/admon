@@ -147,12 +147,23 @@ body::before {
 * { box-sizing: border-box; }
 input, select, textarea { font-size: 16px !important; }
 
-/* Iconos de lucide dentro de títulos: alineados con la línea base y con aire.
-   Los <h1> que antes empezaban con emoji ahora empiezan con un icono (Fase C). */
+/* Iconos de lucide dentro de títulos (Fase C). Los <h1> que antes empezaban
+   con emoji ahora empiezan con un icono. Con `:has()` el título pasa a flex
+   solo si tiene icono: así el texto se parte a la derecha del icono (que queda
+   centrado) en vez de dejar el icono solo en su propia línea cuando el header
+   es angosto (pasa en /vales y /reportes con botón al lado). */
 h1 > svg, h2 > svg, h3 > svg {
 	vertical-align: -0.15em;
 	margin-right: 0.35em;
 	flex-shrink: 0;
+}
+h1:has(> svg), h2:has(> svg), h3:has(> svg) {
+	display: flex;
+	align-items: center;
+	gap: 0.35em;
+}
+h1:has(> svg) > svg, h2:has(> svg) > svg, h3:has(> svg) > svg {
+	margin-right: 0;
 }
 
 /* Buttons */
