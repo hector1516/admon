@@ -159,7 +159,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 
 	async function onBorrar() {
 		if (!h || h.folio == null) {
-			error = 'Solo se puede borrar online con folio asignado.';
+			error = 'Solo se puede eliminar online con folio asignado.';
 			return;
 		}
 		if (!confirm(`¿Eliminar definitivamente ${folioFmt(h.folio)} y sus partidas? Es irreversible.`)) return;
@@ -369,7 +369,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 			{#if mostrandoCrear}
 				<div style="border: 1px solid var(--color-border, var(--color-surface-2)); border-radius: 8px; padding: 0.6rem; margin-top: 0.5rem;">
 					<p class="hint" style="margin-top: 0;">
-						Edita cantidades y desmarca las partidas que NO van. Sin precios. Al crear queda inmutable (solo se puede borrar).
+						Edita cantidades y desmarca las partidas que NO van. Sin precios. Al crear queda inmutable (solo se puede eliminar).
 					</p>
 					{#each remRows as row, i (row.partida)}
 						<div style="display: flex; gap: 0.5rem; align-items: center; padding: 0.3rem 0; border-bottom: 1px solid rgba(148,163,184,0.15);">
@@ -461,7 +461,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 		</div>
 		<button class="btn btn-secondary btn-block" style="margin-bottom: 0.5rem;" on:click={() => navigate(`/cotizaciones/${clave}/estatus`)} disabled={busy}><Settings size={18} /> Cambiar estatus</button>
 		<button class="btn btn-secondary btn-block" style="margin-bottom: 0.5rem;" on:click={abrirHistorial} disabled={busy}>Historial de cambios</button>
-		<HoldButton label="Borrar cotización" onConfirm={onBorrar} disabled={bloqueado} size="md" block={true} />
+		<HoldButton label="Eliminar cotización" onConfirm={onBorrar} disabled={bloqueado} size="md" block={true} />
 		{#if bloqueado}
 			<p class="hint" style="margin-top: 0.5rem;">🔒 Bloqueada (lista para facturar / facturada).</p>
 		{/if}

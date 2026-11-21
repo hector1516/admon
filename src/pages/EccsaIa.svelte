@@ -87,7 +87,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 	async function borrarConversacion() {
 		if (!conversacion) return;
-		if (!confirm('¿Borrar la conversación y empezar de cero?')) return;
+		if (!confirm('¿Eliminar la conversación y empezar de cero?')) return;
 		error = '';
 		try {
 			const res = await fetch(`/api/ia/conversaciones/${conversacion.Id}`, {
@@ -96,11 +96,11 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 			});
 			if (!res.ok) {
 				const data = await res.json().catch(() => ({}));
-				throw new Error(data.detail || 'Error al borrar.');
+				throw new Error(data.detail || 'Error al eliminar.');
 			}
 			await crearConversacion();
 		} catch (e) {
-			error = e.message || 'Error al borrar la conversación.';
+			error = e.message || 'Error al eliminar la conversación.';
 		}
 	}
 
@@ -248,7 +248,7 @@ function formatearFecha(fecha) {
 				<span class="chat-status">🟢 En línea · asistente de ECCSA Automation</span>
 			</div>
 		</div>
-		<button class="btn-icon" on:click={borrarConversacion} title="Borrar la conversación"><Trash2 size={16} /></button>
+		<button class="btn-icon" on:click={borrarConversacion} title="Eliminar la conversación"><Trash2 size={16} /></button>
 	</header>
 
 	{#if error}

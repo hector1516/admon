@@ -129,7 +129,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	}
 
 	async function borrar(n) {
-		if (!confirm(`¿Borrar la nota "${n.titulo}"?`)) return;
+		if (!confirm(`¿Eliminar la nota "${n.titulo}"?`)) return;
 		error = '';
 		try {
 			await api.delete(`/notas/${n.id}`);
@@ -137,7 +137,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 			if (editandoId === n.id) cancelarEditor();
 			aviso = '🗑️ Nota borrada.';
 		} catch (e) {
-			error = e.message || 'No se pudo borrar la nota.';
+			error = e.message || 'No se pudo eliminar la nota.';
 		}
 	}
 
@@ -227,7 +227,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 						<h2 class="nota-titulo">{#if n.fija}<span class="nota-fija">📌 fija</span>{/if}{n.titulo}</h2>
 						<div class="nota-acciones">
 							<button class="btn-icon" onclick={() => abrirEditar(n)} title="Editar"><Pencil size={16} /></button>
-							<HoldButton label="Borrar" onConfirm={() => borrar(n)} size="sm" />
+							<HoldButton label="Eliminar" onConfirm={() => borrar(n)} size="sm" />
 						</div>
 					</div>
 					<div class="nota-contenido">{n.contenido}</div>

@@ -141,13 +141,13 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	}
 
 	async function borrarImagen(id) {
-		if (!confirm('¿Borrar esta imagen del historial?')) return;
+		if (!confirm('¿Eliminar esta imagen del historial?')) return;
 		error = '';
 		try {
 			await api.delete(`/pantalla/portada/${id}`);
 			await cargarPortada();
 		} catch (ex) {
-			error = ex.message || 'No se pudo borrar.';
+			error = ex.message || 'No se pudo eliminar.';
 		}
 	}
 
@@ -303,7 +303,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 							<span class="chip chip-ok">en pantalla</span>
 						{:else}
 							<button class="btn-icon" onclick={() => restaurar(h.id)} title="Volver a ponerla"><Recycle size={16} /></button>
-							<HoldButton label="Borrar" onConfirm={() => borrarImagen(h.id)} size="sm" />
+							<HoldButton label="Eliminar" onConfirm={() => borrarImagen(h.id)} size="sm" />
 						{/if}
 					</div>
 				{/each}
