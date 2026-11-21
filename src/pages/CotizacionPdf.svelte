@@ -150,7 +150,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 			<button class="btn btn-primary btn-block" on:click={downloadPdfNative}><Download size={16} /> Descargar</button>
 		</div>
 		{#if msg}
-			<p style="font-size: 0.8rem; color: var(--color-text-muted); text-align: center; margin: 0 1rem 0.4rem;">{msg}</p>
+			<p style="font-size: var(--font-size-xs); color: var(--color-text-muted); text-align: center; margin: 0 1rem 0.4rem;">{msg}</p>
 		{/if}
 		<iframe src={pdfUrl} title="PDF" style="flex: 1; border: none; width: 100%;"></iframe>
 	{/if}

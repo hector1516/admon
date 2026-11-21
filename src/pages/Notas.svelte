@@ -250,8 +250,8 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	.nota-aviso {
 		padding: 0.5rem 0.75rem;
 		background: rgba(34, 197, 94, 0.12);
-		color: #22C55E;
-		font-size: 0.8rem;
+		color: var(--color-success);
+		font-size: var(--font-size-xs);
 		border-radius: 8px;
 		margin-bottom: 0.75rem;
 	}
@@ -264,7 +264,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		padding: 1rem;
 		margin-bottom: 1rem;
 	}
-	.editor-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.75rem; }
+	.editor-title { font-weight: 700; font-size: var(--font-size-base); margin-bottom: 0.75rem; }
 	.editor .field { margin-bottom: 0.6rem; }
 	.editor-contenido { resize: vertical; min-height: 120px; line-height: 1.5; }
 	.editor-acciones { display: flex; gap: 0.5rem; }
@@ -277,7 +277,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		margin-bottom: 0.75rem;
 	}
 	.colores { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
-	.opciones-lbl { font-size: 0.72rem; color: var(--color-text-muted); margin-right: 0.15rem; }
+	.opciones-lbl { font-size: var(--font-size-xs); color: var(--color-text-muted); margin-right: 0.15rem; }
 	.color-chip {
 		width: 22px;
 		height: 22px;
@@ -288,14 +288,14 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		padding: 0;
 	}
 	.color-chip.sel { border-color: var(--color-text); box-shadow: 0 0 0 2px var(--c); }
-	.fija-check { display: flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; cursor: pointer; }
+	.fija-check { display: flex; align-items: center; gap: 0.35rem; font-size: var(--font-size-xs); cursor: pointer; }
 
 	/* Lista de notas */
 	.notas-lista { display: flex; flex-direction: column; gap: 0.8rem; }
 	.nota-card {
 		background: var(--color-surface);
 		border: 1px solid rgba(255, 255, 255, 0.06);
-		border-left: 5px solid var(--c, #F59E0B);
+		border-left: 5px solid var(--c, var(--color-warning));
 		border-radius: 14px;
 		padding: 0.9rem 1rem;
 	}
@@ -310,12 +310,12 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		vertical-align: middle;
 	}
 	.nota-head { display: flex; align-items: flex-start; gap: 0.5rem; }
-	.nota-titulo { font-size: 1rem; margin: 0; flex: 1; line-height: 1.3; }
+	.nota-titulo { font-size: var(--font-size-base); margin: 0; flex: 1; line-height: 1.3; }
 	.nota-acciones { display: flex; gap: 0.15rem; flex-shrink: 0; }
 	.btn-icon {
 		background: transparent;
 		border: none;
-		font-size: 0.95rem;
+		font-size: var(--font-size-base);
 		cursor: pointer;
 		padding: 0.25rem 0.4rem;
 		border-radius: 8px;
@@ -338,7 +338,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		margin-top: 0.7rem;
 		padding-top: 0.55rem;
 		border-top: 1px solid rgba(255, 255, 255, 0.06);
-		font-size: 0.72rem;
+		font-size: var(--font-size-xs);
 		color: var(--color-text-muted);
 	}
 	.nota-autor { font-weight: 600; color: var(--color-text); }

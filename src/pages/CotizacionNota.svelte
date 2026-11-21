@@ -101,8 +101,8 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 </div>
 
 <style>
-	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
-	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
-	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
+	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: var(--font-size-sm); margin-bottom: 0.75rem; }
+	.msg.err { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+	.msg.ok { background: rgba(34,197,94,0.1); color: var(--color-success); }
 	.card { margin-bottom: 0.75rem; }
 </style>

@@ -432,9 +432,9 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					<button class="btn btn-primary btn-block" on:click={guardarCambios} disabled={busy}><Save size={16} /> Guardar</button>
 				</div>
 			{:else}
-				<div class="grid-2" style="font-size: 0.9rem;">
+				<div class="grid-2" style="font-size: var(--font-size-sm);">
 					<div><strong>Folio:</strong> {reporte.Folio}</div>
-					<div><strong>Estatus:</strong> <span style="padding: 0.1rem 0.5rem; border-radius: 4px; background: {estatusColor(reporte.Estatus)}20; color: {estatusColor(reporte.Estatus)}; font-weight: 700; font-size: 0.8rem;">{reporte.Estatus || 'Borrador'}</span></div>
+					<div><strong>Estatus:</strong> <span style="padding: 0.1rem 0.5rem; border-radius: 4px; background: {estatusColor(reporte.Estatus)}20; color: {estatusColor(reporte.Estatus)}; font-weight: 700; font-size: var(--font-size-xs);">{reporte.Estatus || 'Borrador'}</span></div>
 					<div><strong>Cliente:</strong> {reporte.Cliente}</div>
 					<div><strong>Fecha:</strong> {reporte.Fecha ? String(reporte.Fecha).split('T')[0] : '-'}</div>
 					<div><strong>Contacto:</strong> {reporte.Contacto || '-'}</div>
@@ -466,13 +466,13 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		<!-- Ingenieros adicionales -->
 		<div class="card" style="margin-bottom: 0.75rem;">
 			<div class="card-title">👥 Ingenieros del reporte</div>
-			<div style="font-size: 0.9rem;">
+			<div style="font-size: var(--font-size-sm);">
 				<strong>Responsable:</strong> {reporte.Tecnico}
 			</div>
 			{#if tecnicos.length > 0}
 				<div style="margin-top: 0.5rem;">
 					<strong>Adicionales:</strong>
-					<ul style="margin: 0.25rem 0 0 1.2rem; font-size: 0.85rem;">
+					<ul style="margin: 0.25rem 0 0 1.2rem; font-size: var(--font-size-sm);">
 						{#each tecnicos as t}
 							{#if t !== reporte.Tecnico}
 								<li>{t}</li>
@@ -496,13 +496,13 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 				</div>
 			{/if}
 			{#if fotos.length === 0}
-				<p style="font-size: 0.85rem; color: var(--color-text-muted);">Sin fotos.</p>
+				<p style="font-size: var(--font-size-sm); color: var(--color-text-muted);">Sin fotos.</p>
 			{:else}
 				<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 0.5rem;">
 					{#each fotos as f}
 						<div style="position: relative; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden;">
 							<img src="data:image/jpeg;base64,{f.base64}" alt="Foto {f.orden}" style="width: 100%; aspect-ratio: 4/3; object-fit: cover;" loading="lazy" />
-							<button class="btn btn-sm btn-danger" style="position: absolute; top: 4px; right: 4px; padding: 0.2rem 0.4rem; font-size: 0.7rem;" on:click={() => borrarFoto(f.id)}><Trash2 size={16} /></button>
+							<button class="btn btn-sm btn-danger" style="position: absolute; top: 4px; right: 4px; padding: 0.2rem 0.4rem; font-size: var(--font-size-2xs);" on:click={() => borrarFoto(f.id)}><Trash2 size={16} /></button>
 						</div>
 					{/each}
 				</div>
@@ -513,7 +513,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		<div class="card" style="margin-bottom: 0.75rem;">
 			<div class="card-title">✍️ Firma de conformidad {reporte.FirmaConformidad ? '(FIRMADO)' : ''}</div>
 			{#if firmando}
-				<canvas bind:this={canvasRef} width="100%" height="200" style="border: 1px solid var(--color-border); border-radius: 8px; background: #fff; touch-action: none;" on:pointerdown={onPointerDown} on:pointermove={onPointerMove} on:pointerup={onPointerUp} on:pointerleave={onPointerUp}></canvas>
+				<canvas bind:this={canvasRef} width="100%" height="200" style="border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-white); touch-action: none;" on:pointerdown={onPointerDown} on:pointermove={onPointerMove} on:pointerup={onPointerUp} on:pointerleave={onPointerUp}></canvas>
 				<div class="grid-3" style="margin-top: 0.5rem;">
 					<button class="btn btn-secondary btn-sm" on:click={limpiarFirma}><Brush size={16} /> Limpiar</button>
 					<button class="btn btn-secondary btn-sm" on:click={() => firmando = false}><X size={16} /> Cancelar</button>
@@ -543,9 +543,9 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 <style>
 	.tech-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-	.tech-check { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; background: rgba(255,255,255,0.05); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer; }
+	.tech-check { display: flex; align-items: center; gap: 0.3rem; font-size: var(--font-size-sm); background: rgba(255,255,255,0.05); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer; }
 	.datetime-group { margin-bottom: 0.5rem; }
-	.datetime-label { font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 0.25rem; }
+	.datetime-label { font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 0.25rem; }
 	.datetime-row { display: flex; gap: 0.5rem; }
 	.datetime-row .input { flex: 1; }
 </style>

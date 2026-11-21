@@ -93,7 +93,7 @@
 		width: 12px;
 		height: 12px;
 		border-radius: 50%;
-		background: #0f172a;
+		background: var(--color-bg);
 		transform: translateY(-50%);
 		z-index: 1;
 	}
@@ -115,10 +115,10 @@
 		z-index: 2;
 	}
 
-	.folio { font-weight: 800; color: #ffae00; font-size: 17px; }
-	.vehiculo { font-weight: 700; color: #f1f5f9; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-	.usuario { font-size: 13.5px; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-	.cliente { font-size: 13px; color: #94a3b8; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-	.desc { font-size: 12.5px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-	.fecha { font-size: 11.5px; color: #475569; margin-top: 3px; }
+	.folio { font-weight: 800; color: var(--color-primary-light); font-size: 17px; }
+	.vehiculo { font-weight: 700; color: var(--color-text-strong); font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.usuario { font-size: 13.5px; color: var(--color-line-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.cliente { font-size: 13px; color: var(--color-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.desc { font-size: 12.5px; color: var(--color-text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+	.fecha { font-size: 11.5px; color: var(--color-border); margin-top: 3px; }
 </style>

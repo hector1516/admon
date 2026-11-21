@@ -210,53 +210,53 @@
 <style>
 	.page { max-width: 1200px; margin: 0 auto; padding: 1rem; }
 	.header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
-	.header h1 { font-size: 1.25rem; margin: 0; color: #f1f5f9; }
-	.count { font-size: 0.8rem; color: #94a3b8; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 999px; padding: 0.25rem 0.7rem; }
-	.hint { font-size: 0.75rem; color: #64748b; margin: 0 0 0.9rem; }
-	.hint strong { color: #FFAE00; }
-	.state { text-align: center; color: #94a3b8; padding: 3rem 1rem; font-size: 0.9rem; }
-	.state.err { color: #f87171; }
+	.header h1 { font-size: var(--font-size-xl); margin: 0; color: var(--color-text-strong); }
+	.count { font-size: var(--font-size-xs); color: var(--color-text-muted); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 999px; padding: 0.25rem 0.7rem; }
+	.hint { font-size: var(--font-size-xs); color: var(--color-text-dim); margin: 0 0 0.9rem; }
+	.hint strong { color: var(--color-primary-light); }
+	.state { text-align: center; color: var(--color-text-muted); padding: 3rem 1rem; font-size: var(--font-size-sm); }
+	.state.err { color: var(--color-danger-light); }
 
 	.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 0.9rem; }
 
-	.card-ticket { text-align: left; background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; overflow: hidden; padding: 0; cursor: pointer; transition: transform 0.15s, border-color 0.15s; color: inherit; font: inherit; }
+	.card-ticket { text-align: left; background: var(--color-surface); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; overflow: hidden; padding: 0; cursor: pointer; transition: transform 0.15s, border-color 0.15s; color: inherit; font: inherit; }
 	.card-ticket.pendiente { border-color: rgba(251, 191, 36, 0.4); cursor: default; }
 	.card-ticket.pendiente:hover { transform: none; }
-	.pendiente-badge { font-size: 0.7rem; font-weight: 700; color: #fbbf24; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 999px; padding: 0.2rem 0.6rem; display: inline-block; margin-bottom: 0.4rem; }
+	.pendiente-badge { font-size: var(--font-size-2xs); font-weight: 700; color: var(--color-warning-light); background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3); border-radius: 999px; padding: 0.2rem 0.6rem; display: inline-block; margin-bottom: 0.4rem; }
 	.auto-thumb { width: 60px; height: 40px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.4rem; background: rgba(255, 255, 255, 0.03); border-radius: 6px; overflow: hidden; }
 	.auto-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; }
 	.card-ticket:hover { transform: translateY(-3px); border-color: rgba(255, 107, 0, 0.5); }
 
 	.body { padding: 0.75rem 0.85rem 0.9rem; }
-	.folio { font-family: ui-monospace, 'Cascadia Mono', monospace; font-weight: 800; font-size: 1.05rem; color: #FFAE00; letter-spacing: 0.5px; }
-	.fecha { font-size: 0.72rem; color: #94a3b8; margin-top: 0.15rem; }
+	.folio { font-family: ui-monospace, 'Cascadia Mono', monospace; font-weight: 800; font-size: var(--font-size-base); color: var(--color-primary-light); letter-spacing: 0.5px; }
+	.fecha { font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: 0.15rem; }
 	.chips { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.55rem; }
-	.chip { font-size: 0.68rem; font-weight: 700; border-radius: 999px; padding: 0.22rem 0.6rem; border: 1px solid transparent; }
-	.chip.ok { color: #4ade80; background: rgba(74, 222, 128, 0.1); border-color: rgba(74, 222, 128, 0.25); }
-	.chip.pend { color: #fbbf24; background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.3); }
-	.btn-primary { background: #ff6b00; color: #fff; border: none; }
+	.chip { font-size: var(--font-size-2xs); font-weight: 700; border-radius: 999px; padding: 0.22rem 0.6rem; border: 1px solid transparent; }
+	.chip.ok { color: var(--color-success-light); background: rgba(74, 222, 128, 0.1); border-color: rgba(74, 222, 128, 0.25); }
+	.chip.pend { color: var(--color-warning-light); background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.3); }
+	.btn-primary { background: var(--color-primary); color: var(--color-white); border: none; }
 	.btn-primary:hover { background: #e55a00; }
-	.row { font-size: 0.75rem; color: #cbd5e1; margin-top: 0.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.row { font-size: var(--font-size-xs); color: var(--color-line-strong); margin-top: 0.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 	/* Saldo Go Vale — mismo look que la vista Vales OxxoGas del HUB.
 	   Bloque apilado: etiqueta → monto → alerta → meta (revisado/umbral)
 	   al pie de la tarjeta, para que quede cuadrado con el texto principal. */
 	.saldo-card { border-radius: 14px; padding: 16px 24px; margin: 0 0 14px; box-shadow: 0 4px 18px rgba(0,0,0,.35); background: linear-gradient(135deg, #052E16 0%, #022C22 100%); border: 2px solid #16A34A; }
-	.saldo-card.bajo { background: linear-gradient(135deg, #7F1D1D 0%, #450A0A 100%); border-color: #EF4444; }
-	.saldo-label { color: #94a3b8; font-size: .85rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
-	.saldo-num { font-size: 2.4rem; font-weight: 800; line-height: 1.15; margin-top: 2px; color: #DCFCE7; }
-	.saldo-num.rojo { color: #EF4444; }
-	.saldo-num.verde { color: #22C55E; }
-	.saldo-alerta { font-size: .95rem; font-weight: 600; margin-top: 2px; color: #FEE2E2; }
-	.saldo-alerta.verde { color: #DCFCE7; }
-	.saldo-meta { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.12); color: #94a3b8; font-size: .78rem; }
+	.saldo-card.bajo { background: linear-gradient(135deg, #7F1D1D 0%, #450A0A 100%); border-color: var(--color-danger); }
+	.saldo-label { color: var(--color-text-muted); font-size: .85rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; }
+	.saldo-num { font-size: 2.4rem; font-weight: 800; line-height: 1.15; margin-top: 2px; color: var(--color-success-soft); }
+	.saldo-num.rojo { color: var(--color-danger); }
+	.saldo-num.verde { color: var(--color-success); }
+	.saldo-alerta { font-size: .95rem; font-weight: 600; margin-top: 2px; color: var(--color-danger-soft); }
+	.saldo-alerta.verde { color: var(--color-success-soft); }
+	.saldo-meta { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,.12); color: var(--color-text-muted); font-size: .78rem; }
 
 	/* Estimado de vales = saldo // monto por vale. Va con su propia línea para
 	   que se lea rápido ("¿cuántos vales me alcanza?") sin mezclarlo con el
 	   saldo, que es el dato real. */
 	.vales-estimado { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-top: 8px; padding: 8px 10px; border-radius: 10px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12); }
-	.vales-num { font-size: 1rem; font-weight: 700; color: #FDE68A; }
+	.vales-num { font-size: var(--font-size-base); font-weight: 700; color: #FDE68A; }
 	.vales-estimado.sin-vales { background: rgba(239,68,68,.16); border-color: rgba(239,68,68,.5); }
 	.vales-estimado.sin-vales .vales-num { color: #FCA5A5; }
-	.vales-nota { font-size: .74rem; color: #94a3b8; }
+	.vales-nota { font-size: .74rem; color: var(--color-text-muted); }
 </style>

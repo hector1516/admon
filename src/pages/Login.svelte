@@ -135,7 +135,7 @@ import TextGenerate from '$lib/components/effects/TextGenerate.svelte';
 			</button>
 		{:else if mode === 'suggest'}
 			<div class="suggest">
-				<div style="font-size:2rem">🔐</div>
+				<div style="font-size: var(--font-size-3xl)">🔐</div>
 				<p><strong>Entra más rápido la próxima vez.</strong><br />Crea tu passkey y usa tu huella o Face ID en este equipo.<br />Se llamará: <strong>“{suggestName}”</strong></p>
 				{#if error}
 					<div class="error">{error}</div>
@@ -222,7 +222,7 @@ import TextGenerate from '$lib/components/effects/TextGenerate.svelte';
 		margin-bottom: 0.5rem;
 	}
 	h1 {
-		font-size: 1.5rem;
+		font-size: var(--font-size-2xl);
 		font-weight: 700;
 		margin: 0 0 0.15rem;
 		letter-spacing: 1px;
@@ -230,7 +230,7 @@ import TextGenerate from '$lib/components/effects/TextGenerate.svelte';
 	.subtitle {
 		color: var(--color-text-muted);
 		margin: 0 0 2rem;
-		font-size: 0.8rem;
+		font-size: var(--font-size-xs);
 		text-transform: uppercase;
 		letter-spacing: 2px;
 	}
@@ -248,18 +248,18 @@ import TextGenerate from '$lib/components/effects/TextGenerate.svelte';
 		border-radius: 12px;
 		padding: 1.25rem 1rem;
 	}
-	.suggest p { font-size: 0.9rem; margin: 0.5rem 0 1rem; }
+	.suggest p { font-size: var(--font-size-sm); margin: 0.5rem 0 1rem; }
 	.divider {
 		color: var(--color-text-muted);
-		font-size: 0.8rem;
+		font-size: var(--font-size-xs);
 		margin: 0 0 1rem;
 	}
 	.error {
 		background: rgba(239, 68, 68, 0.1);
-		color: #EF4444;
+		color: var(--color-danger);
 		padding: 0.75rem;
 		border-radius: 8px;
-		font-size: 0.85rem;
+		font-size: var(--font-size-sm);
 		margin-bottom: 1rem;
 		text-align: left;
 	}

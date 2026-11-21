@@ -119,7 +119,7 @@ import { Phone , ArrowLeft, Plus , Timer } from 'lucide-svelte';
 
 	{#if !$online}
 		<div class="card" style="margin-bottom: 0.75rem; border-color: rgba(239,68,68,0.4);">
-			<p style="margin: 0; font-size: 0.85rem;">📡 Lista maestra: requiere conexión.</p>
+			<p style="margin: 0; font-size: var(--font-size-sm);">📡 Lista maestra: requiere conexión.</p>
 		</div>
 	{/if}
 
@@ -130,7 +130,7 @@ import { Phone , ArrowLeft, Plus , Timer } from 'lucide-svelte';
 		<div class="msg ok">{msg}</div>
 	{/if}
 
-	<p style="color: var(--color-text-muted); font-size: 0.8rem;">Mostrando {filtrados.length} de {lista.length} reportes.</p>
+	<p style="color: var(--color-text-muted); font-size: var(--font-size-xs);">Mostrando {filtrados.length} de {lista.length} reportes.</p>
 
 	{#if loading}
 		<LoadingState message="Cargando reportes..." />
@@ -151,7 +151,7 @@ import { Phone , ArrowLeft, Plus , Timer } from 'lucide-svelte';
 					<div class="body">
 						<div class="folio-row">
 							<span class="folio">{r.Folio}</span>
-							<span class="badge" style="font-size: 0.6rem; background: {estatusColor(r.Estatus)}20; color: {estatusColor(r.Estatus)}; font-weight: 700; padding: 0.15rem 0.4rem; border-radius: 4px;">{r.Estatus || 'Borrador'}</span>
+							<span class="badge" style="font-size: var(--font-size-2xs); background: {estatusColor(r.Estatus)}20; color: {estatusColor(r.Estatus)}; font-weight: 700; padding: 0.15rem 0.4rem; border-radius: 4px;">{r.Estatus || 'Borrador'}</span>
 						</div>
 						<div class="cliente">{r.Cliente}</div>
 						<div class="meta">{r.Fecha} · {r.Tecnico}</div>
@@ -170,17 +170,17 @@ import { Phone , ArrowLeft, Plus , Timer } from 'lucide-svelte';
 </div>
 
 <style>
-	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
-	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
-	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
+	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: var(--font-size-sm); margin-bottom: 0.75rem; }
+	.msg.err { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+	.msg.ok { background: rgba(34,197,94,0.1); color: var(--color-success); }
 	.card { margin-bottom: 0.75rem; }
-	.empty { text-align: center; color: #94a3b8; padding: 3rem 1rem; font-size: 0.9rem; }
+	.empty { text-align: center; color: var(--color-text-muted); padding: 3rem 1rem; font-size: var(--font-size-sm); }
 
 	.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.75rem; }
 
 	.card-reporte {
 		text-align: left;
-		background: #1e293b;
+		background: var(--color-surface);
 		border: 1px solid rgba(255, 255, 255, 0.07);
 		border-radius: 12px;
 		overflow: hidden;
@@ -198,9 +198,9 @@ import { Phone , ArrowLeft, Plus , Timer } from 'lucide-svelte';
 
 	.body { padding: 0.65rem 0.75rem 0.75rem; }
 	.folio-row { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.35rem; }
-	.folio { font-family: ui-monospace, 'Cascadia Mono', monospace; font-weight: 800; font-size: 0.95rem; color: #FFAE00; letter-spacing: 0.5px; }
-	.cliente { font-size: 0.85rem; font-weight: 600; color: #e2e8f0; margin-bottom: 0.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.meta { font-size: 0.7rem; color: #94a3b8; margin-bottom: 0.3rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.contacto { font-size: 0.72rem; color: #cbd5e1; margin-bottom: 0.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.tiempo { font-size: 0.65rem; color: #64748b; margin-top: 0.15rem; }
+	.folio { font-family: ui-monospace, 'Cascadia Mono', monospace; font-weight: 800; font-size: var(--font-size-base); color: var(--color-primary-light); letter-spacing: 0.5px; }
+	.cliente { font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text-soft); margin-bottom: 0.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.meta { font-size: var(--font-size-2xs); color: var(--color-text-muted); margin-bottom: 0.3rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.contacto { font-size: var(--font-size-xs); color: var(--color-line-strong); margin-bottom: 0.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.tiempo { font-size: var(--font-size-2xs); color: var(--color-text-dim); margin-top: 0.15rem; }
 </style>

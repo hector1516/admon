@@ -370,7 +370,7 @@ function formatearFecha(fecha) {
 		background: transparent;
 		border: none;
 		color: var(--color-text);
-		font-size: 1.05rem;
+		font-size: var(--font-size-base);
 		cursor: pointer;
 		padding: 0.35rem 0.5rem;
 		border-radius: 8px;
@@ -382,7 +382,7 @@ function formatearFecha(fecha) {
 		width: 36px; height: 36px; border-radius: 50%;
 		background: rgba(255, 107, 0, 0.15);
 		display: flex; align-items: center; justify-content: center;
-		font-size: 1.1rem; flex-shrink: 0;
+		font-size: var(--font-size-lg); flex-shrink: 0;
 	}
 	.wobnimo-avatar {
 		width: 120px; height: 120px;
@@ -402,14 +402,14 @@ function formatearFecha(fecha) {
 		display: block;
 	}
 	.chat-names { display: flex; flex-direction: column; min-width: 0; }
-	.chat-names strong { font-size: 0.95rem; line-height: 1.2; }
-	.chat-status { font-size: 0.68rem; color: var(--color-text-muted); }
+	.chat-names strong { font-size: var(--font-size-base); line-height: 1.2; }
+	.chat-status { font-size: var(--font-size-2xs); color: var(--color-text-muted); }
 
 	.chat-error {
 		padding: 0.5rem 1rem;
 		background: rgba(239, 68, 68, 0.12);
-		color: #EF4444;
-		font-size: 0.8rem;
+		color: var(--color-danger);
+		font-size: var(--font-size-xs);
 		text-align: center;
 		flex-shrink: 0;
 	}
@@ -434,7 +434,7 @@ function formatearFecha(fecha) {
 		width: 30px; height: 30px; border-radius: 50%;
 		background: rgba(255, 107, 0, 0.15);
 		display: flex; align-items: center; justify-content: center;
-		font-size: 0.95rem; flex-shrink: 0; margin-top: 0.2rem;
+		font-size: var(--font-size-base); flex-shrink: 0; margin-top: 0.2rem;
 	}
 
 	.message-bubble {
@@ -447,7 +447,7 @@ function formatearFecha(fecha) {
 	}
 	.message.user .message-bubble {
 		background: var(--color-primary);
-		color: #fff;
+		color: var(--color-white);
 		border-bottom-right-radius: 4px;
 	}
 	.message.assistant .message-bubble {
@@ -458,7 +458,7 @@ function formatearFecha(fecha) {
 	}
 	.message.typing .message-bubble { padding: 0.8rem 1rem; }
 
-	.chat-sender-label { font-size: 0.7rem; color: #94A3B8; font-weight: 700; letter-spacing: 0.02em; }
+	.chat-sender-label { font-size: var(--font-size-2xs); color: var(--color-text-muted); font-weight: 700; letter-spacing: 0.02em; }
 	.msg-content { line-height: 1.55; white-space: pre-wrap; word-wrap: break-word; }
 	/* Respuestas de la IA en Markdown (tablas, listas, negritas) */
 	.msg-content.md { white-space: normal; }
@@ -495,7 +495,7 @@ function formatearFecha(fecha) {
 	.msg-content.md :global(pre code) { background: transparent; padding: 0; }
 
 	.msg-time { font-size: 0.62rem; opacity: 0.55; text-align: right; margin-top: 0.25rem; }
-	.btn-wa-share { margin-top: 0.4rem; padding: 0.3rem 0.7rem; font-size: 0.7rem; border-radius: 8px; border: 1px solid rgba(37,211,102,0.3); background: rgba(37,211,102,0.1); color: #25D366; cursor: pointer; font-family: inherit; font-weight: 600; transition: all 0.15s; display: inline-block; }
+	.btn-wa-share { margin-top: 0.4rem; padding: 0.3rem 0.7rem; font-size: var(--font-size-2xs); border-radius: 8px; border: 1px solid rgba(37,211,102,0.3); background: rgba(37,211,102,0.1); color: #25D366; cursor: pointer; font-family: inherit; font-weight: 600; transition: all 0.15s; display: inline-block; }
 	.btn-wa-share:hover { background: rgba(37,211,102,0.2); }
 	.message.user .msg-time { color: rgba(255, 255, 255, 0.8); }
 
@@ -516,7 +516,7 @@ function formatearFecha(fecha) {
 		color: var(--color-text);
 		border-radius: 999px;
 		padding: 0.4rem 0.8rem;
-		font-size: 0.78rem;
+		font-size: var(--font-size-xs);
 		cursor: pointer;
 		font-family: inherit;
 		transition: all 0.12s;
@@ -541,7 +541,7 @@ function formatearFecha(fecha) {
 		background: var(--color-background);
 		color: var(--color-text);
 		font-family: inherit;
-		font-size: 0.95rem;
+		font-size: var(--font-size-base);
 		line-height: 1.45;
 		resize: none;
 		transition: border-color 0.15s;
@@ -552,11 +552,11 @@ function formatearFecha(fecha) {
 		width: 46px; height: 46px;
 		border-radius: 50%;
 		background: var(--color-primary);
-		color: #fff;
+		color: var(--color-white);
 		border: none;
 		cursor: pointer;
 		display: flex; align-items: center; justify-content: center;
-		font-size: 1.15rem;
+		font-size: var(--font-size-lg);
 		transition: transform 0.1s, background 0.15s;
 		flex-shrink: 0;
 	}

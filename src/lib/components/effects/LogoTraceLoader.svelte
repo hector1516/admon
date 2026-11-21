@@ -86,7 +86,7 @@
 	}
 
 	.trace-stroke {
-		stroke: #ffae00;
+		stroke: var(--color-primary-light);
 		stroke-dasharray: 400;
 		stroke-dashoffset: 400;
 		animation: trace var(--dur) ease-in-out forwards;
@@ -117,7 +117,7 @@
 	.label {
 		font-size: 14px;
 		font-weight: 600;
-		color: #94a3b8;
+		color: var(--color-text-muted);
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		animation: pulse 1.5s ease-in-out infinite;

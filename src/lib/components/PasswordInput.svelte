@@ -30,7 +30,7 @@
 		transform: translateY(-50%);
 		background: none;
 		border: none;
-		font-size: 1.1rem;
+		font-size: var(--font-size-lg);
 		cursor: pointer;
 		padding: 0.25rem;
 		line-height: 1;

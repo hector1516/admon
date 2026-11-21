@@ -148,7 +148,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 	.preview-header h1 {
 		margin: 0;
-		font-size: 1.1rem;
+		font-size: var(--font-size-lg);
 		flex: 1;
 		text-align: center;
 	}

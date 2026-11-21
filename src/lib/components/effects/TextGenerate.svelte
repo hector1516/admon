@@ -80,7 +80,7 @@
   .text-cursor {
     display: inline-block;
     animation: cursor-blink 1s step-end infinite;
-    color: var(--color-primary, #FF6B00);
+    color: var(--color-primary, var(--color-primary));
   }
 
   @keyframes cursor-blink {

@@ -119,7 +119,7 @@
 <style>
   .drop-zone {
     position: relative;
-    border: 2px dashed #334155;
+    border: 2px dashed var(--color-surface-2);
     border-radius: 16px;
     padding: 2rem;
     text-align: center;
@@ -132,18 +132,18 @@
   }
 
   .drop-zone:hover {
-    border-color: #FF6B00;
+    border-color: var(--color-primary);
     background: rgba(255, 107, 0, 0.05);
   }
 
   .drop-zone.dragging {
-    border-color: #FF6B00;
+    border-color: var(--color-primary);
     background: rgba(255, 107, 0, 0.1);
     transform: scale(1.02);
   }
 
   .drop-zone.over {
-    border-color: #22C55E;
+    border-color: var(--color-success);
     background: rgba(34, 197, 94, 0.1);
     transform: scale(1.05);
   }
@@ -156,19 +156,19 @@
   }
 
   .drop-icon {
-    font-size: 2.5rem;
+    font-size: var(--font-size-4xl);
     opacity: 0.6;
   }
 
   .drop-label {
-    color: #E2E8F0;
+    color: var(--color-text-soft);
     font-weight: 600;
     margin: 0;
   }
 
   .drop-hint {
-    color: #64748B;
-    font-size: 0.8rem;
+    color: var(--color-text-dim);
+    font-size: var(--font-size-xs);
     margin: 0;
   }
 
@@ -182,15 +182,15 @@
   .magnet-ring {
     width: 80px;
     height: 80px;
-    border: 3px solid #FF6B00;
+    border: 3px solid var(--color-primary);
     border-radius: 50%;
     animation: magnet-pulse 0.8s ease-in-out infinite;
   }
 
   .magnet-core {
     position: absolute;
-    font-size: 2rem;
-    color: #FF6B00;
+    font-size: var(--font-size-3xl);
+    color: var(--color-primary);
   }
 
   @keyframes magnet-pulse {
@@ -212,23 +212,23 @@
     padding: 0.5rem 0.75rem;
     background: rgba(30, 41, 59, 0.8);
     border-radius: 8px;
-    font-size: 0.85rem;
+    font-size: var(--font-size-sm);
   }
 
-  .file-icon { font-size: 1.2rem; }
-  .file-name { flex: 1; color: #E2E8F0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .file-size { color: #64748B; font-size: 0.75rem; }
+  .file-icon { font-size: var(--font-size-xl); }
+  .file-name { flex: 1; color: var(--color-text-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-size { color: var(--color-text-dim); font-size: var(--font-size-xs); }
   .file-remove {
     background: none;
     border: none;
-    color: #64748B;
+    color: var(--color-text-dim);
     cursor: pointer;
     padding: 0.25rem;
     border-radius: 4px;
     transition: color 0.2s, background 0.2s;
   }
   .file-remove:hover {
-    color: #EF4444;
+    color: var(--color-danger);
     background: rgba(239, 68, 68, 0.1);
   }
 

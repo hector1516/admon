@@ -492,23 +492,23 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 </div>
 
 <style>
-	.card-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
-	.hint { font-size: 0.8rem; color: var(--color-text-muted); margin: 0 0 0.5rem; }
-	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
-	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
-	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
-	.dev-row { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.8rem; padding: 0.45rem 0; border-top: 1px solid rgba(255,255,255,0.05); }
+	.card-title { font-weight: 700; font-size: var(--font-size-base); margin-bottom: 0.25rem; }
+	.hint { font-size: var(--font-size-xs); color: var(--color-text-muted); margin: 0 0 0.5rem; }
+	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: var(--font-size-sm); margin-bottom: 0.75rem; }
+	.msg.err { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+	.msg.ok { background: rgba(34,197,94,0.1); color: var(--color-success); }
+	.dev-row { display: flex; justify-content: space-between; gap: 1rem; font-size: var(--font-size-xs); padding: 0.45rem 0; border-top: 1px solid rgba(255,255,255,0.05); }
 	.dev-row span { color: var(--color-text-muted); flex-shrink: 0; }
 	.dev-row strong { font-weight: 600; text-align: right; word-break: break-word; }
 	.dev-row.col { flex-direction: column; gap: 0.25rem; }
-	.dev-row code { font-size: 0.68rem; color: var(--color-text-muted); word-break: break-all; font-family: monospace; }
-	.check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; margin-bottom: 0.5rem; cursor: pointer; }
+	.dev-row code { font-size: var(--font-size-2xs); color: var(--color-text-muted); word-break: break-all; font-family: monospace; }
+	.check { display: flex; align-items: center; gap: 0.5rem; font-size: var(--font-size-sm); margin-bottom: 0.5rem; cursor: pointer; }
 	.check input { width: 1.1rem; height: 1.1rem; }
-	.empty-sm { font-size: 0.85rem; color: var(--color-text-muted); padding: 0.4rem 0; }
-	.pk-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; padding: 0.4rem 0; border-top: 1px solid rgba(255,255,255,0.05); }
-	.pk-badge { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 6px; margin-left: 0.4rem; vertical-align: middle; text-transform: uppercase; }
-	.pk-ok { background: rgba(34,197,94,0.15); color: #22C55E; }
-	.pk-warn { background: rgba(245,158,11,0.15); color: #F59E0B; }
+	.empty-sm { font-size: var(--font-size-sm); color: var(--color-text-muted); padding: 0.4rem 0; }
+	.pk-row { display: flex; justify-content: space-between; align-items: center; font-size: var(--font-size-sm); padding: 0.4rem 0; border-top: 1px solid rgba(255,255,255,0.05); }
+	.pk-badge { display: inline-block; font-size: var(--font-size-2xs); font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 6px; margin-left: 0.4rem; vertical-align: middle; text-transform: uppercase; }
+	.pk-ok { background: rgba(34,197,94,0.15); color: var(--color-success); }
+	.pk-warn { background: rgba(245,158,11,0.15); color: var(--color-warning); }
 	.userlist { max-height: 180px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 0.5rem 0.75rem; margin-bottom: 0.75rem; }
 	.card { margin-bottom: 0.75rem; }
 </style>

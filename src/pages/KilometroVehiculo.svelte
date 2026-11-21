@@ -138,31 +138,31 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <style>
 	.page { max-width: 860px; margin: 0 auto; padding: 1rem; }
 	.header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
-	.header h1 { font-size: 1.25rem; margin: 0; color: #f1f5f9; }
-	.count { font-size: 0.8rem; color: #94a3b8; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 999px; padding: 0.25rem 0.7rem; }
-	.state { text-align: center; color: #94a3b8; padding: 3rem 1rem; font-size: 0.9rem; }
-	.state.err { color: #f87171; }
-	.hint { font-size: 0.75rem; color: #64748b; margin: 0 0 0.9rem; }
-	.sub { font-size: 0.95rem; color: #f1f5f9; margin: 1.4rem 0 0.6rem; }
+	.header h1 { font-size: var(--font-size-xl); margin: 0; color: var(--color-text-strong); }
+	.count { font-size: var(--font-size-xs); color: var(--color-text-muted); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 999px; padding: 0.25rem 0.7rem; }
+	.state { text-align: center; color: var(--color-text-muted); padding: 3rem 1rem; font-size: var(--font-size-sm); }
+	.state.err { color: var(--color-danger-light); }
+	.hint { font-size: var(--font-size-xs); color: var(--color-text-dim); margin: 0 0 0.9rem; }
+	.sub { font-size: var(--font-size-base); color: var(--color-text-strong); margin: 1.4rem 0 0.6rem; }
 
-	.folio { font-family: ui-monospace, 'Cascadia Mono', monospace; font-weight: 800; color: #FFAE00; letter-spacing: 0.5px; }
-	.folio.grande { font-size: 1.3rem; }
-	.sub-modelo { font-size: 0.8rem; color: #94a3b8; margin-top: 0.15rem; }
+	.folio { font-family: ui-monospace, 'Cascadia Mono', monospace; font-weight: 800; color: var(--color-primary-light); letter-spacing: 0.5px; }
+	.folio.grande { font-size: var(--font-size-xl); }
+	.sub-modelo { font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: 0.15rem; }
 
 	.mini-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0.8rem 0 0.4rem; }
-	.mini { background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; padding: 0.5rem 0.6rem; }
-	.mini-lbl { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; font-weight: 700; }
-	.mini-val { font-size: 1.05rem; font-weight: 800; color: #f1f5f9; }
+	.mini { background: var(--color-surface); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 10px; padding: 0.5rem 0.6rem; }
+	.mini-lbl { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--color-text-muted); font-weight: 700; }
+	.mini-val { font-size: var(--font-size-base); font-weight: 800; color: var(--color-text-strong); }
 
-	.chip { font-size: 0.68rem; font-weight: 700; border-radius: 999px; padding: 0.22rem 0.6rem; border: 1px solid transparent;
-		background: rgba(255, 255, 255, 0.06); color: #cbd5e1; }
+	.chip { font-size: var(--font-size-2xs); font-weight: 700; border-radius: 999px; padding: 0.22rem 0.6rem; border: 1px solid transparent;
+		background: rgba(255, 255, 255, 0.06); color: var(--color-line-strong); }
 	.chip.warn { color: #fca5a5; background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.3); }
 
 	.lista { display: flex; flex-direction: column; gap: 0.3rem; }
-	.item { display: flex; align-items: baseline; gap: 0.6rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 0.4rem 0.6rem; font-size: 0.78rem; }
-	.item-fecha { color: #94a3b8; min-width: 120px; }
-	.item-valor { color: #FFAE00; font-weight: 700; min-width: 96px; text-align: right; }
-	.item-extra { color: #cbd5e1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.item { display: flex; align-items: baseline; gap: 0.6rem; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 0.4rem 0.6rem; font-size: var(--font-size-xs); }
+	.item-fecha { color: var(--color-text-muted); min-width: 120px; }
+	.item-valor { color: var(--color-primary-light); font-weight: 700; min-width: 96px; text-align: right; }
+	.item-extra { color: var(--color-line-strong); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 	.btn-back { width: 100%; margin-top: 1.4rem; }
 </style>

@@ -109,10 +109,10 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					<div style="font-size: 1.6rem;">{op.emoji}</div>
 					<div style="flex: 1; text-align: left;">
 						<div style="font-weight: 800;">{op.titulo}</div>
-						<div style="font-size: 0.8rem; color: var(--color-text-muted);">{op.desc}</div>
+						<div style="font-size: var(--font-size-xs); color: var(--color-text-muted);">{op.desc}</div>
 					</div>
 					{#if parseInt(sel, 10) === op.color}
-						<span style="color: var(--color-success); font-size: 1.3rem;"><Check size={16} /></span>
+						<span style="color: var(--color-success); font-size: var(--font-size-xl);"><Check size={16} /></span>
 					{/if}
 				</button>
 			{/each}
@@ -135,8 +135,8 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 <style>
 	.estatus-opt.sel { border-color: var(--color-primary); }
-	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
-	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
-	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
-	.hint { font-size: 0.8rem; color: var(--color-text-muted); }
+	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: var(--font-size-sm); margin-bottom: 0.75rem; }
+	.msg.err { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+	.msg.ok { background: rgba(34,197,94,0.1); color: var(--color-success); }
+	.hint { font-size: var(--font-size-xs); color: var(--color-text-muted); }
 </style>

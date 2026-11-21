@@ -310,7 +310,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		margin-bottom: 0.75rem;
 	}
 	.actualizado {
-		font-size: 0.8rem;
+		font-size: var(--font-size-xs);
 		color: var(--color-text-muted);
 	}
 	.actualizado b { color: var(--color-text); }
@@ -335,22 +335,22 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		gap: 0.15rem;
 	}
 	.metrica .rot {
-		font-size: 0.72rem;
+		font-size: var(--font-size-xs);
 		font-weight: 700;
 		letter-spacing: 0.1em;
 		text-transform: uppercase;
 		color: var(--color-text-muted);
 	}
 	.metrica .num {
-		font-size: 1.5rem;
+		font-size: var(--font-size-2xl);
 		font-weight: 800;
 		line-height: 1.1;
 		font-variant-numeric: tabular-nums;
 	}
 	.metrica.sitio { border-color: rgba(74, 222, 128, 0.4); }
-	.metrica.sitio .num { color: #4ade80; }
+	.metrica.sitio .num { color: var(--color-success-light); }
 	.metrica.fuera { border-color: rgba(248, 113, 113, 0.35); }
-	.metrica.fuera .num { color: #f87171; }
+	.metrica.fuera .num { color: var(--color-danger-light); }
 
 	/* Rejilla que se acomoda al ancho en vez de calcularse para un TV de
 	   1920×1080: en celular cae a una columna y en escritorio a varias. */
@@ -418,12 +418,12 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	.datos { flex: 1; min-width: 0; }
 	.nombre {
 		font-weight: 700;
-		font-size: 1rem;
+		font-size: var(--font-size-base);
 		line-height: 1.25;
 		overflow-wrap: anywhere;
 	}
 	.reingreso {
-		font-size: 0.78rem;
+		font-size: var(--font-size-xs);
 		color: #86efac;
 		margin-top: 0.15rem;
 	}
@@ -441,7 +441,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		justify-content: center;
 	}
 	.avatar img { width: 100%; height: 100%; object-fit: cover; }
-	.avatar span { font-size: 0.95rem; font-weight: 700; color: var(--color-text-muted); }
+	.avatar span { font-size: var(--font-size-base); font-weight: 700; color: var(--color-text-muted); }
 
 	.horas { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 	.hora {
@@ -461,7 +461,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		color: rgba(255, 255, 255, 0.6);
 	}
 	.hhmm {
-		font-size: 1.05rem;
+		font-size: var(--font-size-base);
 		font-weight: 800;
 		line-height: 1;
 		font-variant-numeric: tabular-nums;
@@ -472,7 +472,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	.vacio-sub {
 		display: block;
 		margin-top: 0.3rem;
-		font-size: 0.8rem;
+		font-size: var(--font-size-xs);
 		color: var(--color-text-muted);
 	}
 
@@ -482,7 +482,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		border-radius: 12px;
 		background: rgba(148, 163, 184, 0.06);
 		border: 1px solid rgba(148, 163, 184, 0.12);
-		font-size: 0.78rem;
+		font-size: var(--font-size-xs);
 		line-height: 1.45;
 		color: var(--color-text-muted);
 	}
@@ -492,7 +492,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		/* En celular las tres métricas en 3 columnas se aprietan demasiado. */
 		.metricas { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
 		.metrica { padding: 0.5rem 0.6rem; }
-		.metrica .num { font-size: 1.2rem; }
+		.metrica .num { font-size: var(--font-size-xl); }
 		.metrica .rot { font-size: 0.62rem; letter-spacing: 0.04em; }
 	}
 </style>

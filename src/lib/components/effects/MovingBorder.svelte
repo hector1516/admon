@@ -53,8 +53,8 @@
     background: conic-gradient(
       from 0deg,
       transparent 0%,
-      var(--color-primary, #FF6B00) 10%,
-      var(--color-primary-light, #FFAE00) 20%,
+      var(--color-primary, var(--color-primary)) 10%,
+      var(--color-primary-light, var(--color-primary-light)) 20%,
       transparent 30%
     );
     animation: moving-border-rotate var(--duration) linear infinite;
@@ -63,7 +63,7 @@
   .moving-border-content {
     position: relative;
     z-index: 1;
-    background: var(--color-surface, #1E293B);
+    background: var(--color-surface, var(--color-surface));
     border-radius: calc(var(--border-radius) - 1px);
     padding: 1rem;
   }

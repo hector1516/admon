@@ -86,7 +86,7 @@
 
 	.stamp-subtext {
 		font-size: calc(var(--size) * 0.09);
-		color: #94a3b8;
+		color: var(--color-text-muted);
 		margin-top: 4px;
 		line-height: 1.2;
 	}

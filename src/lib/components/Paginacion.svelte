@@ -88,7 +88,7 @@
 		margin-top: 1rem;
 		padding-top: 0.85rem;
 		border-top: 1px solid var(--color-line);
-		font-size: 0.8rem;
+		font-size: var(--font-size-xs);
 		color: var(--color-text-muted);
 	}
 	.rango { white-space: nowrap; }
@@ -102,7 +102,7 @@
 		border: 1px solid var(--color-line);
 		border-radius: var(--radius-sm);
 		padding: 0.35rem 0.6rem;
-		font-size: 0.78rem;
+		font-size: var(--font-size-xs);
 		font-family: var(--font-family);
 		cursor: pointer;
 		transition: background 0.15s, border-color 0.15s;
@@ -116,7 +116,7 @@
 		border: 1px solid var(--color-line);
 		border-radius: var(--radius-sm);
 		padding: 0.35rem 0.5rem;
-		font-size: 0.78rem;
+		font-size: var(--font-size-xs);
 		font-family: var(--font-family);
 	}
 	@media (max-width: 640px) {

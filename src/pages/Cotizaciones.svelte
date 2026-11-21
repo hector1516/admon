@@ -115,11 +115,11 @@ import { ArrowLeft, Plus , Clock, Minus , Scale } from 'lucide-svelte';
 
 	{#if !$online}
 		<div class="card" style="margin-bottom: 0.75rem; border-color: rgba(239,68,68,0.4);">
-			<p style="margin: 0; font-size: 0.85rem;">📡 Sin conexión — mostrando datos guardados.</p>
+			<p style="margin: 0; font-size: var(--font-size-sm);">📡 Sin conexión — mostrando datos guardados.</p>
 		</div>
 	{/if}
 
-	<p style="color: var(--color-text-muted); font-size: 0.8rem;">
+	<p style="color: var(--color-text-muted); font-size: var(--font-size-xs);">
 		{#if busqueda.trim()}
 			{filtradas.length} resultado{filtradas.length === 1 ? '' : 's'} para "{busqueda.trim()}"
 		{:else}
@@ -149,12 +149,12 @@ import { ArrowLeft, Plus , Clock, Minus , Scale } from 'lucide-svelte';
 					<div class="body">
 						<div class="folio-row">
 							<span class="folio">{c.folio != null ? folioFmt(c.folio) : '<AlertTriangle size={16} /> Sin folio'}</span>
-							<span class="badge {estatusBadge(c.estatus)}" style="font-size: 0.6rem;">{mapEstatus(c.estatus)}</span>
+							<span class="badge {estatusBadge(c.estatus)}" style="font-size: var(--font-size-2xs);">{mapEstatus(c.estatus)}</span>
 							{#if c.folio == null || !c.synced}
-								<span class="badge badge-warning" style="font-size: 0.6rem;"><Clock size={16} /> pendiente</span>
+								<span class="badge badge-warning" style="font-size: var(--font-size-2xs);"><Clock size={16} /> pendiente</span>
 							{/if}
 							{#if c.pdf_en_smb}
-								<span style="font-size: 0.6rem; font-weight: 700; border-radius: 999px; padding: 0.15rem 0.5rem; background: rgba(74, 222, 128, 0.15); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3);">PDF</span>
+								<span style="font-size: var(--font-size-2xs); font-weight: 700; border-radius: 999px; padding: 0.15rem 0.5rem; background: rgba(74, 222, 128, 0.15); color: var(--color-success-light); border: 1px solid rgba(74, 222, 128, 0.3);">PDF</span>
 							{/if}
 						</div>
 						<div class="cliente">{c.cliente || c.id_cliente || 'N/A'}</div>
@@ -178,15 +178,15 @@ import { ArrowLeft, Plus , Clock, Minus , Scale } from 'lucide-svelte';
 <style>
 	.page { max-width: 1400px; margin: 0 auto; padding: 1rem; }
 	.header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
-	.header h1 { font-size: 1.25rem; margin: 0; color: #f1f5f9; }
+	.header h1 { font-size: var(--font-size-xl); margin: 0; color: var(--color-text-strong); }
 	.field { margin-bottom: 0.75rem; }
-	.empty { text-align: center; color: #94a3b8; padding: 3rem 1rem; font-size: 0.9rem; }
+	.empty { text-align: center; color: var(--color-text-muted); padding: 3rem 1rem; font-size: var(--font-size-sm); }
 
 	.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.75rem; }
 
 	.card-cotizacion {
 		text-align: left;
-		background: #1e293b;
+		background: var(--color-surface);
 		border: 1px solid rgba(255, 255, 255, 0.07);
 		border-radius: 12px;
 		overflow: hidden;
@@ -204,10 +204,10 @@ import { ArrowLeft, Plus , Clock, Minus , Scale } from 'lucide-svelte';
 
 	.body { padding: 0.65rem 0.75rem 0.75rem; }
 	.folio-row { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.35rem; }
-	.folio { font-family: ui-monospace, 'Cascadia Mono', monospace; font-weight: 800; font-size: 0.95rem; color: #FFAE00; letter-spacing: 0.5px; }
-	.cliente { font-size: 0.85rem; font-weight: 600; color: #e2e8f0; margin-bottom: 0.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.meta { font-size: 0.7rem; color: #94a3b8; margin-bottom: 0.3rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.desc { font-size: 0.72rem; color: #cbd5e1; margin-bottom: 0.35rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.total { font-size: 1.1rem; font-weight: 800; color: var(--color-primary-light, #FFAE00); margin-top: 0.25rem; }
-	.autor { font-size: 0.65rem; color: #64748b; margin-top: 0.15rem; }
+	.folio { font-family: ui-monospace, 'Cascadia Mono', monospace; font-weight: 800; font-size: var(--font-size-base); color: var(--color-primary-light); letter-spacing: 0.5px; }
+	.cliente { font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text-soft); margin-bottom: 0.2rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.meta { font-size: var(--font-size-2xs); color: var(--color-text-muted); margin-bottom: 0.3rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.desc { font-size: var(--font-size-xs); color: var(--color-line-strong); margin-bottom: 0.35rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.total { font-size: var(--font-size-lg); font-weight: 800; color: var(--color-primary-light, var(--color-primary-light)); margin-top: 0.25rem; }
+	.autor { font-size: var(--font-size-2xs); color: var(--color-text-dim); margin-top: 0.15rem; }
 </style>

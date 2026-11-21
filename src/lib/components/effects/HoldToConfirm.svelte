@@ -97,7 +97,7 @@
     overflow: hidden;
     font-family: inherit;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: var(--font-size-base);
     transition: border-color 0.2s, color 0.2s;
     user-select: none;
     -webkit-user-select: none;
@@ -129,7 +129,7 @@
   }
 
   .hold-check {
-    font-size: 1.2rem;
+    font-size: var(--font-size-xl);
     font-weight: 700;
   }
 
@@ -142,37 +142,37 @@
     background: rgba(220, 38, 38, 0.2);
   }
   .hold-danger.holding {
-    border-color: #EF4444;
-    color: #EF4444;
+    border-color: var(--color-danger);
+    color: var(--color-danger);
   }
   .hold-danger.confirmed {
-    border-color: #22C55E;
-    color: #22C55E;
+    border-color: var(--color-success);
+    color: var(--color-success);
     background: rgba(34, 197, 94, 0.1);
   }
 
   /* Warning variant */
   .hold-warning {
-    border-color: #F59E0B;
-    color: #F59E0B;
+    border-color: var(--color-warning);
+    color: var(--color-warning);
   }
   .hold-warning .hold-fill {
     background: rgba(245, 158, 11, 0.2);
   }
   .hold-warning.holding {
-    border-color: #FBBF24;
-    color: #FBBF24;
+    border-color: var(--color-warning-light);
+    color: var(--color-warning-light);
   }
   .hold-warning.confirmed {
-    border-color: #22C55E;
-    color: #22C55E;
+    border-color: var(--color-success);
+    color: var(--color-success);
     background: rgba(34, 197, 94, 0.1);
   }
 
   /* Primary variant */
   .hold-primary {
-    border-color: #FF6B00;
-    color: #FF6B00;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
   }
   .hold-primary .hold-fill {
     background: rgba(255, 107, 0, 0.2);
@@ -182,8 +182,8 @@
     color: #FF8C33;
   }
   .hold-primary.confirmed {
-    border-color: #22C55E;
-    color: #22C55E;
+    border-color: var(--color-success);
+    color: var(--color-success);
     background: rgba(34, 197, 94, 0.1);
   }
 </style>

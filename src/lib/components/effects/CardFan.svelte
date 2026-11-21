@@ -46,7 +46,7 @@
 				--offset: {offset}px;
 				--index: {i};
 				--z: {visibleCards.length - i};
-				--color: {card.color || '#ffae00'};
+				--color: {card.color || 'var(--color-primary-light)'};
 			"
 			onmouseenter={() => (hoveredIndex = i)}
 			onmouseleave={() => (hoveredIndex = null)}
@@ -80,7 +80,7 @@
 		width: 140px;
 		height: 180px;
 		border-radius: 12px;
-		background: linear-gradient(135deg, #1e293b, #0f172a);
+		background: linear-gradient(135deg, var(--color-surface), var(--color-bg));
 		border: 1px solid rgba(255, 174, 0, 0.2);
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 		transform: rotate(var(--angle)) translateX(var(--offset)) translateZ(calc(var(--z) * 1px));
@@ -115,7 +115,7 @@
 	.card-title {
 		font-size: 14px;
 		font-weight: 700;
-		color: #f1f5f9;
+		color: var(--color-text-strong);
 		white-space: nowrap;
 		overflow: hidden;
 		text-overflow: ellipsis;
@@ -124,7 +124,7 @@
 
 	.card-subtitle {
 		font-size: 11px;
-		color: #94a3b8;
+		color: var(--color-text-muted);
 		margin-top: 4px;
 		white-space: nowrap;
 		overflow: hidden;

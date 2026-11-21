@@ -62,6 +62,6 @@
 		display: inline-block;
 	}
 	.scramble.animating {
-		color: #ffae00;
+		color: var(--color-primary-light);
 	}
 </style>

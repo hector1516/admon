@@ -592,25 +592,25 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 </div>
 
 <style>
-	.card-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 0.75rem; }
-	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
-	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
-	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
-	.check { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; margin-bottom: 0.5rem; cursor: pointer; }
+	.card-title { font-weight: 700; font-size: var(--font-size-base); margin-bottom: 0.75rem; }
+	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: var(--font-size-sm); margin-bottom: 0.75rem; }
+	.msg.err { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+	.msg.ok { background: rgba(34,197,94,0.1); color: var(--color-success); }
+	.check { display: flex; align-items: center; gap: 0.5rem; font-size: var(--font-size-sm); margin-bottom: 0.5rem; cursor: pointer; }
 	.check input { width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
-	.hint { font-size: 0.85rem; color: var(--color-text-muted); }
+	.hint { font-size: var(--font-size-sm); color: var(--color-text-muted); }
 	.tel-estado { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; }
 	.tel-chip {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.3rem;
-		font-size: 0.75rem;
+		font-size: var(--font-size-xs);
 		padding: 0.25rem 0.55rem;
 		border-radius: 999px;
 		background: rgba(255, 255, 255, 0.06);
 		color: var(--color-text-muted);
 	}
-	.tel-aqui { background: rgba(34, 197, 94, 0.14); color: #22C55E; }
+	.tel-aqui { background: rgba(34, 197, 94, 0.14); color: var(--color-success); }
 
 	/* Recuadros más grandes que los .card del shell (mismo estilo, más aire
 	   adentro). Es una regla con scope de este componente, así que no toca
@@ -658,7 +658,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		border-radius: var(--radius);
 		padding: 0.85rem 1rem;
 	}
-	.perm-titulo { font-weight: 700; font-size: 0.9rem; margin: 0 0 0.5rem; }
+	.perm-titulo { font-weight: 700; font-size: var(--font-size-sm); margin: 0 0 0.5rem; }
 
-	code { font-size: 0.75rem; background: rgba(255, 255, 255, 0.08); padding: 0.1rem 0.3rem; border-radius: 4px; }
+	code { font-size: var(--font-size-xs); background: rgba(255, 255, 255, 0.08); padding: 0.1rem 0.3rem; border-radius: 4px; }
 </style>

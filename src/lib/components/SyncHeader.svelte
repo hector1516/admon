@@ -156,16 +156,16 @@
   }
   .sh-row { display: flex; align-items: center; gap: 0.5rem; }
   .sh-top { justify-content: space-between; }
-  .sh-modulo { font-size: 1.1rem; font-weight: 700; color: var(--color-text, #f1f5f9); }
-  .sh-usuario { font-size: 0.75rem; color: var(--color-text-muted, #94a3b8); }
+  .sh-modulo { font-size: var(--font-size-lg); font-weight: 700; color: var(--color-text, var(--color-text-strong)); }
+  .sh-usuario { font-size: var(--font-size-xs); color: var(--color-text-muted, var(--color-text-muted)); }
   .sh-url { cursor: pointer; margin-top: 0.15rem; }
   .sh-url-text {
-    font-size: 0.65rem; font-family: monospace;
-    color: var(--color-text-muted, #94a3b8);
+    font-size: var(--font-size-2xs); font-family: monospace;
+    color: var(--color-text-muted, var(--color-text-muted));
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     max-width: 85%;
   }
-  .sh-copiado { font-size: 0.65rem; color: var(--color-primary, #FF6B00); font-weight: 600; }
+  .sh-copiado { font-size: var(--font-size-2xs); color: var(--color-primary, var(--color-primary)); font-weight: 600; }
 
   .bottom-nav {
     position: fixed;
@@ -196,7 +196,7 @@
     border-radius: var(--radius-xs, 4px);
     cursor: pointer;
     transition: all 0.15s;
-    color: var(--color-text-muted, #94a3b8);
+    color: var(--color-text-muted, var(--color-text-muted));
     background: none;
     border: none;
     font-family: inherit;
@@ -204,7 +204,7 @@
     min-height: 44px;
   }
   .nav-item.active {
-    color: var(--color-primary, #FF6B00);
+    color: var(--color-primary, var(--color-primary));
     background: rgba(255, 107, 0, 0.1);
   }
 </style>

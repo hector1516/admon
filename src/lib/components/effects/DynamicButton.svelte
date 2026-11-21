@@ -52,7 +52,7 @@
     padding: 0.625rem 1rem;
     font-family: inherit;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
     cursor: pointer;
     transition: min-width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s, transform 0.1s;
     overflow: hidden;
@@ -69,15 +69,15 @@
   }
 
   .dynamic-primary {
-    background: linear-gradient(135deg, #FF6B00, #FF8C33);
-    color: #fff;
+    background: linear-gradient(135deg, var(--color-primary), #FF8C33);
+    color: var(--color-white);
     box-shadow: 0 2px 8px rgba(255, 107, 0, 0.3);
   }
 
   .dynamic-secondary {
-    background: #1E293B;
-    color: #E2E8F0;
-    border: 1px solid #334155;
+    background: var(--color-surface);
+    color: var(--color-text-soft);
+    border: 1px solid var(--color-surface-2);
   }
 
   .dynamic-text {
@@ -90,7 +90,7 @@
     width: 14px;
     height: 14px;
     border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top-color: #fff;
+    border-top-color: var(--color-white);
     border-radius: 50%;
     animation: spin 0.6s linear infinite;
   }

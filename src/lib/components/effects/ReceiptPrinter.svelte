@@ -65,8 +65,8 @@
 
 <style>
 	.receipt {
-		background: #f8fafc;
-		color: #1e293b;
+		background: var(--color-text);
+		color: var(--color-surface);
 		border-radius: 8px;
 		padding: 16px;
 		font-family: 'Courier New', monospace;
@@ -103,7 +103,7 @@
 
 	.receipt-header {
 		text-align: center;
-		border-bottom: 1px dashed #cbd5e1;
+		border-bottom: 1px dashed var(--color-line-strong);
 		padding-bottom: 12px;
 		margin-bottom: 12px;
 	}
@@ -139,11 +139,11 @@
 		to { opacity: 1; transform: none; }
 	}
 
-	.label { color: #64748b; }
-	.value { font-weight: 600; color: #1e293b; }
+	.label { color: var(--color-text-dim); }
+	.value { font-weight: 600; color: var(--color-surface); }
 
 	.receipt-footer {
-		border-top: 1px dashed #cbd5e1;
+		border-top: 1px dashed var(--color-line-strong);
 		padding-top: 12px;
 		margin-top: 12px;
 		text-align: center;
@@ -153,9 +153,9 @@
 		height: 30px;
 		background: repeating-linear-gradient(
 			90deg,
-			#1e293b 0px, #1e293b 2px,
+			var(--color-surface) 0px, var(--color-surface) 2px,
 			transparent 2px, transparent 4px,
-			#1e293b 4px, #1e293b 5px,
+			var(--color-surface) 4px, var(--color-surface) 5px,
 			transparent 5px, transparent 8px
 		);
 		margin-bottom: 8px;
@@ -164,7 +164,7 @@
 
 	.receipt-date {
 		font-size: 10px;
-		color: #94a3b8;
+		color: var(--color-text-muted);
 	}
 
 	.print-effect {

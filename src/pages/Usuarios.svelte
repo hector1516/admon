@@ -107,8 +107,8 @@ usuarios = Array.isArray(res) ? res : (res.items || []);
 	{/if}
 
 	<div class="card" style="margin-bottom: 0.75rem;">
-		<p style="color: var(--color-text-muted); font-size: 0.8rem; text-transform: uppercase; margin: 0 0 0.25rem;">Total usuarios</p>
-		<p style="font-size: 1.5rem; font-weight: 700; margin: 0;">{usuarios.length}</p>
+		<p style="color: var(--color-text-muted); font-size: var(--font-size-xs); text-transform: uppercase; margin: 0 0 0.25rem;">Total usuarios</p>
+		<p style="font-size: var(--font-size-2xl); font-weight: 700; margin: 0;">{usuarios.length}</p>
 	</div>
 
 	{#if loading}
@@ -165,7 +165,7 @@ usuarios = Array.isArray(res) ? res : (res.items || []);
 	/* Título de la sección cuando esta vista va dentro de una pestaña
 	   (src/pages/Admin.svelte). */
 	.embed-titulo { margin: 0 0 0.75rem; }
-	.embed-titulo h2 { margin: 0; font-size: 1.05rem; font-weight: 700; }
+	.embed-titulo h2 { margin: 0; font-size: var(--font-size-base); font-weight: 700; }
 
 	/* MAC del teléfono (Detección de Red <Radio size={16} />): monoespaciada para leerla de un
 	   vistazo. Va aquí y no en styles/app.css porque ese archivo es del shell
@@ -188,17 +188,17 @@ usuarios = Array.isArray(res) ? res : (res.items || []);
 	.info { flex: 1; min-width: 0; }
 	.nombre {
 		font-weight: 700;
-		font-size: 1.05rem;
+		font-size: var(--font-size-base);
 		line-height: 1.3;
 		overflow-wrap: anywhere;
 	}
 	.correo {
-		font-size: 0.85rem;
+		font-size: var(--font-size-sm);
 		color: var(--color-text-muted);
 		overflow-wrap: anywhere;
 	}
 	.puesto {
-		font-size: 0.85rem;
+		font-size: var(--font-size-sm);
 		color: var(--color-text-muted);
 		margin-top: 0.1rem;
 		overflow-wrap: anywhere;
@@ -233,7 +233,7 @@ usuarios = Array.isArray(res) ? res : (res.items || []);
 	}
 	.avatar.mini { opacity: 0.5; }
 	.avatar img { width: 100%; height: 100%; object-fit: cover; }
-	.avatar span { font-size: 1.2rem; font-weight: 700; color: var(--color-text-muted); }
+	.avatar span { font-size: var(--font-size-xl); font-weight: 700; color: var(--color-text-muted); }
 
 	/* En escritorio los recuadros se ven en dos columnas: más anchos y sin
 	   estirarse a lo ancho de la pantalla entera. */

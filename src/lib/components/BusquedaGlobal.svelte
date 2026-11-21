@@ -196,7 +196,7 @@
 	.modal {
 		width: 90%;
 		max-width: 560px;
-		background: #1e293b;
+		background: var(--color-surface);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 16px;
 		overflow: hidden;
@@ -205,21 +205,21 @@
 	.search-input {
 		width: 100%;
 		padding: 1rem 1.25rem;
-		font-size: 1.1rem;
+		font-size: var(--font-size-lg);
 		background: transparent;
 		border: none;
 		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-		color: #f1f5f9;
+		color: var(--color-text-strong);
 		outline: none;
 	}
-	.search-input::placeholder { color: #64748b; }
+	.search-input::placeholder { color: var(--color-text-dim); }
 	.loading, .empty, .hint {
 		padding: 2rem 1.25rem;
 		text-align: center;
-		color: #94a3b8;
-		font-size: 0.9rem;
+		color: var(--color-text-muted);
+		font-size: var(--font-size-sm);
 	}
-	.shortcut { font-size: 0.75rem; color: #64748b; }
+	.shortcut { font-size: var(--font-size-xs); color: var(--color-text-dim); }
 	.resultados { max-height: 400px; overflow-y: auto; }
 	.resultado {
 		display: flex;
@@ -237,11 +237,11 @@
 	.resultado:hover, .resultado.selected {
 		background: rgba(255, 107, 0, 0.1);
 	}
-	.resultado .icon { font-size: 1.25rem; }
+	.resultado .icon { font-size: var(--font-size-xl); }
 	.resultado .info { flex: 1; min-width: 0; }
-	.resultado .titulo { font-weight: 600; color: #f1f5f9; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.resultado .subtitulo { font-size: 0.75rem; color: #94a3b8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.resultado .tipo { font-size: 0.65rem; color: #64748b; text-transform: uppercase; }
+	.resultado .titulo { font-weight: 600; color: var(--color-text-strong); font-size: var(--font-size-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.resultado .subtitulo { font-size: var(--font-size-xs); color: var(--color-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.resultado .tipo { font-size: var(--font-size-2xs); color: var(--color-text-dim); text-transform: uppercase; }
 	.fab {
 		position: fixed;
 		bottom: 24px;
@@ -249,10 +249,10 @@
 		width: 48px;
 		height: 48px;
 		border-radius: 50%;
-		background: #FF6B00;
+		background: var(--color-primary);
 		color: white;
 		border: none;
-		font-size: 1.25rem;
+		font-size: var(--font-size-xl);
 		cursor: pointer;
 		box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4);
 		z-index: 9998;

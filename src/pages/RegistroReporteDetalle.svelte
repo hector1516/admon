@@ -475,7 +475,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					<button class="btn btn-primary btn-block" onclick={guardarEdicion} disabled={busy}><Save size={16} /> Guardar</button>
 				</div>
 			{:else}
-				<div class="grid-2" style="font-size: 0.9rem;">
+				<div class="grid-2" style="font-size: var(--font-size-sm);">
 					<div><strong>Folio:</strong> {reporte.Folio}</div>
 					<div><strong>Estatus:</strong> {@html estatusHtml(reporte.Estatus)}</div>
 					<div><strong>Cliente:</strong> {reporte.Cliente}</div>
@@ -523,7 +523,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					<button class="btn btn-primary btn-sm" onclick={guardarFotos} disabled={busy}><Save size={16} /> Guardar Fotos</button>
 				{/if}
 			{:else}
-				<p style="font-size: 0.85rem; color: var(--color-text-muted); margin-top: 0.5rem;">ℹ️ Este reporte ya tiene el máximo de 6 fotos.</p>
+				<p style="font-size: var(--font-size-sm); color: var(--color-text-muted); margin-top: 0.5rem;">ℹ️ Este reporte ya tiene el máximo de 6 fotos.</p>
 			{/if}
 
 			{#if reporte._fotos && reporte._fotos.length > 0}
@@ -531,7 +531,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					{#each reporte._fotos as f}
 						<div style="position: relative; border: 1px solid var(--color-border); border-radius: 8px; overflow: hidden;">
 							<img src="data:image/jpeg;base64,{f.base64}" alt="Foto {f.orden}" style="width: 100%; aspect-ratio: 4/3; object-fit: cover;" loading="lazy" />
-							<span class="badge" style="position: absolute; top: 4px; left: 4px; font-size: 0.7rem;">#{f.orden}</span>
+							<span class="badge" style="position: absolute; top: 4px; left: 4px; font-size: var(--font-size-2xs);">#{f.orden}</span>
 						</div>
 					{/each}
 				</div>
@@ -574,22 +574,22 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 </div>
 
 <style>
-	.card-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
-	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
-	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
-	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
-	.info-box { padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--color-border); white-space: pre-wrap; font-size: 0.85rem; }
-	.badge { padding: 0.1rem 0.5rem; border-radius: 12px; font-weight: 600; font-size: 0.7rem; color: #fff; }
+	.card-title { font-weight: 700; font-size: var(--font-size-base); margin-bottom: 0.25rem; }
+	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: var(--font-size-sm); margin-bottom: 0.75rem; }
+	.msg.err { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+	.msg.ok { background: rgba(34,197,94,0.1); color: var(--color-success); }
+	.info-box { padding: 0.75rem; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid var(--color-border); white-space: pre-wrap; font-size: var(--font-size-sm); }
+	.badge { padding: 0.1rem 0.5rem; border-radius: 12px; font-weight: 600; font-size: var(--font-size-2xs); color: var(--color-white); }
 	.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
 	.modal { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; max-width: 900px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; }
 	.modal-large { max-width: 95vw; }
 	.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--color-border); }
-	.modal-header h3 { margin: 0; font-size: 1.1rem; }
+	.modal-header h3 { margin: 0; font-size: var(--font-size-lg); }
 	.modal-body { flex: 1; overflow: auto; }
 	.btn-ghost { background: transparent; border: none; color: var(--color-text-muted); cursor: pointer; padding: 0.5rem; }
 	.btn-info { background: var(--color-primary); color: white; border: none; }
 	.btn-info:hover:not(:disabled) { filter: brightness(1.1); }
 	.btn-info:disabled { opacity: 0.5; cursor: not-allowed; }
 	.tech-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-	.tech-check { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; background: rgba(255,255,255,0.05); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer; }
+	.tech-check { display: flex; align-items: center; gap: 0.3rem; font-size: var(--font-size-sm); background: rgba(255,255,255,0.05); padding: 0.4rem 0.7rem; border-radius: 6px; cursor: pointer; }
 </style>

@@ -28,7 +28,7 @@
   .aurora-container {
     position: relative;
     overflow: hidden;
-    background: var(--color-bg, #0F172A);
+    background: var(--color-bg, var(--color-bg));
   }
 
   .aurora-bg {

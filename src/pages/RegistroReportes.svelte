@@ -377,7 +377,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 			{/if}
 		</div>
 	{:else}
-		<p style="color: var(--color-text-muted); font-size: 0.8rem; margin-bottom: 0.5rem;">
+		<p style="color: var(--color-text-muted); font-size: var(--font-size-xs); margin-bottom: 0.5rem;">
 			Mostrando <strong>{listaTab.length}</strong> de <strong>{lista.length}</strong> reportes globales.
 		</p>
 
@@ -389,15 +389,15 @@ lista = Array.isArray(res) ? res : (res.items || []);
 					<span style="font-weight: 800; color: var(--color-primary-light);">{r.Folio}</span>
 					{@html estatusHtml(r.Estatus)}
 					{#if r.Eliminado === 1 || r.Eliminado === true}
-						<span class="badge" style="background:#EF4444;">🗑️ Papelera</span>
+						<span class="badge" style="background:var(--color-danger);">🗑️ Papelera</span>
 					{/if}
 				</div>
-				<div style="font-size: 0.9rem; margin-top: 0.15rem;">{r.Cliente}</div>
-				<div style="font-size: 0.75rem; color: var(--color-text-muted);">
+				<div style="font-size: var(--font-size-sm); margin-top: 0.15rem;">{r.Cliente}</div>
+				<div style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
 					{r.Tecnico} · {formatearFecha(r.FechaHoraInicio)} · {r.MaquinaLinea || '—'}
 				</div>
 			</div>
-			<div style="text-align: right; font-size: 0.75rem; color: var(--color-text-muted);">
+			<div style="text-align: right; font-size: var(--font-size-xs); color: var(--color-text-muted);">
 				Cot: {r.Cotizacion || '—'}
 				{#if tab === 'excel'}
 					<div class="horas">{horasReporte(r) ?? '⚠️'}{horasReporte(r) != null ? ' h' : ' sin horas'}</div>
@@ -436,11 +436,11 @@ lista = Array.isArray(res) ? res : (res.items || []);
 </div>
 
 <style>
-	.subtitle { color: #94A3B8; font-size: 0.9rem; font-weight: 400; margin: 0; }
-	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
-	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
-	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
-	.badge { padding: 0.1rem 0.5rem; border-radius: 12px; font-weight: 600; font-size: 0.7rem; color: #fff; }
+	.subtitle { color: var(--color-text-muted); font-size: var(--font-size-sm); font-weight: 400; margin: 0; }
+	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: var(--font-size-sm); margin-bottom: 0.75rem; }
+	.msg.err { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+	.msg.ok { background: rgba(34,197,94,0.1); color: var(--color-success); }
+	.badge { padding: 0.1rem 0.5rem; border-radius: 12px; font-weight: 600; font-size: var(--font-size-2xs); color: var(--color-white); }
 	.tab-btn.active { color: var(--color-primary-light); border-bottom-color: var(--color-primary-light); }
 	.tab-btn:hover:not(.active) { color: var(--color-text-muted); }
 
@@ -448,7 +448,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 
 	.card-reporte {
 		text-align: left;
-		background: #1e293b;
+		background: var(--color-surface);
 		border: 1px solid rgba(255, 255, 255, 0.07);
 		border-radius: 12px;
 		overflow: hidden;
@@ -466,7 +466,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 		transform: translateY(-3px);
 		border-color: rgba(255, 107, 0, 0.5);
 	}
-	.card-reporte.selected { border-color: var(--color-primary, #FFAE00); }
+	.card-reporte.selected { border-color: var(--color-primary, var(--color-primary-light)); }
 
 	/* ── Pestaña 📊 Excel: barra de selección, chips y ayudas ─────────── */
 	.excel-bar {
@@ -480,10 +480,10 @@ lista = Array.isArray(res) ? res : (res.items || []);
 		border-radius: var(--radius);
 		margin-bottom: 0.5rem;
 	}
-	.excel-cuenta { font-size: 0.85rem; color: var(--color-text-muted); }
+	.excel-cuenta { font-size: var(--font-size-sm); color: var(--color-text-muted); }
 	.excel-cuenta strong { color: var(--color-primary-light); }
 	.excel-hint {
-		font-size: 0.78rem;
+		font-size: var(--font-size-xs);
 		color: var(--color-text-muted);
 		margin: 0 0 0.75rem;
 		line-height: 1.45;
@@ -497,7 +497,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 		color: var(--color-primary-light);
 		border-radius: 999px;
 		padding: 0.15rem 0.65rem;
-		font-size: 0.78rem;
+		font-size: var(--font-size-xs);
 		font-weight: 600;
 	}
 	.chip-x {
@@ -505,7 +505,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 		border: none;
 		color: inherit;
 		cursor: pointer;
-		font-size: 0.75rem;
+		font-size: var(--font-size-xs);
 		padding: 0 0.15rem;
 		line-height: 1;
 	}
@@ -521,6 +521,6 @@ lista = Array.isArray(res) ? res : (res.items || []);
 		margin-top: 0.2rem;
 		font-weight: 700;
 		color: var(--color-primary-light);
-		font-size: 0.78rem;
+		font-size: var(--font-size-xs);
 	}
 </style>

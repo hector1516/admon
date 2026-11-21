@@ -308,18 +308,18 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 			<p style="margin: 0.2rem 0;"><strong>Cliente:</strong> {h.cliente_nombre || h.cliente || h.id_cliente || 'N/A'}</p>
 			<p style="margin: 0.2rem 0;"><strong>Contacto:</strong> {h.contacto || 'N/A'}</p>
 			<p style="margin: 0.2rem 0;"><strong>Descripción:</strong> {h.descripcion || '—'}</p>
-			<p style="margin: 0.2rem 0; color: var(--color-text-muted); font-size: 0.85rem;">
+			<p style="margin: 0.2rem 0; color: var(--color-text-muted); font-size: var(--font-size-sm);">
 				Creado por {h.autor || '—'} · {h.fecha || ''}
 			</p>
-			<p style="margin: 0.4rem 0 0; font-size: 1.2rem; font-weight: 800; color: var(--color-primary-light);">
+			<p style="margin: 0.4rem 0 0; font-size: var(--font-size-xl); font-weight: 800; color: var(--color-primary-light);">
 				Total: {fmtMXN(tots.total)}
 			</p>
 			{#if pdfEnSmb !== null}
-				<p style="margin: 0.3rem 0 0; font-size: 0.78rem;">
+				<p style="margin: 0.3rem 0 0; font-size: var(--font-size-xs);">
 					{#if pdfEnSmb}
-						<span style="color: #4ade80;">✅ PDF guardado en \\Fileserver\hub\Cotizaciones_Materiales</span>
+						<span style="color: var(--color-success-light);">✅ PDF guardado en \\Fileserver\hub\Cotizaciones_Materiales</span>
 					{:else}
-						<span style="color: #fbbf24;">⏳ PDF pendiente de guardar en el share</span>
+						<span style="color: var(--color-warning-light);">⏳ PDF pendiente de guardar en el share</span>
 					{/if}
 				</p>
 			{/if}
@@ -328,37 +328,37 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 		<div class="card" style="margin-bottom: 0.75rem;">
 			<div class="card-title">📝 Nota interna</div>
 			{#if (h.nota || '').trim()}
-				<p style="margin: 0; font-size: 0.9rem;">{h.nota}</p>
+				<p style="margin: 0; font-size: var(--font-size-sm);">{h.nota}</p>
 			{:else}
-				<p style="margin: 0; font-size: 0.85rem; color: var(--color-text-muted);">Sin notas registradas.</p>
+				<p style="margin: 0; font-size: var(--font-size-sm); color: var(--color-text-muted);">Sin notas registradas.</p>
 			{/if}
 		</div>
 
 		<div class="card" style="margin-bottom: 0.75rem;">
 			<div class="card-title">📦 Partidas ({items.length})</div>
 			{#if items.length === 0}
-				<p style="margin: 0; font-size: 0.85rem; color: var(--color-text-muted);">Sin partidas registradas.</p>
+				<p style="margin: 0; font-size: var(--font-size-sm); color: var(--color-text-muted);">Sin partidas registradas.</p>
 			{:else}
 				<div class="list">
 					{#each items as p (p.partida)}
 						<div class="list-card" style="cursor: default;">
 							<div style="flex: 1; min-width: 0;">
-								<div style="font-size: 0.75rem; color: var(--color-text-muted);">
+								<div style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
 									#{p.partida} · cant. {p.cantidad}
-									{#if !p.synced}<span class="badge badge-warning" style="font-size: 0.6rem;">⏳</span>{/if}
+									{#if !p.synced}<span class="badge badge-warning" style="font-size: var(--font-size-2xs);">⏳</span>{/if}
 								</div>
-								<div style="font-size: 0.9rem; font-weight: 600;">{p.descripcion}</div>
-								<div style="font-size: 0.75rem; color: var(--color-text-muted);">{p.proveedor || 'Sin proveedor'}</div>
+								<div style="font-size: var(--font-size-sm); font-weight: 600;">{p.descripcion}</div>
+								<div style="font-size: var(--font-size-xs); color: var(--color-text-muted);">{p.proveedor || 'Sin proveedor'}</div>
 							</div>
 							<div style="font-weight: 700; color: var(--color-primary-light); flex-shrink: 0;">{fmtMXN(p.total_venta)}</div>
 						</div>
 					{/each}
 				</div>
 			{/if}
-			<div style="margin-top: 0.75rem; font-size: 0.9rem;">
+			<div style="margin-top: 0.75rem; font-size: var(--font-size-sm);">
 				<div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-muted);">Subtotal</span><strong>{fmtMXN(tots.subtotal)}</strong></div>
 				<div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-muted);">IVA 16%</span><strong>{fmtMXN(tots.iva)}</strong></div>
-				<div style="display: flex; justify-content: space-between; font-size: 1.05rem;"><span>Total</span><strong style="color: var(--color-primary-light);">{fmtMXN(tots.total)}</strong></div>
+				<div style="display: flex; justify-content: space-between; font-size: var(--font-size-base);"><span>Total</span><strong style="color: var(--color-primary-light);">{fmtMXN(tots.total)}</strong></div>
 			</div>
 		</div>
 
@@ -367,16 +367,16 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 			<p class="hint">Documento sin precios para entrega; el cliente lo firma en Field.</p>
 
 			{#if mostrandoCrear}
-				<div style="border: 1px solid var(--color-border, #334155); border-radius: 8px; padding: 0.6rem; margin-top: 0.5rem;">
+				<div style="border: 1px solid var(--color-border, var(--color-surface-2)); border-radius: 8px; padding: 0.6rem; margin-top: 0.5rem;">
 					<p class="hint" style="margin-top: 0;">
 						Edita cantidades y desmarca las partidas que NO van. Sin precios. Al crear queda inmutable (solo se puede borrar).
 					</p>
 					{#each remRows as row, i (row.partida)}
 						<div style="display: flex; gap: 0.5rem; align-items: center; padding: 0.3rem 0; border-bottom: 1px solid rgba(148,163,184,0.15);">
 							<input type="checkbox" bind:checked={row.incluida} aria-label="Incluir partida {row.partida}" />
-							<span style="font-size: 0.75rem; color: var(--color-text-muted); width: 2.2rem;">#{row.partida}</span>
+							<span style="font-size: var(--font-size-xs); color: var(--color-text-muted); width: 2.2rem;">#{row.partida}</span>
 							<input type="number" class="input" min="1" step="1" style="width: 4.5rem;" bind:value={row.cantidad} disabled={!row.incluida} aria-label="Cantidad" />
-							<span style="flex: 1; min-width: 0; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{row.descripcion}</span>
+							<span style="flex: 1; min-width: 0; font-size: var(--font-size-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{row.descripcion}</span>
 						</div>
 					{/each}
 					<p class="hint" style="margin: 0.4rem 0;">Partidas incluidas: <strong>{remSelCount}</strong> de {remRows.length}</p>
@@ -394,7 +394,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 							<div class="card" style="cursor: default; margin-bottom: 0.5rem;">
 								<div style="display: flex; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
 									<div style="min-width: 0;">
-										<div style="font-weight: 700; font-size: 0.9rem;">{r.folio}</div>
+										<div style="font-weight: 700; font-size: var(--font-size-sm);">{r.folio}</div>
 										<div class="hint">Creado por: {r.creado_por} · {r.fecha}</div>
 										{#if r.firmada}
 											<div class="hint">✅ Firmada {r.fecha_firma}</div>
@@ -496,22 +496,22 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 </div>
 
 <style>
-	.card-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
-	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
-	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
-	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
-	.hint { font-size: 0.8rem; color: var(--color-text-muted); }
+	.card-title { font-weight: 700; font-size: var(--font-size-base); margin-bottom: 0.25rem; }
+	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: var(--font-size-sm); margin-bottom: 0.75rem; }
+	.msg.err { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+	.msg.ok { background: rgba(34,197,94,0.1); color: var(--color-success); }
+	.hint { font-size: var(--font-size-xs); color: var(--color-text-muted); }
 	.card { margin-bottom: 0.75rem; }
 	.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 1rem; }
-	.modal { width: 90%; max-width: 600px; max-height: 80vh; background: #1e293b; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+	.modal { width: 90%; max-width: 600px; max-height: 80vh; background: var(--color-surface); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
 	.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
-	.modal-header h3 { margin: 0; font-size: 1.1rem; color: #f1f5f9; }
+	.modal-header h3 { margin: 0; font-size: var(--font-size-lg); color: var(--color-text-strong); }
 	.historial-list { padding: 1rem; overflow-y: auto; flex: 1; }
 	.historial-item { padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
 	.historial-meta { display: flex; justify-content: space-between; margin-bottom: 0.25rem; }
-	.historial-user { font-weight: 600; color: #FFAE00; font-size: 0.8rem; }
-	.historial-fecha { font-size: 0.7rem; color: #64748b; }
-	.historial-accion { font-size: 0.85rem; color: #e2e8f0; }
+	.historial-user { font-weight: 600; color: var(--color-primary-light); font-size: var(--font-size-xs); }
+	.historial-fecha { font-size: var(--font-size-2xs); color: var(--color-text-dim); }
+	.historial-accion { font-size: var(--font-size-sm); color: var(--color-text-soft); }
 </style>
 / /   t r i g g e r 
  

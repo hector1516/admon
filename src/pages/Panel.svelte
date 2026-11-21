@@ -100,5 +100,5 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		border-bottom-color: var(--color-primary);
 		background: rgba(255, 107, 0, 0.08);
 	}
-	.tab-ico { font-size: 1rem; line-height: 1; }
+	.tab-ico { font-size: var(--font-size-base); line-height: 1; }
 </style>

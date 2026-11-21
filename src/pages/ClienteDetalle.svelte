@@ -228,7 +228,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 				🗑️ lo quita solo del catálogo (las cotizaciones no cambian).
 			</p>
 			{#if contactos.length === 0}
-				<p style="font-size: 0.85rem; color: var(--color-text-muted);">Sin contactos registrados.</p>
+				<p style="font-size: var(--font-size-sm); color: var(--color-text-muted);">Sin contactos registrados.</p>
 			{:else}
 				<div class="list">
 					{#each contactos as c}
@@ -278,8 +278,8 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 </div>
 
 <style>
-	.card-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
-	.hint { font-size: 0.8rem; color: var(--color-text-muted); }
+	.card-title { font-weight: 700; font-size: var(--font-size-base); margin-bottom: 0.25rem; }
+	.hint { font-size: var(--font-size-xs); color: var(--color-text-muted); }
 	.tag {
 		font-size: 0.66rem;
 		color: var(--color-text-muted);
@@ -290,8 +290,8 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		vertical-align: middle;
 		white-space: nowrap;
 	}
-	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
-	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
-	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
+	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: var(--font-size-sm); margin-bottom: 0.75rem; }
+	.msg.err { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+	.msg.ok { background: rgba(34,197,94,0.1); color: var(--color-success); }
 	.card { margin-bottom: 0.75rem; }
 </style>

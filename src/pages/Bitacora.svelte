@@ -143,7 +143,7 @@
 				</div>
 			{/each}
 		</div>
-		<div style="text-align: center; margin-top: 0.5rem; font-size: 0.8rem; color: var(--color-text-muted);">
+		<div style="text-align: center; margin-top: 0.5rem; font-size: var(--font-size-xs); color: var(--color-text-muted);">
 			Mostrando {logs.length} registros
 		</div>
 	{/if}
@@ -151,7 +151,7 @@
 
 <style>
 	.brand-col { display: flex; flex-direction: column; gap: 0; }
-	.brand { display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: 1.2rem; }
+	.brand { display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: var(--font-size-xl); }
 
 	.mb-spinner {
 		width: 28px; height: 28px; margin: 0 auto 0.75rem;
@@ -162,29 +162,29 @@
 	}
 	@keyframes mb-spin { to { transform: rotate(360deg); } }
 
-	.alert { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.85rem 1rem; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 1rem; }
+	.alert { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.85rem 1rem; border-radius: var(--radius-sm); font-size: var(--font-size-sm); margin-bottom: 1rem; }
 	.alert-danger { background: rgba(239, 68, 68, 0.15); color: var(--color-danger); }
 
-	.card { background: var(--color-surface-1, #1e293b); border-radius: var(--radius-sm, 8px); padding: 1rem; margin-bottom: 0.75rem; }
+	.card { background: var(--color-surface-1, var(--color-surface)); border-radius: var(--radius-sm, 8px); padding: 1rem; margin-bottom: 0.75rem; }
 
 	.log-row {
 		display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;
-		padding: 0.4rem 0; border-bottom: 1px solid var(--color-border, #334155);
-		font-size: 0.8rem;
+		padding: 0.4rem 0; border-bottom: 1px solid var(--color-border, var(--color-surface-2));
+		font-size: var(--font-size-xs);
 	}
-	.log-fecha { font-family: monospace; font-size: 0.7rem; color: var(--color-text-muted); min-width: 120px; }
+	.log-fecha { font-family: monospace; font-size: var(--font-size-2xs); color: var(--color-text-muted); min-width: 120px; }
 	.log-usuario { font-weight: 600; min-width: 80px; }
-	.log-modulo { background: var(--color-surface-2, #334155); padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.7rem; }
-	.log-tipo { font-weight: 600; font-size: 0.75rem; }
-	.log-accion { flex: 1; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-	.log-duracion { font-family: monospace; font-size: 0.7rem; color: var(--color-text-muted); }
+	.log-modulo { background: var(--color-surface-2, var(--color-surface-2)); padding: 0.1rem 0.4rem; border-radius: 3px; font-size: var(--font-size-2xs); }
+	.log-tipo { font-weight: 600; font-size: var(--font-size-xs); }
+	.log-accion { flex: 1; font-size: var(--font-size-xs); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+	.log-duracion { font-family: monospace; font-size: var(--font-size-2xs); color: var(--color-text-muted); }
 
 	.empty { text-align: center; padding: 2rem; color: var(--color-text-muted); }
 
-	.btn { padding: 0.4rem 0.75rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.85rem; }
-	.btn-primary { background: var(--color-primary, #3b82f6); color: white; }
-	.btn-secondary { background: var(--color-surface-2, #334155); color: white; }
-	.btn-sm { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+	.btn { padding: 0.4rem 0.75rem; border-radius: 6px; border: none; cursor: pointer; font-size: var(--font-size-sm); }
+	.btn-primary { background: var(--color-primary, var(--color-info)); color: white; }
+	.btn-secondary { background: var(--color-surface-2, var(--color-surface-2)); color: white; }
+	.btn-sm { padding: 0.25rem 0.5rem; font-size: var(--font-size-xs); }
 	.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-	.input { padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid var(--color-border, #334155); background: var(--color-surface-2, #334155); color: var(--color-text); font-size: 0.85rem; }
+	.input { padding: 0.4rem 0.6rem; border-radius: 6px; border: 1px solid var(--color-border, var(--color-surface-2)); background: var(--color-surface-2, var(--color-surface-2)); color: var(--color-text); font-size: var(--font-size-sm); }
 </style>

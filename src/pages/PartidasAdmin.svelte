@@ -227,14 +227,14 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	{:else if h}
 		{#if bloqueado}
 			<div class="card" style="border-color: rgba(239,68,68,0.4);">
-				<p style="margin: 0; font-size: 0.85rem;">🔒 Cotización bloqueada (lista para facturar / facturada).</p>
+				<p style="margin: 0; font-size: var(--font-size-sm);">🔒 Cotización bloqueada (lista para facturar / facturada).</p>
 			</div>
 		{/if}
 
 		<div class="card" style="margin-bottom: 0.75rem;">
 			<div class="card-title">Partidas registradas ({items.length})</div>
 			{#if items.length === 0}
-				<p style="margin: 0; font-size: 0.85rem; color: var(--color-text-muted);">
+				<p style="margin: 0; font-size: var(--font-size-sm); color: var(--color-text-muted);">
 					ℹ️ Sin partidas aún. Usa el formulario de abajo para agregar la primera.
 				</p>
 			{:else}
@@ -242,19 +242,19 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					{#each items as p (p.partida)}
 						<button class="list-card" class:selected={editando === p.partida} on:click={() => seleccionar(p)} disabled={bloqueado}>
 							<div style="flex: 1; min-width: 0; text-align: left;">
-								<div style="font-size: 0.75rem; color: var(--color-text-muted);">
+								<div style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
 									#{p.partida} · cant. {p.cantidad}
-									{#if !p.synced}<span class="badge badge-warning" style="font-size: 0.6rem;"><Clock size={16} /></span>{/if}
+									{#if !p.synced}<span class="badge badge-warning" style="font-size: var(--font-size-2xs);"><Clock size={16} /></span>{/if}
 								</div>
-								<div style="font-size: 0.9rem; font-weight: 600;">{p.descripcion}</div>
-								<div style="font-size: 0.75rem; color: var(--color-text-muted);">
+								<div style="font-size: var(--font-size-sm); font-weight: 600;">{p.descripcion}</div>
+								<div style="font-size: var(--font-size-xs); color: var(--color-text-muted);">
 									${Number(p.precio_compra).toFixed(2)} <X size={16} /> (1+{p.factor}){p.flete ? ` + flete $${Number(p.flete).toFixed(2)}` : ''}
 								</div>
 								{#if p.articulo_generico}
-									<div style="font-size: 0.7rem; color: var(--color-text-muted);"><Package size={16} /> {p.articulo_generico}</div>
+									<div style="font-size: var(--font-size-2xs); color: var(--color-text-muted);"><Package size={16} /> {p.articulo_generico}</div>
 								{/if}
 								{#if p.sat_prod_serv}
-									<div style="font-size: 0.7rem; color: var(--color-text-muted);">
+									<div style="font-size: var(--font-size-2xs); color: var(--color-text-muted);">
 										<Receipt size={16} /> SAT: {p.sat_prod_serv}{p.sat_unidad ? ` · ${p.sat_unidad}` : ''}
 										{#if p.sat_fuente}· {p.sat_fuente}{/if}
 									</div>
@@ -265,10 +265,10 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					{/each}
 				</div>
 			{/if}
-			<div style="margin-top: 0.75rem; font-size: 0.9rem;">
+			<div style="margin-top: 0.75rem; font-size: var(--font-size-sm);">
 				<div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-muted);">Subtotal</span><strong>{fmtMXN(tots.subtotal)}</strong></div>
 				<div style="display: flex; justify-content: space-between;"><span style="color: var(--color-text-muted);">IVA 16%</span><strong>{fmtMXN(tots.iva)}</strong></div>
-				<div style="display: flex; justify-content: space-between; font-size: 1.05rem;"><span>Total</span><strong style="color: var(--color-primary-light);">{fmtMXN(tots.total)}</strong></div>
+				<div style="display: flex; justify-content: space-between; font-size: var(--font-size-base);"><span>Total</span><strong style="color: var(--color-primary-light);">{fmtMXN(tots.total)}</strong></div>
 			</div>
 		</div>
 
@@ -372,11 +372,11 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 </div>
 
 <style>
-	.card-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; }
-	.hint { font-size: 0.8rem; color: var(--color-text-muted); }
-	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
-	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
-	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
+	.card-title { font-weight: 700; font-size: var(--font-size-base); margin-bottom: 0.25rem; }
+	.hint { font-size: var(--font-size-xs); color: var(--color-text-muted); }
+	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: var(--font-size-sm); margin-bottom: 0.75rem; }
+	.msg.err { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+	.msg.ok { background: rgba(34,197,94,0.1); color: var(--color-success); }
 	.card { margin-bottom: 0.75rem; }
 	.list-card.selected { border-color: var(--color-primary); }
 </style>

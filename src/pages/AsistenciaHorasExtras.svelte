@@ -101,27 +101,27 @@
 <style>
 	.page { padding: 1rem; max-width: 900px; margin: 0 auto; }
 	.header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
-	.header h1 { font-size: 1.25rem; font-weight: 700; flex: 1; }
+	.header h1 { font-size: var(--font-size-xl); font-weight: 700; flex: 1; }
 	.tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-	.tab { padding: 0.5rem 1rem; border: none; background: #e2e8f0; border-radius: 0.5rem; cursor: pointer; font-weight: 500; }
-	.tab.active { background: #3b82f6; color: white; }
+	.tab { padding: 0.5rem 1rem; border: none; background: var(--color-text-soft); border-radius: 0.5rem; cursor: pointer; font-weight: 500; }
+	.tab.active { background: var(--color-info); color: white; }
 	.reportes-list { display: flex; flex-direction: column; gap: 0.5rem; }
 	.reporte-card { display: flex; justify-content: space-between; align-items: center; background: white; border-radius: 0.5rem; padding: 0.75rem 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-	.reporte-info { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; font-size: 0.85rem; }
-	.reporte-user { color: #64748b; }
-	.reporte-periodo { color: #94a3b8; font-size: 0.8rem; }
-	.reporte-horas { font-weight: 600; color: #1e293b; }
-	.badge { padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; }
+	.reporte-info { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; font-size: var(--font-size-sm); }
+	.reporte-user { color: var(--color-text-dim); }
+	.reporte-periodo { color: var(--color-text-muted); font-size: var(--font-size-xs); }
+	.reporte-horas { font-weight: 600; color: var(--color-surface); }
+	.badge { padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: var(--font-size-xs); font-weight: 600; }
 	.badge.Generado { background: #dbeafe; color: #1e40af; }
-	.badge.Pagado { background: #dcfce7; color: #166534; }
-	.badge.Cancelado { background: #fee2e2; color: #991b1b; }
+	.badge.Pagado { background: var(--color-success-soft); color: #166534; }
+	.badge.Cancelado { background: var(--color-danger-soft); color: var(--color-danger-dark); }
 	.config-card { background: white; border-radius: 0.75rem; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-	.config-card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; color: #3b82f6; }
-	.config-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.25rem 0; border-bottom: 1px solid #f1f5f9; }
-	.empty { text-align: center; color: #94a3b8; padding: 2rem; }
-	.error-box { background: #fee2e2; color: #991b1b; padding: 0.75rem; border-radius: 0.5rem; }
-	.loading { text-align: center; padding: 2rem; color: #94a3b8; }
-	.btn { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; cursor: pointer; border: none; font-size: 0.875rem; }
-	.btn-secondary { background: #e2e8f0; color: #334155; }
-	.btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8rem; }
+	.config-card h3 { font-size: var(--font-size-base); font-weight: 600; margin-bottom: 0.75rem; color: var(--color-info); }
+	.config-row { display: flex; justify-content: space-between; font-size: var(--font-size-sm); padding: 0.25rem 0; border-bottom: 1px solid var(--color-text-strong); }
+	.empty { text-align: center; color: var(--color-text-muted); padding: 2rem; }
+	.error-box { background: var(--color-danger-soft); color: var(--color-danger-dark); padding: 0.75rem; border-radius: 0.5rem; }
+	.loading { text-align: center; padding: 2rem; color: var(--color-text-muted); }
+	.btn { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; cursor: pointer; border: none; font-size: var(--font-size-sm); }
+	.btn-secondary { background: var(--color-text-soft); color: var(--color-surface-2); }
+	.btn-sm { padding: 0.375rem 0.75rem; font-size: var(--font-size-xs); }
 </style>

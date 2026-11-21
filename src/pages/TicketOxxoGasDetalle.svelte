@@ -340,40 +340,40 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <style>
 	.page { max-width: 1200px; margin: 0 auto; padding: 1rem; }
 	.header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
-	.header h1 { font-size: 1.25rem; margin: 0; color: #f1f5f9; }
-	.fecha-head { font-size: 0.78rem; color: #94a3b8; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 999px; padding: 0.25rem 0.7rem; }
-	.state { text-align: center; color: #94a3b8; padding: 3rem 1rem; font-size: 0.9rem; }
-	.state.err { color: #f87171; }
+	.header h1 { font-size: var(--font-size-xl); margin: 0; color: var(--color-text-strong); }
+	.fecha-head { font-size: var(--font-size-xs); color: var(--color-text-muted); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 999px; padding: 0.25rem 0.7rem; }
+	.state { text-align: center; color: var(--color-text-muted); padding: 3rem 1rem; font-size: var(--font-size-sm); }
+	.state.err { color: var(--color-danger-light); }
 
 	.grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 1.1rem; align-items: start; }
 	@media (max-width: 860px) { .grid { grid-template-columns: 1fr; } }
 
 	.auto-detail-img { width: 100%; height: 120px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.8rem; background: rgba(255, 255, 255, 0.03); border-radius: 8px; overflow: hidden; }
 	.auto-detail-img img { max-width: 100%; max-height: 100%; object-fit: contain; }
-	.img-box { position: relative; background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+	.img-box { position: relative; background: var(--color-bg); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
 	.img-box img { width: 100%; max-height: 82vh; object-fit: contain; display: block; }
 	.img-box.has-zoom img { cursor: zoom-in; }
 
 	/* Toda la foto es el área de toque. Reset del <button> para que no
 	   traiga estilos de agente de usuario ni encoge la imagen. */
 	.img-zoom-trigger { display: block; width: 100%; padding: 0; margin: 0; border: 0; background: none; position: relative; cursor: zoom-in; font: inherit; color: inherit; -webkit-appearance: none; appearance: none; }
-	.img-zoom-trigger:focus-visible { outline: 2px solid #ff6b00; outline-offset: -2px; }
+	.img-zoom-trigger:focus-visible { outline: 2px solid var(--color-primary); outline-offset: -2px; }
 
 	/* Disparador visual del zoom: 44px de área táctil (mínimo de diseño). */
-	.zoom-fab { position: absolute; top: 0.55rem; right: 0.55rem; width: 44px; height: 44px; padding: 0; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(2, 6, 23, 0.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); font-size: 1.05rem; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; transition: background 0.15s, border-color 0.15s; }
+	.zoom-fab { position: absolute; top: 0.55rem; right: 0.55rem; width: 44px; height: 44px; padding: 0; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(2, 6, 23, 0.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); font-size: var(--font-size-base); display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 2; transition: background 0.15s, border-color 0.15s; }
 	.zoom-fab:hover, .zoom-fab:focus-visible { background: rgba(255, 107, 0, 0.3); border-color: rgba(255, 107, 0, 0.65); outline: none; }
-	.zoom-hint { position: absolute; left: 0.55rem; bottom: 0.55rem; font-size: 0.68rem; color: #94a3b8; background: rgba(2, 6, 23, 0.72); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 999px; padding: 0.2rem 0.6rem; pointer-events: none; }
+	.zoom-hint { position: absolute; left: 0.55rem; bottom: 0.55rem; font-size: var(--font-size-2xs); color: var(--color-text-muted); background: rgba(2, 6, 23, 0.72); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 999px; padding: 0.2rem 0.6rem; pointer-events: none; }
 
 	/* ── Lightbox ───────────────────────────────────────────────────────── */
 	.lightbox { position: fixed; inset: 0; z-index: 1000; background: rgba(2, 6, 23, 0.96); display: flex; flex-direction: column; }
 	.lb-bar { display: flex; align-items: center; gap: 0.35rem; padding: 0.55rem 0.65rem; background: rgba(15, 23, 42, 0.9); border-bottom: 1px solid rgba(255, 255, 255, 0.08); flex-wrap: wrap; }
-	.lb-folio { font-family: ui-monospace, 'Cascadia Mono', monospace; color: #ffae00; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px; }
+	.lb-folio { font-family: ui-monospace, 'Cascadia Mono', monospace; color: var(--color-primary-light); font-size: var(--font-size-sm); font-weight: 700; letter-spacing: 0.5px; }
 	.lb-spacer { flex: 1; }
-	.lb-btn { min-width: 44px; min-height: 44px; padding: 0; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.06); color: #f8fafc; font-size: 1.15rem; line-height: 1; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+	.lb-btn { min-width: 44px; min-height: 44px; padding: 0; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.06); color: var(--color-text); font-size: var(--font-size-lg); line-height: 1; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
 	.lb-btn:not(:disabled):hover, .lb-btn:not(:disabled):focus-visible { background: rgba(255, 107, 0, 0.22); border-color: rgba(255, 107, 0, 0.6); outline: none; }
 	.lb-btn:disabled { opacity: 0.3; cursor: default; }
 	.lb-reset { background: rgba(255, 174, 0, 0.12); border-color: rgba(255, 174, 0, 0.4); }
-	.lb-pct { min-width: 3.1rem; text-align: center; font-size: 0.78rem; color: #94a3b8; font-variant-numeric: tabular-nums; }
+	.lb-pct { min-width: 3.1rem; text-align: center; font-size: var(--font-size-xs); color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
 
 	.lb-stage { position: relative; flex: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; touch-action: none; user-select: none; -webkit-user-select: none; cursor: pointer; }
 	.lb-stage.is-zoomed { cursor: grab; }
@@ -381,32 +381,32 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	.lb-stage img { max-width: 100%; max-height: 100%; object-fit: contain; transform-origin: center center; transition: transform 0.12s ease-out; will-change: transform; pointer-events: none; }
 	.lb-stage img.is-drag { transition: none; }
 
-	.lb-foot { padding: 0.5rem 0.8rem calc(0.5rem + env(safe-area-inset-bottom, 0px)); font-size: 0.7rem; color: #64748b; text-align: center; background: rgba(15, 23, 42, 0.85); border-top: 1px solid rgba(255, 255, 255, 0.06); }
+	.lb-foot { padding: 0.5rem 0.8rem calc(0.5rem + env(safe-area-inset-bottom, 0px)); font-size: var(--font-size-2xs); color: var(--color-text-dim); text-align: center; background: rgba(15, 23, 42, 0.85); border-top: 1px solid rgba(255, 255, 255, 0.06); }
 
-	.no-photo { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; color: #475569; font-size: 3.5rem; padding: 4rem 0; }
-	.no-photo span { font-size: 0.8rem; }
+	.no-photo { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; color: var(--color-border); font-size: 3.5rem; padding: 4rem 0; }
+	.no-photo span { font-size: var(--font-size-xs); }
 
 	.col { display: flex; flex-direction: column; gap: 0.8rem; }
 
 	.info-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 12px; padding: 0.8rem 0.95rem; }
-	.info-label { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: #FFAE00; margin-bottom: 0.5rem; }
-	.info-line { display: flex; justify-content: space-between; gap: 1rem; font-size: 0.85rem; padding: 0.3rem 0; border-bottom: 1px dashed rgba(255, 255, 255, 0.05); }
+	.info-label { font-size: var(--font-size-2xs); font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; color: var(--color-primary-light); margin-bottom: 0.5rem; }
+	.info-line { display: flex; justify-content: space-between; gap: 1rem; font-size: var(--font-size-sm); padding: 0.3rem 0; border-bottom: 1px dashed rgba(255, 255, 255, 0.05); }
 	.info-line:last-child { border-bottom: none; }
-	.info-line span { color: #94a3b8; flex-shrink: 0; }
-	.info-line strong { color: #f1f5f9; text-align: right; font-weight: 600; overflow-wrap: anywhere; }
+	.info-line span { color: var(--color-text-muted); flex-shrink: 0; }
+	.info-line strong { color: var(--color-text-strong); text-align: right; font-weight: 600; overflow-wrap: anywhere; }
 
 	/* Folio en la lista ordenada: mono y acento, sin ser el héroe de la página.
 	   Specificity >= `.info-line strong` para ganar sin !important. */
-	.info-line .folio-inline { font-family: ui-monospace, 'Cascadia Mono', monospace; color: #FFAE00; letter-spacing: 0.5px; }
+	.info-line .folio-inline { font-family: ui-monospace, 'Cascadia Mono', monospace; color: var(--color-primary-light); letter-spacing: 0.5px; }
 
 	/* Cantidad sin vale enlazado todavía. Idem: gana a `.info-line span`. */
-	.info-line .pend-inline { color: #fbbf24; font-size: 0.85rem; flex-shrink: 0; }
+	.info-line .pend-inline { color: var(--color-warning-light); font-size: var(--font-size-sm); flex-shrink: 0; }
 
 	/* Etiqueta de apoyo en la fila de fechas (p. ej. "sin vale"). Se pone como
 	   <i> para no heredar el estilo del <strong> ni del <span> del label. */
 	i.tag-ticket {
 		font-style: normal;
-		font-size: 0.68rem;
+		font-size: var(--font-size-2xs);
 		font-weight: 700;
 		text-transform: uppercase;
 		letter-spacing: 0.4px;
@@ -415,11 +415,11 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		border-radius: 999px;
 		white-space: nowrap;
 		vertical-align: middle;
-		color: #94a3b8;
+		color: var(--color-text-muted);
 		background: rgba(148, 163, 184, 0.12);
 		border: 1px solid rgba(148, 163, 184, 0.28);
 	}
 
-	.pend-row { font-size: 0.85rem; color: #fbbf24; background: rgba(251, 191, 36, 0.08); border: 1px dashed rgba(251, 191, 36, 0.35); border-radius: 8px; padding: 0.5rem 0.65rem; margin: 0.3rem 0; }
+	.pend-row { font-size: var(--font-size-sm); color: var(--color-warning-light); background: rgba(251, 191, 36, 0.08); border: 1px dashed rgba(251, 191, 36, 0.35); border-radius: 8px; padding: 0.5rem 0.65rem; margin: 0.3rem 0; }
 	.btn-back { width: 100%; }
 </style>

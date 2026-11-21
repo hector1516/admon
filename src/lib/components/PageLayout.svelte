@@ -48,15 +48,15 @@
   .header-left { display: flex; align-items: center; gap: 0.5rem; }
   .btn-back {
     background: none; border: none; cursor: pointer;
-    color: var(--color-text-muted, #94a3b8);
+    color: var(--color-text-muted, var(--color-text-muted));
     padding: 0.4rem; border-radius: 6px;
     display: flex; align-items: center; justify-content: center;
     transition: background 0.15s;
   }
-  .btn-back:hover { background: var(--color-surface-2, #334155); }
+  .btn-back:hover { background: var(--color-surface-2, var(--color-surface-2)); }
   .header-titles { display: flex; flex-direction: column; gap: 0; }
-  .page-title { font-size: 1.2rem; font-weight: 700; margin: 0; color: var(--color-text, #f1f5f9); }
-  .page-subtitle { font-size: 0.8rem; color: var(--color-text-muted, #94a3b8); margin: 0; }
+  .page-title { font-size: var(--font-size-xl); font-weight: 700; margin: 0; color: var(--color-text, var(--color-text-strong)); }
+  .page-subtitle { font-size: var(--font-size-xs); color: var(--color-text-muted, var(--color-text-muted)); margin: 0; }
   .header-actions { display: flex; gap: 0.5rem; align-items: center; }
   .page-content { display: flex; flex-direction: column; gap: 0.75rem; }
 </style>

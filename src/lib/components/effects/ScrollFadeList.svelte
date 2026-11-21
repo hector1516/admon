@@ -50,7 +50,7 @@
     overflow-y: auto;
     max-height: inherit;
     scrollbar-width: thin;
-    scrollbar-color: #334155 transparent;
+    scrollbar-color: var(--color-surface-2) transparent;
   }
 
   .scroll-content::-webkit-scrollbar {
@@ -62,12 +62,12 @@
   }
 
   .scroll-content::-webkit-scrollbar-thumb {
-    background: #334155;
+    background: var(--color-surface-2);
     border-radius: 3px;
   }
 
   .scroll-content::-webkit-scrollbar-thumb:hover {
-    background: #475569;
+    background: var(--color-border);
   }
 
   .fade-top, .fade-bottom {

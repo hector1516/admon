@@ -88,7 +88,7 @@
 
 <style>
 	.brand-col { display: flex; flex-direction: column; gap: 0; }
-	.brand { display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: 1.2rem; }
+	.brand { display: flex; align-items: center; gap: 0.5rem; margin: 0; font-size: var(--font-size-xl); }
 	.brand-logo { width: 34px; height: 34px; object-fit: cover; border-radius: 8px; }
 	/* Menú de módulos: la grilla y las tarjetas las pinta el shell
 	   (.module-grid con las columnas por resolución y .module-card

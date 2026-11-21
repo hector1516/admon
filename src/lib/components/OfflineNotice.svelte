@@ -24,13 +24,13 @@
 		margin: 0 0 0.75rem;
 		padding: 0.55rem 0.7rem;
 		border-radius: 8px;
-		font-size: 0.8rem;
+		font-size: var(--font-size-xs);
 		background: rgba(239, 68, 68, 0.1);
 		border: 1px solid rgba(239, 68, 68, 0.35);
 		color: #fca5a5;
 	}
 	.aviso-offline.compacto {
 		padding: 0.35rem 0.5rem;
-		font-size: 0.75rem;
+		font-size: var(--font-size-xs);
 	}
 </style>

@@ -267,29 +267,29 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <style>
 	.page { max-width: 800px; margin: 0 auto; padding: 1rem; }
 	.header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
-	.header h1 { font-size: 1.25rem; margin: 0; color: #f1f5f9; }
-	.card { background: #1e293b; border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; padding: 1.25rem; }
+	.header h1 { font-size: var(--font-size-xl); margin: 0; color: var(--color-text-strong); }
+	.card { background: var(--color-surface); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 14px; padding: 1.25rem; }
 	.field { margin-bottom: 1rem; }
-	.field label { display: block; font-size: 0.85rem; color: #94a3b8; margin-bottom: 0.4rem; font-weight: 600; }
-	.input { width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); background: #0f172a; color: #f1f5f9; font-size: 0.9rem; }
-	.input:focus { outline: none; border-color: #ff6b00; }
+	.field label { display: block; font-size: var(--font-size-sm); color: var(--color-text-muted); margin-bottom: 0.4rem; font-weight: 600; }
+	.input { width: 100%; padding: 0.6rem 0.75rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); background: var(--color-bg); color: var(--color-text-strong); font-size: var(--font-size-sm); }
+	.input:focus { outline: none; border-color: var(--color-primary); }
 	textarea.input { resize: vertical; }
-	.help { font-size: 0.75rem; color: #64748b; margin-top: 0.3rem; }
-	.btn { padding: 0.6rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; }
-	.btn-primary { background: #ff6b00; color: #fff; }
+	.help { font-size: var(--font-size-xs); color: var(--color-text-dim); margin-top: 0.3rem; }
+	.btn { padding: 0.6rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-size: var(--font-size-sm); font-weight: 600; }
+	.btn-primary { background: var(--color-primary); color: var(--color-white); }
 	.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-	.btn-secondary { background: rgba(255, 255, 255, 0.08); color: #f1f5f9; }
-	.btn-sm { padding: 0.4rem 0.7rem; font-size: 0.8rem; }
+	.btn-secondary { background: rgba(255, 255, 255, 0.08); color: var(--color-text-strong); }
+	.btn-sm { padding: 0.4rem 0.7rem; font-size: var(--font-size-xs); }
 	.btn-info { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
 	.btn-block { width: 100%; margin-top: 0.5rem; }
 	.folio-row { display: flex; gap: 0.5rem; }
 	.folio-row input { flex: 1; }
 	.photo-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }
-	.add-photo-btn { display: flex; align-items: center; justify-content: center; padding: 0.75rem; border: 2px dashed rgba(255, 255, 255, 0.15); border-radius: 12px; color: #94a3b8; cursor: pointer; font-weight: 600; font-size: 0.85rem; }
-	.add-photo-btn:active { border-color: #ff6b00; }
-	.camera { border-color: rgba(239, 68, 68, 0.3); color: #ef4444; }
-	.gallery { border-color: rgba(59, 130, 246, 0.3); color: #3b82f6; }
+	.add-photo-btn { display: flex; align-items: center; justify-content: center; padding: 0.75rem; border: 2px dashed rgba(255, 255, 255, 0.15); border-radius: 12px; color: var(--color-text-muted); cursor: pointer; font-weight: 600; font-size: var(--font-size-sm); }
+	.add-photo-btn:active { border-color: var(--color-primary); }
+	.camera { border-color: rgba(239, 68, 68, 0.3); color: var(--color-danger); }
+	.gallery { border-color: rgba(59, 130, 246, 0.3); color: var(--color-info); }
 	.foto-preview { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255, 255, 255, 0.1); margin-top: 0.5rem; }
 	.foto-preview img { width: 100%; max-height: 200px; object-fit: contain; display: block; }
-	.photo-remove { position: absolute; top: 6px; right: 6px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: 0.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+	.photo-remove { position: absolute; top: 6px; right: 6px; background: var(--color-danger); color: white; border: none; border-radius: 50%; width: 28px; height: 28px; font-size: var(--font-size-xs); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 </style>

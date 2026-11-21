@@ -19,6 +19,39 @@
 	--color-info: #3B82F6;
 	--font-family: 'Outfit', system-ui, sans-serif;
 
+	/* Neutros y acentos (mismos valores que el @theme de arriba) */
+	--color-text-strong: #F1F5F9;
+	--color-text-soft: #E2E8F0;
+	--color-text-dim: #64748B;
+	--color-border: #475569;
+	--color-line-strong: #CBD5E1;
+	--color-on-primary: #FFFFFF;
+	--color-white: #FFFFFF;
+	--color-ink: #050810;
+	--color-gold: #FFD700;
+	--color-success-light: #4ADE80;
+	--color-warning-light: #FBBF24;
+	--color-danger-light: #F87171;
+	--color-danger-dark: #991B1B;
+	--color-success-soft: #DCFCE7;
+	--color-danger-soft: #FEE2E2;
+
+	/* Escala tipográfica (Fase C). Se llaman --font-size-* y NO --text-*
+	   a propósito: en Tailwind v4, --text-sm en @theme PISA el text-sm de
+	   Tailwind y cambiaría media app de golpe. Estos tokens solo los usa
+	   quien escribe var(--font-size-*).
+	   Los valores son los que ya usaba la app; la migración mueve cada
+	   tamaño como mucho ±0.05rem (±0.8px). */
+	--font-size-2xs: 0.65rem;   /* 10.4px · etiquetas pequeñas */
+	--font-size-xs: 0.75rem;    /* 12px */
+	--font-size-sm: 0.85rem;    /* 13.6px · cuerpo compacto (el más usado) */
+	--font-size-base: 1rem;     /* 16px */
+	--font-size-lg: 1.1rem;     /* 17.6px */
+	--font-size-xl: 1.25rem;    /* 20px */
+	--font-size-2xl: 1.5rem;    /* 24px */
+	--font-size-3xl: 2rem;      /* 32px */
+	--font-size-4xl: 2.5rem;    /* 40px */
+
 	/* Tokens de estructura del shell (los usa shell.css) */
 	--color-line: rgba(255, 255, 255, 0.08);
 	--radius: 16px;      /* tarjetas */
@@ -45,6 +78,24 @@
 	--color-danger: #EF4444;
 	--color-info: #3B82F6;
 	--font-family: 'Outfit', system-ui, sans-serif;
+
+	/* Neutros y acentos que ya usaban las apps sin token (Fase C, 2026-11-20).
+	   Los valores son EXACTAMENTE los que había: migrar no cambia el color. */
+	--color-text-strong: #F1F5F9;
+	--color-text-soft: #E2E8F0;
+	--color-text-dim: #64748B;
+	--color-border: #475569;
+	--color-line-strong: #CBD5E1;
+	--color-on-primary: #FFFFFF;
+	--color-white: #FFFFFF;
+	--color-ink: #050810;
+	--color-gold: #FFD700;
+	--color-success-light: #4ADE80;
+	--color-warning-light: #FBBF24;
+	--color-danger-light: #F87171;
+	--color-danger-dark: #991B1B;
+	--color-success-soft: #DCFCE7;
+	--color-danger-soft: #FEE2E2;
 }
 
 /* ECCSA-Shell · src/body.css — CSS de componentes (sin prólogo de Tailwind).

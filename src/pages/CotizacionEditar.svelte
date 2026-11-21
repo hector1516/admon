@@ -199,10 +199,10 @@ import { logClick } from '$lib/audit.js';
 </div>
 
 <style>
-	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; margin-bottom: 0.75rem; }
-	.msg.err { background: rgba(239,68,68,0.1); color: #EF4444; }
-	.msg.ok { background: rgba(34,197,94,0.1); color: #22C55E; }
-	.hint { font-size: 0.8rem; color: var(--color-text-muted); }
+	.msg { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: var(--font-size-sm); margin-bottom: 0.75rem; }
+	.msg.err { background: rgba(239,68,68,0.1); color: var(--color-danger); }
+	.msg.ok { background: rgba(34,197,94,0.1); color: var(--color-success); }
+	.hint { font-size: var(--font-size-xs); color: var(--color-text-muted); }
 	.card { margin-bottom: 0.75rem; }
 	select.input { appearance: auto; }
 </style>
