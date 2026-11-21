@@ -6,11 +6,10 @@
 	import { auth } from '$lib/stores/auth';
 	let msg = $state('');
 	import { online } from '$lib/stores/online';
-	import { Clock, MapPin, HelpCircle, FileText, ArrowLeft, CheckCircle, XCircle, Loader2, Timer, Download, Camera } from 'lucide-svelte';
+	import { Clock, MapPin, HelpCircle, FileText, ArrowLeft, CheckCircle, XCircle, Loader2, Timer, Download } from 'lucide-svelte';
 	import CicloCard from '$lib/components/asistencia/CicloCard.svelte';
 	import { agruparCiclos } from '$lib/components/asistencia/ciclos.js';
-	import { cargarModelo, describir, esperarVideo } from '$lib/components/asistencia/rostro.js';
-	import { pasoAsistencia } from '$lib/passkey.js';
+	import { pasoAsistencia, registerPasskey, randomDeviceName } from '$lib/passkey.js';
 
 	let loading = $state(true);
 	let marking = $state(false);
@@ -38,20 +37,9 @@
 	let fraseActual = $state('');
 	let timerInterval: any;
 
-	// Rostro + passkey (D1 A / D2 A / D3 B)
-	let tieneReferenciaFacial = $state(false);
-	let videoEl: HTMLVideoElement;
-	let canvasEl: HTMLCanvasElement;
-	let stream: MediaStream | null = null;
-	let mostrarCamara = $state(false);
-	let modoCamara = $state<'verificar' | 'registro'>('verificar');
-	let pasoRostro = $state('');
-	let intentosRostro = $state(0);
-	let procesando = $state(false);
-	// Se sabe al cargar la página para no preguntarlo dentro del gesto: en iOS
-	// pedir la cámara después de un `await` la deja en negro.
+	// Se sabe al cargar la página para no preguntarlo en medio del gesto del
+	// botón: si falta, la passkey se crea ahí mismo con la huella o Face ID.
 	let passkeyOk = $state<boolean | null>(null);
-	let pedidoCamara: Promise<MediaStream> | null = null;
 
 	// Tarjetas por ciclo (entrada + salida) con horas extra según la LFT.
 	let configLft = $state({ horas_jornada: 8, extras_max_dia: 3, extras_dobles_semana: 9 });
@@ -152,205 +140,49 @@
 	}
 
 	/** Pide la cámara DENTRO del gesto del usuario y reusa la misma promesa. */
-	function pedirCamara(): Promise<MediaStream> {
-		if (!pedidoCamara) {
-			pedidoCamara = navigator.mediaDevices
-				.getUserMedia({ video: { facingMode: 'user' } })
-				.catch((e) => {
-					pedidoCamara = null;
-					throw e;
-				});
-		}
-		return pedidoCamara;
-	}
-
-	function mensajeDeCamara(e: any): string {
-		const nombre = e?.name || '';
-		if (nombre === 'NotAllowedError' || nombre === 'SecurityError')
-			return 'El teléfono bloqueó la cámara. Revisa los permisos de la app.';
-		if (nombre === 'NotFoundError' || nombre === 'OverconstrainedError')
-			return 'No encontré una cámara en este equipo.';
-		if (nombre === 'NotReadableError' || nombre === 'AbortError')
-			return 'La cámara está ocupada por otra app. Ciérrala y vuelve a intentar.';
-		return e?.message || 'No se pudo abrir la cámara';
-	}
-
-	async function abrirCamara(modo: 'verificar' | 'registro') {
-		modoCamara = modo;
-		mostrarCamara = true;
-		await tick(); // el <video> tiene que existir antes de engancharle el stream
+	/**
+	 * Deja una passkey lista. Si el usuario no tiene ninguna, se la crea aquí
+	 * mismo: mandarlo a Configuración en medio del marcado no tiene sentido.
+	 */
+	async function asegurarPasskey(): Promise<boolean> {
+		if (passkeyOk === true) return true;
 		try {
-			const vivo = !!stream && stream.getTracks().some((t) => t.readyState === 'live');
-			if (!vivo) stream = await pedirCamara();
-			if (!videoEl) throw new Error('No se pudo montar el video');
-			videoEl.srcObject = stream;
-			videoEl.muted = true;
-			await videoEl.play().catch(() => {});
-			if (!(await esperarVideo(videoEl, 4000))) {
-				throw new Error(
-					'La cámara abrió pero no entrega imagen. Cierra la app del todo y vuelve a abrirla.'
-				);
-			}
-		} catch (e: any) {
-			mostrarCamara = false;
-			detenerCamara();
-			pedidoCamara = null;
-			throw new Error(mensajeDeCamara(e));
-		}
-	}
-
-	function detenerCamara() {
-		if (stream) {
-			stream.getTracks().forEach((t) => t.stop());
-			stream = null;
-		}
-	}
-
-	function cerrarCamara() {
-		detenerCamara();
-		mostrarCamara = false;
-		pasoRostro = '';
-	}
-
-	/** Suelta la cámara si se pidió y al final no se usó (sin passkey, etc.). */
-	async function soltarCamara() {
-		try {
-			const s = await pedidoCamara;
-			s?.getTracks().forEach((t) => t.stop());
-		} catch {}
-		pedidoCamara = null;
-		stream = null;
-	}
-
-	async function capturarFoto(): Promise<string | null> {
-		if (!videoEl || !canvasEl) return null;
-		canvasEl.width = videoEl.videoWidth;
-		canvasEl.height = videoEl.videoHeight;
-		const ctx = canvasEl.getContext('2d');
-		if (!ctx) return null;
-		ctx.drawImage(videoEl, 0, 0);
-		return canvasEl.toDataURL('image/jpeg', 0.8);
-	}
-
-	async function abrirRegistroRostro() {
-		try {
-			await abrirCamara('registro');
-		} catch (e: any) {
-			error = e.message;
-			return;
-		}
-		pasoRostro = 'Mira a la cámara y toca Guardar';
-	}
-
-	async function registrarRostro() {
-		procesando = true;
-		try {
-			await cargarModelo();
-			await new Promise((r) => setTimeout(r, 700));
-			const foto = await capturarFoto();
-			const embedding = await describir(videoEl);
-			if (!embedding) {
-				pasoRostro = 'No veo tu cara. Acomódate frente a la cámara.';
-				return;
-			}
-			await api.post('/mi-asistencia/facial/registrar', {
-				foto_base64: foto, content_type: 'image/jpeg', embedding
-			});
-			tieneReferenciaFacial = true;
-			cerrarCamara();
-			msg = 'Rostro registrado';
-		} catch (e: any) {
-			error = e.message || 'Error registrando rostro';
-		} finally {
-			procesando = false;
-		}
-	}
-
-	/** Verifica el rostro hasta 3 veces (D2 A). */
-	async function flujoRostro(): Promise<boolean> {
-		try {
-			await abrirCamara('verificar');
-		} catch (e: any) {
-			error = e.message;
-			return false;
-		}
-		intentosRostro = 0;
-		try {
-			await cargarModelo();
+			const pks = await api.get('/passkeys/mine');
+			passkeyOk = !!pks?.passkeys?.length;
 		} catch {
-			cerrarCamara();
-			error = 'No se pudo cargar el reconocimiento facial.';
+			error = 'No se pudo comprobar tu passkey. Revisa tu conexión.';
 			return false;
 		}
-		while (intentosRostro < 3) {
-			pasoRostro = intentosRostro === 0 ? 'Mira a la cámara…' : `Intento ${intentosRostro + 1} de 3…`;
-			await new Promise((r) => setTimeout(r, 900));
-			let embedding: number[] | null = null;
-			try {
-				embedding = await describir(videoEl);
-			} catch {
-				embedding = null;
-			}
-			if (!embedding) {
-				intentosRostro++;
-				pasoRostro = 'No veo tu cara. Acomódate frente a la cámara.';
-				await new Promise((r) => setTimeout(r, 1000));
-				continue;
-			}
-			const res = await api.post('/mi-asistencia/facial/verificar', { embedding });
-			if (res.verificado) {
-				cerrarCamara();
-				return true;
-			}
-			intentosRostro++;
-			pasoRostro = `No te reconocí (${intentosRostro}/3).`;
-			await new Promise((r) => setTimeout(r, 700));
+		if (passkeyOk) return true;
+
+		msg = 'Crea tu passkey con la huella o Face ID del teléfono…';
+		try {
+			await registerPasskey(randomDeviceName());
+			passkeyOk = true;
+			msg = '';
+			return true;
+		} catch (e: any) {
+			error = e?.message || 'No se pudo crear la passkey. Vuelve a intentar.';
+			return false;
 		}
-		cerrarCamara();
-		error = 'No se pudo verificar tu rostro. Regístralo o avisa a tu supervisor.';
-		return false;
 	}
 
 	async function marcar() {
 		if (marking) return;
 		marking = true;
 		error = '';
-		// iOS solo entrega la cámara si se pide dentro del gesto: va aquí, antes
-		// de cualquier `await`. Si luego no hace falta, se suelta.
-		const pedido = pedirCamara();
-		void pedido;
 		try {
-			if (passkeyOk === false) {
-				await soltarCamara();
-				error = 'Registra una passkey en Configuración para poder marcar.';
-				return;
-			}
-			// D3 B: sin passkey registrada no se puede marcar.
-			if (passkeyOk !== true) {
-				try {
-					const pks = await api.get('/passkeys/mine');
-					passkeyOk = !!pks?.passkeys?.length;
-					if (!passkeyOk) {
-						await soltarCamara();
-						error = 'Registra una passkey en Configuración para poder marcar.';
-						return;
-					}
-				} catch {
-					await soltarCamara();
-					error = 'No se pudo comprobar tu passkey. Revisa tu conexión.';
-					return;
-				}
-			}
+			if (!(await asegurarPasskey())) return;
 			try {
 				await obtenerGPS();
 			} catch {}
-			const rostroOk = await flujoRostro();
-			if (!rostroOk) return;
+
+			// La passkey se firma ahora: así nadie marca por otro.
 			const stepup_token = await pasoAsistencia();
 			const tipo = timerActivo ? 'Salida' : 'Entrada';
 			const res = await api.post('/mi-asistencia/marcar', {
 				tipo, latitud: gpsLat, longitud: gpsLon, precision: gpsPrecision,
-				verificacion_facial: true, stepup_token, dispositivo: navigator.userAgent
+				verificacion_facial: false, stepup_token, dispositivo: navigator.userAgent
 			});
 			msg = res.mensaje || `${tipo} registrada`;
 			if (tipo === 'Entrada') {
@@ -366,7 +198,7 @@
 			}
 			await cargarDatos();
 		} catch (e: any) {
-			error = e.message || 'Error al marcar';
+			error = e?.message || 'Error al marcar';
 		} finally {
 			marking = false;
 		}
@@ -442,17 +274,6 @@
 	{#if loading}
 		<div class="loading">Cargando...</div>
 	{:else}
-		{#if !tieneReferenciaFacial}
-			<div class="card" style="text-align: center;">
-				<p style="font-size: var(--font-size-sm); color: var(--color-text-dim); margin-bottom: 0.75rem;">
-					Registra tu rostro una vez para poder marcar
-				</p>
-				<button class="btn btn-sm btn-primary" onclick={abrirRegistroRostro}>
-					<Camera size={16} /> Registrar rostro
-				</button>
-			</div>
-		{/if}
-
 		<!-- Check-in button -->
 		<div class="checkin-section">
 			<button class="checkin-btn {timerActivo ? 'checkout' : 'checkin'}" onclick={marcar} disabled={marking}>
@@ -561,31 +382,6 @@
 	{/if}
 
 	<!-- Help modal -->
-	{#if mostrarCamara}
-		<div class="modal-overlay">
-			<div class="modal">
-				<div class="modal-header">
-					<h2>{modoCamara === 'registro' ? 'Registrar rostro' : 'Verificación facial'}</h2>
-				</div>
-				<div class="camara-wrap">
-					<video bind:this={videoEl} autoplay playsinline muted></video>
-					<canvas bind:this={canvasEl} style="display:none"></canvas>
-				</div>
-				<p class="camara-paso">{pasoRostro}</p>
-				<div class="modal-botones">
-					<button class="btn btn-sm btn-secondary" onclick={cerrarCamara} disabled={procesando}>
-						Cancelar
-					</button>
-					{#if modoCamara === 'registro'}
-						<button class="btn btn-sm btn-primary" onclick={registrarRostro} disabled={procesando}>
-							{procesando ? 'Guardando…' : 'Guardar'}
-						</button>
-					{/if}
-				</div>
-			</div>
-		</div>
-	{/if}
-
 	{#if showHelp}
 		<div class="modal-overlay" onclick={() => showHelp = false}>
 			<div class="modal" onclick={(e) => e.stopPropagation()}>
@@ -654,31 +450,6 @@
 	.stat-row { display: flex; justify-content: space-between; padding: 0.25rem 0; font-size: var(--font-size-sm); }
 	.stat-label { color: var(--color-text-dim); }
 	.stat-value { font-weight: 600; color: var(--color-surface); }
-	.camara-wrap {
-		border-radius: var(--radius-sm);
-		overflow: hidden;
-		background: #000;
-		display: flex;
-		justify-content: center;
-	}
-	.camara-wrap video {
-		display: block;
-		width: 100%;
-		max-width: 320px;
-		height: auto;
-	}
-	.camara-paso {
-		font-size: var(--font-size-sm);
-		color: var(--color-text-muted);
-		text-align: center;
-		margin: 0.6rem 0;
-		min-height: 1.4em;
-	}
-	.modal-botones {
-		display: flex;
-		gap: 0.5rem;
-		justify-content: flex-end;
-	}
 	.marking-list { display: flex; flex-direction: column; gap: 0.5rem; }
 	.marking-item { display: flex; gap: 0.5rem; align-items: center; font-size: var(--font-size-xs); padding: 0.25rem 0; border-bottom: 1px solid var(--color-text-strong); }
 	.marking-tipo { font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: var(--font-size-xs); }

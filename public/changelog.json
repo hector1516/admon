@@ -1,7 +1,8 @@
 {
   "app": "admon",
-  "version": "1.9.4",
+  "version": "1.9.5",
   "cambios": [
+    "🔐 Para marcar ahora solo usas la huella o Face ID del teléfono: si no tienes passkey se crea en ese momento, y ya no hay que capturar el rostro.",
     "📷 La cámara de Mi Asistencia ya muestra la imagen en el teléfono: antes se veía negra y decía que no te reconocía.",
     "⚡ Admon carga más rápido: las imágenes pesaban 15 MB y ahora pesan menos de 1 MB.",
     "🐛 La cámara de Mi Asistencia ahora arranca de verdad: antes se abría el cuadro pero el video quedaba en negro y no pasaba nada.",
@@ -12,7 +13,6 @@
     "🏆 Legends se rediseñó en Admon: ranking semanal, temporada, racha y 20 logros.",
     "💵 Ahora los puntos siguen el dinero: cotización pagada +15 a +75 según el subtotal, entregada +10, cliente nuevo cotizado +5 y cobranza +3.",
     "📸 El reporte suma por fotos de evidencia y por cerrarse el mismo día del servicio.",
-    "⛔ Los vales sin comprobante, los reportes tardíos y el retrabajo restan puntos.",
-    "🧭 La pantalla quedó más limpia, con la regla económica y la guía de puntos a la vista."
+    "⛔ Los vales sin comprobante, los reportes tardíos y el retrabajo restan puntos."
   ]
 }

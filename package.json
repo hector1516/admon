@@ -1,6 +1,6 @@
 {
   "name": "admon",
-  "version": "1.9.4",
+  "version": "1.9.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@simplewebauthn/browser": "^14.0.0",
-    "@vladmandic/face-api": "^1.7.15",
     "dexie": "^4.4.6",
     "lucide-svelte": "^1.0.1",
     "marked": "^18.0.14",

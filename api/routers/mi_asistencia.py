@@ -10,7 +10,6 @@ import base64
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from tz_mx import now_mx
-from api import rostro, stepup
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
@@ -85,7 +84,7 @@ def marcar_asistencia(req: MarcarReq, current_user: dict = Depends(get_current_u
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (user_id, ahora.date(), req.tipo, ahora.strftime('%H:%M:%S'),
               req.latitud, req.longitud, req.precision,
-              1, req.id_foto_verificacion, credencial,
+              1 if req.verificacion_facial else 0, req.id_foto_verificacion, credencial,
               req.dispositivo, ahora, 'Valido'))
         conn.commit()
         return {"ok": True, "tipo": req.tipo, "fecha": str(ahora.date()),
@@ -491,15 +490,6 @@ def admin_config_lft(current_user: dict = Depends(get_current_user)):
         conn.close()
 
 
-class FacialRegistroReq(BaseModel):
-    foto_base64: str
-    content_type: str = "image/jpeg"
-    embedding: Optional[List[float]] = None
-
-class FacialVerificarReq(BaseModel):
-    embedding: List[float]
-    foto_base64: Optional[str] = None
-    content_type: str = "image/jpeg"
 
 
 @router.post("/passkey/options")
@@ -558,83 +548,3 @@ def passkey_verify(req: PasskeyVerifyReq, request: Request,
     return {"ok": True, "credential_id": cred_id,
             "stepup_token": stepup.emitir(user_id, cred_id, _pk._passkey_secret())}
 
-@router.post("/facial/registrar")
-def registrar_facial(req: FacialRegistroReq, current_user: dict = Depends(get_current_user)):
-    """Registra la foto de referencia facial del usuario."""
-    user_id = current_user.get("id") or current_user.get("Id")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Usuario no identificado")
-    try:
-        import base64
-        foto_data = req.foto_base64.split(',')[1] if ',' in req.foto_base64 else req.foto_base64
-        foto_bytes = base64.b64decode(foto_data)
-    except Exception:
-        raise HTTPException(status_code=400, detail="Foto base64 invalida")
-    embedding_json = json.dumps(req.embedding) if req.embedding else None
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("""
-            IF EXISTS (SELECT 1 FROM HUB_UsuariosFaciales WHERE IdUsuario = %s)
-                UPDATE HUB_UsuariosFaciales
-                   SET FotoReferencia = %s, ContentType = %s,
-                       Embedding = COALESCE(%s, Embedding), FechaActualizacion = GETDATE()
-                 WHERE IdUsuario = %s
-            ELSE
-                INSERT INTO HUB_UsuariosFaciales
-                       (IdUsuario, FotoReferencia, ContentType, Embedding, FechaRegistro)
-                VALUES (%s, %s, %s, %s, GETDATE())
-        """, (user_id, foto_bytes, req.content_type, embedding_json, user_id,
-              user_id, foto_bytes, req.content_type, embedding_json))
-        conn.commit()
-        return {"ok": True, "mensaje": "Foto de referencia registrada"}
-    except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        cur.close()
-        conn.close()
-
-@router.get("/facial/estado")
-def estado_facial(current_user: dict = Depends(get_current_user)):
-    """Verifica si el usuario tiene foto de referencia facial."""
-    user_id = current_user.get("id") or current_user.get("Id")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Usuario no identificado")
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute("SELECT 1 FROM HUB_UsuariosFaciales WHERE IdUsuario = %s AND FotoReferencia IS NOT NULL", (user_id,))
-        tiene = cur.fetchone() is not None
-        return {"tiene_referencia": tiene}
-    finally:
-        cur.close()
-        conn.close()
-
-@router.post("/facial/verificar")
-def verificar_facial(req: FacialVerificarReq, current_user: dict = Depends(get_current_user)):
-    """Compara el descriptor de la selfie contra el guardado (D1 A)."""
-    user_id = current_user.get("id") or current_user.get("Id")
-    if not user_id:
-        raise HTTPException(status_code=401, detail="Usuario no identificado")
-    conn = get_connection()
-    cur = conn.cursor()
-    try:
-        cur.execute(
-            "SELECT Embedding FROM HUB_UsuariosFaciales "
-            "WHERE IdUsuario = %s AND Embedding IS NOT NULL",
-            (user_id,))
-        fila = cur.fetchone()
-        if not fila or not fila[0]:
-            return {"verificado": False, "score": None,
-                    "mensaje": "No tiene rostro registrado"}
-        try:
-            guardado = json.loads(fila[0])
-        except Exception:
-            return {"verificado": False, "score": None,
-                    "mensaje": "El rostro guardado está dañado; regístralo de nuevo"}
-        score = round(rostro.distancia(guardado, req.embedding), 3)
-        return {"verificado": rostro.coincide(guardado, req.embedding), "score": score}
-    finally:
-        cur.close()
-        conn.close()
