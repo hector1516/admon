@@ -160,6 +160,7 @@ import EstatusServicios from './pages/EstatusServicios.svelte';
 			shellVersion={SHELL_VERSION}
 			fetcher={shellFetch}
 			onsync={shellSync}
+			destacado="/mi_asistencia"
 		/>
 	{/if}
 
