@@ -117,10 +117,31 @@ class UsageTrackingMiddleware(BaseHTTPMiddleware):
                     lote.append(self._cola.get_nowait())
                 except queue.Empty:
                     break
+            self._escribir(lote)
+
+    def _escribir(self, lote):
+        """Un registro inválido no debe tirar las otras 19 filas del lote."""
+        try:
+            self._insertar_lote(lote)
+            return
+        except Exception as e:
+            logger.warning(
+                "telemetria: lote de %d filas falló (%s); reintento fila por fila",
+                len(lote), e,
+            )
+        if len(lote) == 1:
+            return
+        fallos_seguidos = 0
+        for fila in lote:
             try:
-                self._insertar_lote(lote)
+                self._insertar_lote([fila])
+                fallos_seguidos = 0
             except Exception as e:
-                logger.debug(f"DB log error: {e}")
+                fallos_seguidos += 1
+                logger.debug("telemetria: fila perdida (%s)", e)
+                if fallos_seguidos >= 3:
+                    # La BD está caída: no seguir martillando con el resto.
+                    break
 
     def _insertar_lote(self, lote):
         from api import db as _db

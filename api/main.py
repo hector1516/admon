@@ -6,13 +6,12 @@ from api.pdf_remision import build_remision_pdf
 from api.lugar import lugar_de
 from api import sat_helper
 from api import db as _db
-from api.cache import TTLCache
+from api.cache import TTLCache, debe_invalidar_prefetch
 from api import usuarios_foto as _foto_usuario
 from api import ficha_nfc as _ficha_nfc
 from api import legends_core as _legends_core
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
-import pymssql
 import os
 import io
 import json
@@ -46,6 +45,16 @@ def get_connection():
 
 # Prefetch offline: misma carga para todos, 43-756 ms de costo. 30 s de TTL.
 _CACHE_SYNC = TTLCache(ttl=30)
+
+
+@app.middleware("http")
+async def _invalidar_prefetch_offline(request, call_next):
+    """Si una escritura cambia clientes o cotizaciones, el prefetch cacheado ya
+    no sirve: se tira para que la próxima lectura lo recalcule."""
+    response = await call_next(request)
+    if debe_invalidar_prefetch(request.method, request.url.path, response.status_code):
+        _CACHE_SYNC.invalidar("sync")
+    return response
 
 
 # --- Helper Functions (usados por IA Tools) ---
@@ -1451,34 +1460,33 @@ def sync_pull(current_user: dict = Depends(get_current_user)):
     """
     _require_cotiz(current_user)
 
-    cacheado = _CACHE_SYNC.get("sync")
-    if cacheado is not None:
-        return cacheado
-
-    conn = None
-    try:
-        conn = get_connection()
-        filas, _ = _listar_cotizaciones(conn, top=TOTAL_COTIZACIONES_MAX)
-        cots = [{"folio": r["folio"], "id_cliente": r["id_cliente"], "cliente": r["cliente"],
-                 "contacto": r["contacto"], "fecha": r["fecha"], "descripcion": r["descripcion"],
-                 "autor": r["autor"], "estatus": r["estatus"], "suma_partidas": r["suma_partidas"],
-                 "flete": r["flete"], "subtotal": r["subtotal"], "iva": r["iva"], "total": r["total"]}
-                for r in filas]
-        cursor = conn.cursor()
-        cursor.execute("SELECT IdCliente, Cliente, CondicionesPagoDias FROM clientes ORDER BY IdCliente ASC")
-        clis = [{"id_cliente": r[0], "nombre": r[1], "dias_pago": r[2]} for r in cursor.fetchall()]
-        conn.close()
+    def construir():
         conn = None
-        payload = {"cotizaciones": cots, "clientes": clis}
-        _CACHE_SYNC.set("sync", payload)
-        return payload
-    except Exception as e:
-        if conn:
-            try:
-                conn.close()
-            except Exception:
-                pass
-        raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+        try:
+            conn = get_connection()
+            filas, _ = _listar_cotizaciones(conn, top=TOTAL_COTIZACIONES_MAX)
+            cots = [{"folio": r["folio"], "id_cliente": r["id_cliente"], "cliente": r["cliente"],
+                     "contacto": r["contacto"], "fecha": r["fecha"], "descripcion": r["descripcion"],
+                     "autor": r["autor"], "estatus": r["estatus"], "suma_partidas": r["suma_partidas"],
+                     "flete": r["flete"], "subtotal": r["subtotal"], "iva": r["iva"], "total": r["total"]}
+                    for r in filas]
+            cursor = conn.cursor()
+            cursor.execute("SELECT IdCliente, Cliente, CondicionesPagoDias FROM clientes ORDER BY IdCliente ASC")
+            clis = [{"id_cliente": r[0], "nombre": r[1], "dias_pago": r[2]} for r in cursor.fetchall()]
+            cursor.close()
+            return {"cotizaciones": cots, "clientes": clis}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error: {str(e)}")
+        finally:
+            if conn is not None:
+                try:
+                    conn.close()
+                except Exception:
+                    pass
+
+    # get_or_set = single-flight: si llegan 5 peticiones con la caché vacía,
+    # solo una consulta (las otras esperan y reciben el mismo resultado).
+    return _CACHE_SYNC.get_or_set("sync", construir)
 
 
 # --- Dashboard endpoint ---

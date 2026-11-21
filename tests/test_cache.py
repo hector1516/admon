@@ -10,7 +10,7 @@ import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "api"))
 
-from cache import TTLCache  # noqa: E402
+from cache import TTLCache, debe_invalidar_prefetch  # noqa: E402
 
 
 def test_devuelve_el_valor_dentro_del_ttl():
@@ -44,7 +44,49 @@ def test_invalidar_todo():
 
 
 def test_no_cachea_none():
-    """Un `None` no debe confundirse con 'no está en caché'."""
+    """Limitación conocida: un valor `None` se confunde con 'no está en caché'
+    (por eso `get_or_set` no guarda resultados `None`)."""
     cache = TTLCache(ttl=60)
     cache.set("x", None)
     assert cache.get("x") is None
+
+
+def test_get_or_set_usa_el_valor_cacheado():
+    cache = TTLCache(ttl=60)
+    cache.set("k", 1)
+    assert cache.get_or_set("k", lambda: 2) == 1
+
+
+def test_get_or_set_calcula_una_sola_vez_con_varios_hilos():
+    """Evita el thundering herd: 5 peticiones con la caché vacía no deben
+    disparar 5 consultas de 160 ms a la vez."""
+    import threading
+
+    cache = TTLCache(ttl=60)
+    llamadas = []
+    resultados = []
+
+    def calcular():
+        llamadas.append(1)
+        time.sleep(0.1)
+        return {"x": 1}
+
+    def pedir():
+        resultados.append(cache.get_or_set("k", calcular))
+
+    hilos = [threading.Thread(target=pedir) for _ in range(5)]
+    for hilo in hilos:
+        hilo.start()
+    for hilo in hilos:
+        hilo.join()
+
+    assert len(llamadas) == 1
+    assert resultados == [{"x": 1}] * 5
+
+
+def test_debe_invalidar_prefetch():
+    assert debe_invalidar_prefetch("POST", "/api/clientes", 201)
+    assert debe_invalidar_prefetch("DELETE", "/api/cotizaciones/5", 200)
+    assert not debe_invalidar_prefetch("GET", "/api/clientes", 200)
+    assert not debe_invalidar_prefetch("POST", "/api/reportes", 200)
+    assert not debe_invalidar_prefetch("POST", "/api/clientes", 500)

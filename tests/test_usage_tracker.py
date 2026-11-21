@@ -86,3 +86,23 @@ def test_cola_llena_descarta_sin_romper():
 
     for _ in range(10):
         middleware._encolar("/api/x", "GET", "it", 1, 200)  # no debe lanzar
+
+
+def test_una_fila_mala_no_tira_el_lote():
+    """Un solo registro inválido no debe perder las otras 19 filas del lote."""
+    middleware = UsageTrackingMiddleware(app=None)
+    guardadas = []
+
+    def insertar(lote):
+        if any(fila[0] == "/api/malo" for fila in lote):
+            raise ValueError("fila mala")
+        guardadas.extend(lote)
+
+    middleware._insertar_lote = insertar
+    middleware._escribir([
+        ("/api/ok1", "GET", "it", 1, 200),
+        ("/api/malo", "GET", "it", 1, 200),
+        ("/api/ok2", "GET", "it", 1, 200),
+    ])
+
+    assert [f[0] for f in guardadas] == ["/api/ok1", "/api/ok2"]

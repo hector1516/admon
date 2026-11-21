@@ -52,6 +52,25 @@ def _validate_select_one(raw):
             pass
 
 
+def _default_reset(raw):
+    """Limpia el estado antes de devolver la conexión al pool."""
+    raw.rollback()
+
+
+def _ping(raw):
+    """Admon conecta con autocommit=True: `rollback()` es un no-op y NO detecta
+    una conexión muerta. Un `SELECT 1` sí (cuesta ~0.3 ms)."""
+    cur = raw.cursor()
+    try:
+        cur.execute("SELECT 1")
+        cur.fetchone()
+    finally:
+        try:
+            cur.close()
+        except Exception:
+            pass
+
+
 class PooledConnection:
     """Envoltura de una conexión pymssql que vuelve al pool en vez de cerrarse.
 
@@ -82,6 +101,16 @@ class PooledConnection:
         self._closed = True
         self._pool.release(self._raw, self._born, healthy=not self._broken)
 
+    def __del__(self):
+        # La mayoría de los endpoints hacen `conn = get_connection()` y NUNCA
+        # llaman close(): sin esto la conexión se destruye al recolectarse y el
+        # pool queda vacío.
+        try:
+            if not object.__getattribute__(self, "_closed"):
+                self.close()
+        except Exception:
+            pass
+
     def mark_broken(self):
         self._broken = True
 
@@ -108,13 +137,14 @@ class ConnectionPool:
     guarda las ociosas."""
 
     def __init__(self, factory, max_idle=_MAX_IDLE, max_age=_MAX_AGE,
-                 validate=None, validate_after=_VALIDATE_AFTER):
+                 validate=None, validate_after=_VALIDATE_AFTER, reset=None):
         self._factory = factory
         self._idle = queue.LifoQueue()
         self._max_idle = max_idle
         self._max_age = max_age
         self._validate = validate
         self._validate_after = validate_after
+        self._reset = reset or _default_reset
         self._lock = threading.Lock()
 
     def acquire(self):
@@ -158,9 +188,9 @@ class ConnectionPool:
             return
 
         try:
-            # Con autocommit=True es un no-op barato; queda por si alguien
-            # cambia la conexión a transaccional.
-            raw.rollback()
+            # En Admon `_reset` es `_ping` (autocommit=True: rollback() es
+            # no-op y no detecta una conexión muerta).
+            self._reset(raw)
         except Exception:
             _safe_close(raw)
             return
@@ -169,10 +199,10 @@ class ConnectionPool:
             if self._idle.qsize() >= self._max_idle:
                 _safe_close(raw)
                 return
-        try:
-            self._idle.put_nowait((raw, born, time.time()))
-        except Exception:
-            _safe_close(raw)
+            try:
+                self._idle.put_nowait((raw, born, time.time()))
+            except Exception:
+                _safe_close(raw)
 
     def stats(self):
         return {"idle": self._idle.qsize(), "max_idle": self._max_idle}
@@ -191,7 +221,7 @@ def _connect():
     )
 
 
-_pool = ConnectionPool(_connect, validate=_validate_select_one)
+_pool = ConnectionPool(_connect, validate=_validate_select_one, reset=_ping)
 
 
 def get_connection():

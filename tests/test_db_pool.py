@@ -194,3 +194,53 @@ def test_context_manager_returns_connection():
 
     assert raw.closed is False
     assert raw.rolled_back == 1
+
+
+def test_vuelve_al_pool_al_soltar_la_referencia():
+    """Muchos endpoints no llaman conn.close(): si el wrapper no devuelve la
+    conexión al recolectarse, el pool no se usa y cada petición vuelve a pagar
+    el login TDS completo."""
+    import gc
+
+    created = []
+    pool = make_pool(created)
+
+    conn = pool.acquire()
+    raw = conn._raw
+    del conn
+    gc.collect()
+
+    assert raw.closed is False
+    assert pool.stats()["idle"] == 1
+
+    segunda = pool.acquire()
+    assert segunda._raw is raw
+    segunda.close()
+
+
+def test_reset_personalizado_se_usa():
+    created = []
+    resets = []
+    pool = make_pool(created, reset=lambda raw: resets.append(raw))
+
+    conn = pool.acquire()
+    raw = conn._raw
+    conn.close()
+
+    assert resets == [raw]
+    assert raw.closed is False
+
+
+def test_reset_que_falla_descarta_la_conexion():
+    created = []
+
+    def reset(_raw):
+        raise RuntimeError("conexión muerta")
+
+    pool = make_pool(created, reset=reset)
+    conn = pool.acquire()
+    raw = conn._raw
+    conn.close()
+
+    assert raw.closed is True
+    assert pool.stats()["idle"] == 0
