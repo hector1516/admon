@@ -6,6 +6,7 @@ from api.pdf_remision import build_remision_pdf
 from api.lugar import lugar_de
 from api import sat_helper
 from api import db as _db
+from api.cache import TTLCache
 from api import usuarios_foto as _foto_usuario
 from api import ficha_nfc as _ficha_nfc
 from api import legends_core as _legends_core
@@ -41,6 +42,10 @@ _db.db_config()
 
 def get_connection():
     return _db.get_connection()
+
+
+# Prefetch offline: misma carga para todos, 43-756 ms de costo. 30 s de TTL.
+_CACHE_SYNC = TTLCache(ttl=30)
 
 
 # --- Helper Functions (usados por IA Tools) ---
@@ -1438,8 +1443,18 @@ def sync_pull(current_user: dict = Depends(get_current_user)):
     consulta lenta de 999 filas de la vista: entrar a la app congelaba el
     servidor ~26 s. Reusa el listado ya corregido y, como es `def`, no bloquea
     el event loop.
+
+    Fase B (B2): la respuesta es idéntica para todos los usuarios con acceso y
+    cuesta 43-756 ms (mediana ~160 ms), así que se cachea 30 s. Es el prefetch
+    offline: el cliente ya tolera desfase, y lo que el usuario mira en pantalla
+    se lee fresco por otra ruta.
     """
     _require_cotiz(current_user)
+
+    cacheado = _CACHE_SYNC.get("sync")
+    if cacheado is not None:
+        return cacheado
+
     conn = None
     try:
         conn = get_connection()
@@ -1454,7 +1469,9 @@ def sync_pull(current_user: dict = Depends(get_current_user)):
         clis = [{"id_cliente": r[0], "nombre": r[1], "dias_pago": r[2]} for r in cursor.fetchall()]
         conn.close()
         conn = None
-        return {"cotizaciones": cots, "clientes": clis}
+        payload = {"cotizaciones": cots, "clientes": clis}
+        _CACHE_SYNC.set("sync", payload)
+        return payload
     except Exception as e:
         if conn:
             try:
