@@ -1,5 +1,9 @@
 # Admon
 
+> ⚠️ **LEGACY (ServerVM `10.188.141.31`):** lo que sigue describe el host
+> viejo, que **ya no se usa**. Las apps se despliegan en WebbApps con Arcane
+> (ver `AGENTS.md` de la raíz, §2). **No ejecutes estos pasos en ServerVM.**
+
 App de administración de ECCSA — [`admon.ecc-sa.com.mx`](https://admon.ecc-sa.com.mx).
 
 Interfaz **Svelte 5 + Vite + Tailwind v3**, API **FastAPI** sobre
