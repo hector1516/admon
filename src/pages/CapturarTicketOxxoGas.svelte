@@ -275,13 +275,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	.input:focus { outline: none; border-color: var(--color-primary); }
 	textarea.input { resize: vertical; }
 	.help { font-size: var(--font-size-xs); color: var(--color-text-dim); margin-top: 0.3rem; }
-	.btn { padding: 0.6rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-size: var(--font-size-sm); font-weight: 600; }
-	.btn-primary { background: var(--color-primary); color: var(--color-white); }
-	.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-	.btn-secondary { background: rgba(255, 255, 255, 0.08); color: var(--color-text-strong); }
-	.btn-sm { padding: 0.4rem 0.7rem; font-size: var(--font-size-xs); }
 	.btn-info { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
-	.btn-block { width: 100%; margin-top: 0.5rem; }
 	.folio-row { display: flex; gap: 0.5rem; }
 	.folio-row input { flex: 1; }
 	.photo-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem; }

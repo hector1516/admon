@@ -46,7 +46,4 @@
   .empty-icon { font-size: 3rem; line-height: 1; margin-bottom: 1rem; opacity: 0.6; }
   .empty-title { font-size: var(--font-size-base); font-weight: 600; margin: 0 0 0.5rem; color: var(--color-text, var(--color-text-strong)); }
   .empty-desc { font-size: var(--font-size-sm); line-height: 1.5; margin: 0 0 1rem; max-width: 300px; }
-  .btn { padding: 0.4rem 0.75rem; border-radius: 6px; border: none; cursor: pointer; font-size: var(--font-size-sm); }
-  .btn-primary { background: var(--color-primary, var(--color-info)); color: white; }
-  .btn-sm { padding: 0.25rem 0.5rem; font-size: var(--font-size-xs); }
 </style>

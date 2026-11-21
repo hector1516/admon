@@ -96,19 +96,6 @@
 	.botones { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
 	.folio { padding: 0 0.45rem; white-space: nowrap; }
 	.folio b { color: var(--color-text); }
-	.btn-sm {
-		background: var(--color-surface);
-		color: var(--color-text);
-		border: 1px solid var(--color-line);
-		border-radius: var(--radius-sm);
-		padding: 0.35rem 0.6rem;
-		font-size: var(--font-size-xs);
-		font-family: var(--font-family);
-		cursor: pointer;
-		transition: background 0.15s, border-color 0.15s;
-	}
-	.btn-sm:hover:not(:disabled) { background: rgba(255, 107, 0, 0.12); border-color: var(--color-primary); }
-	.btn-sm:disabled { opacity: 0.4; cursor: not-allowed; }
 	.saltar {
 		width: 4.2rem;
 		background: var(--color-surface);

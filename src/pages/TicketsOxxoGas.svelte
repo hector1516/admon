@@ -234,8 +234,6 @@
 	.chip { font-size: var(--font-size-2xs); font-weight: 700; border-radius: 999px; padding: 0.22rem 0.6rem; border: 1px solid transparent; }
 	.chip.ok { color: var(--color-success-light); background: rgba(74, 222, 128, 0.1); border-color: rgba(74, 222, 128, 0.25); }
 	.chip.pend { color: var(--color-warning-light); background: rgba(251, 191, 36, 0.1); border-color: rgba(251, 191, 36, 0.3); }
-	.btn-primary { background: var(--color-primary); color: var(--color-white); border: none; }
-	.btn-primary:hover { background: #e55a00; }
 	.row { font-size: var(--font-size-xs); color: var(--color-line-strong); margin-top: 0.4rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 	/* Saldo Go Vale — mismo look que la vista Vales OxxoGas del HUB.

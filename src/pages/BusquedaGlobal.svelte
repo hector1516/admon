@@ -170,12 +170,6 @@
 	.resultado-fecha { font-size: var(--font-size-2xs); color: var(--color-text-muted); margin-top: 0.15rem; }
 
 	.empty { text-align: center; padding: 2rem; color: var(--color-text-muted); }
-
-	.btn { padding: 0.4rem 0.75rem; border-radius: 6px; border: none; cursor: pointer; font-size: var(--font-size-sm); }
-	.btn-primary { background: var(--color-primary, var(--color-info)); color: white; }
-	.btn-secondary { background: var(--color-surface-2, var(--color-surface-2)); color: white; }
-	.btn-sm { padding: 0.25rem 0.5rem; font-size: var(--font-size-xs); }
-	.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 	.input { width: 100%; padding: 0.5rem 0.75rem; border-radius: 6px; border: 1px solid var(--color-border, var(--color-surface-2)); background: var(--color-surface-2, var(--color-surface-2)); color: var(--color-text); font-size: var(--font-size-sm); box-sizing: border-box; }
 	.card { background: var(--color-surface-1, var(--color-surface)); border-radius: var(--radius-sm, 8px); padding: 1rem; margin-bottom: 0.75rem; }
 	.field { margin-bottom: 0.75rem; }

@@ -443,11 +443,5 @@
 
 	.empty { text-align: center; padding: 2rem; color: var(--color-text-muted); }
 	.empty-text { color: var(--color-text-muted); font-size: var(--font-size-sm); }
-
-	.btn { padding: 0.4rem 0.75rem; border-radius: 6px; border: none; cursor: pointer; font-size: var(--font-size-sm); display: inline-flex; align-items: center; gap: 0.3rem; }
-	.btn-primary { background: var(--color-primary, var(--color-info)); color: white; }
-	.btn-secondary { background: var(--color-surface-2, var(--color-surface-2)); color: white; }
-	.btn-sm { padding: 0.25rem 0.5rem; font-size: var(--font-size-xs); }
-	.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 	.btn-close { background: none; border: none; font-size: var(--font-size-xl); cursor: pointer; color: var(--color-text-muted); }
 </style>

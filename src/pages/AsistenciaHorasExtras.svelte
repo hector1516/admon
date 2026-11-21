@@ -121,7 +121,4 @@
 	.empty { text-align: center; color: var(--color-text-muted); padding: 2rem; }
 	.error-box { background: var(--color-danger-soft); color: var(--color-danger-dark); padding: 0.75rem; border-radius: 0.5rem; }
 	.loading { text-align: center; padding: 2rem; color: var(--color-text-muted); }
-	.btn { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; cursor: pointer; border: none; font-size: var(--font-size-sm); }
-	.btn-secondary { background: var(--color-text-soft); color: var(--color-surface-2); }
-	.btn-sm { padding: 0.375rem 0.75rem; font-size: var(--font-size-xs); }
 </style>

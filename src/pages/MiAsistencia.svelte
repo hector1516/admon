@@ -397,11 +397,6 @@
 	.empty { color: var(--color-text-muted); font-size: var(--font-size-sm); text-align: center; padding: 1rem; }
 	.error-box { background: var(--color-danger-soft); color: var(--color-danger-dark); padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; }
 	.msg-box { background: var(--color-success-soft); color: #166534; padding: 0.75rem; border-radius: 0.5rem; margin-bottom: 1rem; }
-	.btn { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem; border-radius: 0.5rem; font-weight: 500; cursor: pointer; border: none; font-size: var(--font-size-sm); }
-	.btn-primary { background: var(--color-info); color: white; }
-	.btn-secondary { background: var(--color-text-soft); color: var(--color-surface-2); }
-	.btn-sm { padding: 0.375rem 0.75rem; font-size: var(--font-size-xs); }
-	.btn:disabled { opacity: 0.5; cursor: not-allowed; }
 	.loading { text-align: center; padding: 2rem; color: var(--color-text-muted); }
 	.spin { animation: spin 1s linear infinite; }
 	@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
