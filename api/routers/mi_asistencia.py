@@ -5,9 +5,13 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime, date, time, timedelta
 import sys, os
+import json
+import base64
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from tz_mx import now_mx
+import rostro
+import stepup
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
@@ -34,6 +38,16 @@ class MarcarReq(BaseModel):
     id_foto_verificacion: Optional[int] = None
     passkey_credential_id: Optional[str] = None
     dispositivo: Optional[str] = None
+    stepup_token: str  # obligatorio (D3 B): lo emite /passkey/verify
+
+
+class PasskeyOptionsReq(BaseModel):
+    rp: Optional[str] = None
+
+
+class PasskeyVerifyReq(BaseModel):
+    state: str
+    credential: dict
 
 class GenerarReporteReq(BaseModel):
     periodo_inicio: str  # YYYY-MM-DD
@@ -49,6 +63,17 @@ def marcar_asistencia(req: MarcarReq, current_user: dict = Depends(get_current_u
     user_id = current_user.get("id") or current_user.get("Id")
     if not user_id:
         raise HTTPException(status_code=401, detail="Usuario no identificado")
+    from routers import passkeys as _pk
+    try:
+        credencial = stepup.validar(req.stepup_token, user_id, _pk._passkey_secret())
+    except ValueError:
+        raise HTTPException(
+            status_code=401,
+            detail="La verificación con passkey expiró o no es válida. Vuelve a intentarlo.")
+    if not req.verificacion_facial:
+        raise HTTPException(
+            status_code=400,
+            detail="Falta la verificación facial para marcar.")
     ahora = now_mx()
     conn = get_connection()
     cur = conn.cursor()
@@ -61,8 +86,8 @@ def marcar_asistencia(req: MarcarReq, current_user: dict = Depends(get_current_u
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (user_id, ahora.date(), req.tipo, ahora.strftime('%H:%M:%S'),
               req.latitud, req.longitud, req.precision,
-              1 if req.verificacion_facial else 0, req.id_foto_verificacion,
-              req.passkey_credential_id, req.dispositivo, ahora, 'Valido'))
+              1, req.id_foto_verificacion, credencial,
+              req.dispositivo, ahora, 'Valido'))
         conn.commit()
         return {"ok": True, "tipo": req.tipo, "fecha": str(ahora.date()),
                 "hora": str(ahora.time()), "mensaje": f"{req.tipo} registrada correctamente"}
@@ -455,10 +480,69 @@ def admin_config_lft(current_user: dict = Depends(get_current_user)):
 class FacialRegistroReq(BaseModel):
     foto_base64: str
     content_type: str = "image/jpeg"
+    embedding: Optional[List[float]] = None
 
 class FacialVerificarReq(BaseModel):
-    foto_base64: str
+    embedding: List[float]
+    foto_base64: Optional[str] = None
     content_type: str = "image/jpeg"
+
+
+@router.post("/passkey/options")
+def passkey_options(req: Optional[PasskeyOptionsReq] = None,
+                    current_user: dict = Depends(get_current_user)):
+    """Desafío para firmar con la passkey del usuario (paso previo al marcado)."""
+    from routers import passkeys as _pk
+    rp = (req.rp if req else None) or _pk.RP_ID_OLD
+    if rp not in _pk.ALLOWED_RP_IDS:
+        rp = _pk.RP_ID_OLD
+    state, challenge = _pk._issue_challenge("marcado")
+    options = _pk.generate_authentication_options(rp_id=rp, challenge=challenge)
+    return {"options": _pk.options_to_json(options), "state": state, "rp": rp}
+
+
+@router.post("/passkey/verify")
+def passkey_verify(req: PasskeyVerifyReq, request: Request,
+                   current_user: dict = Depends(get_current_user)):
+    """Valida la firma del autenticador y devuelve el token de paso (2 min)."""
+    from routers import passkeys as _pk
+    user_id = int(current_user.get("id") or current_user.get("Id"))
+    challenge = _pk._read_challenge(req.state, "marcado")
+    cred_id = req.credential.get("id", "")
+    conn = get_connection()
+    try:
+        with conn.cursor(as_dict=True) as cur:
+            cur.execute("SELECT * FROM HUB_Passkeys WHERE CredentialId = %s", (cred_id,))
+            fila = cur.fetchone()
+        if not fila:
+            raise HTTPException(status_code=404, detail="Passkey no reconocida")
+        if int(fila["IdUsuario"]) != user_id:
+            raise HTTPException(status_code=403, detail="Esa passkey no es tuya")
+        cred_rp = (fila.get("RpId") or _pk.RP_ID_OLD).strip() or _pk.RP_ID_OLD
+        if cred_rp not in _pk.ALLOWED_RP_IDS:
+            cred_rp = _pk.RP_ID_OLD
+        expected_origin = _pk._origin_for_request(request, cred_rp)
+        try:
+            v = _pk.verify_authentication_response(
+                credential=req.credential,
+                expected_challenge=challenge,
+                expected_rp_id=cred_rp,
+                expected_origin=expected_origin,
+                credential_public_key=base64.urlsafe_b64decode(fila["PublicKey"] + "=="),
+                credential_current_sign_count=fila["SignCount"],
+                require_user_verification=False,
+            )
+        except Exception:
+            raise HTTPException(status_code=401, detail="No se pudo verificar la passkey")
+        with conn.cursor() as cur:
+            cur.execute(
+                "UPDATE HUB_Passkeys SET SignCount = %s, UltimoUso = GETDATE() WHERE Id = %s",
+                (v.new_sign_count, fila["Id"]))
+        conn.commit()
+    finally:
+        conn.close()
+    return {"ok": True, "credential_id": cred_id,
+            "stepup_token": stepup.emitir(user_id, cred_id, _pk._passkey_secret())}
 
 @router.post("/facial/registrar")
 def registrar_facial(req: FacialRegistroReq, current_user: dict = Depends(get_current_user)):
@@ -472,15 +556,22 @@ def registrar_facial(req: FacialRegistroReq, current_user: dict = Depends(get_cu
         foto_bytes = base64.b64decode(foto_data)
     except Exception:
         raise HTTPException(status_code=400, detail="Foto base64 invalida")
+    embedding_json = json.dumps(req.embedding) if req.embedding else None
     conn = get_connection()
     cur = conn.cursor()
     try:
         cur.execute("""
             IF EXISTS (SELECT 1 FROM HUB_UsuariosFaciales WHERE IdUsuario = %s)
-                UPDATE HUB_UsuariosFaciales SET FotoReferencia = %s, ContentType = %s, FechaActualizacion = GETDATE() WHERE IdUsuario = %s
+                UPDATE HUB_UsuariosFaciales
+                   SET FotoReferencia = %s, ContentType = %s,
+                       Embedding = COALESCE(%s, Embedding), FechaActualizacion = GETDATE()
+                 WHERE IdUsuario = %s
             ELSE
-                INSERT INTO HUB_UsuariosFaciales (IdUsuario, FotoReferencia, ContentType, FechaRegistro) VALUES (%s, %s, %s, GETDATE())
-        """, (user_id, foto_bytes, req.content_type, user_id, user_id, foto_bytes, req.content_type))
+                INSERT INTO HUB_UsuariosFaciales
+                       (IdUsuario, FotoReferencia, ContentType, Embedding, FechaRegistro)
+                VALUES (%s, %s, %s, %s, GETDATE())
+        """, (user_id, foto_bytes, req.content_type, embedding_json, user_id,
+              user_id, foto_bytes, req.content_type, embedding_json))
         conn.commit()
         return {"ok": True, "mensaje": "Foto de referencia registrada"}
     except Exception as e:
@@ -508,19 +599,28 @@ def estado_facial(current_user: dict = Depends(get_current_user)):
 
 @router.post("/facial/verificar")
 def verificar_facial(req: FacialVerificarReq, current_user: dict = Depends(get_current_user)):
-    """Verifica la foto capturada contra la referencia. Simplificado: acepta si tiene referencia."""
+    """Compara el descriptor de la selfie contra el guardado (D1 A)."""
     user_id = current_user.get("id") or current_user.get("Id")
     if not user_id:
         raise HTTPException(status_code=401, detail="Usuario no identificado")
     conn = get_connection()
     cur = conn.cursor()
     try:
-        cur.execute("SELECT 1 FROM HUB_UsuariosFaciales WHERE IdUsuario = %s AND FotoReferencia IS NOT NULL", (user_id,))
-        tiene = cur.fetchone() is not None
-        if not tiene:
-            return {"verificado": False, "mensaje": "No tiene foto de referencia registrada"}
-        # Verificacion simplificada: acepta la foto (la comparacion real se hace con MediaPipe en el frontend)
-        return {"verificado": True, "mensaje": "Verificacion facial exitosa"}
+        cur.execute(
+            "SELECT Embedding FROM HUB_UsuariosFaciales "
+            "WHERE IdUsuario = %s AND Embedding IS NOT NULL",
+            (user_id,))
+        fila = cur.fetchone()
+        if not fila or not fila[0]:
+            return {"verificado": False, "score": None,
+                    "mensaje": "No tiene rostro registrado"}
+        try:
+            guardado = json.loads(fila[0])
+        except Exception:
+            return {"verificado": False, "score": None,
+                    "mensaje": "El rostro guardado está dañado; regístralo de nuevo"}
+        score = round(rostro.distancia(guardado, req.embedding), 3)
+        return {"verificado": rostro.coincide(guardado, req.embedding), "score": score}
     finally:
         cur.close()
         conn.close()
