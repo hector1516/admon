@@ -6,13 +6,21 @@ Se instala como middleware en FastAPI.
 Uso en main.py:
     from api.usage_tracker import UsageTrackingMiddleware
     app.add_middleware(UsageTrackingMiddleware, app_name="admon")
+
+Fase B: el INSERT medía 16-216 ms (25k filas, 3 índices, 1 vCPU). Esperarlo en
+`dispatch` metía ese costo en CADA respuesta. Ahora se encola y un hilo de fondo
+agrupa hasta 50 filas en un solo INSERT: la respuesta no espera y la BD recibe
+~1 escritura por ráfaga en vez de una por petición. Es telemetría: si la cola se
+llena, se descarta.
 """
 
-import time
 import logging
+import queue
+import threading
+import time
+
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
-from starlette.concurrency import run_in_threadpool
 
 logger = logging.getLogger("usage_tracker")
 
@@ -29,11 +37,21 @@ SKIP_PATHS = {
 # Endpoints que NO requieren auth (se trackean con usuario null)
 AUTH_OPTIONAL = {"/api/token", "/api/shell/state"}
 
+# Cuántas filas se juntan como máximo en un INSERT múltiple. 20: medido, 50
+# filas en un solo INSERT se dispara a 130-430 ms (compila 300 parámetros);
+# 20 se queda en ~50-70 ms.
+MAX_LOTE = 20
+# Cuántos registros se guardan como máximo si el escritor va lento.
+MAX_COLA = 5000
+
 
 class UsageTrackingMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, app_name: str = "admon"):
         super().__init__(app)
         self.app_name = app_name
+        self._cola = queue.Queue(maxsize=MAX_COLA)
+        self._hilo = None
+        self._lock = threading.Lock()
 
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
@@ -58,38 +76,72 @@ class UsageTrackingMiddleware(BaseHTTPMiddleware):
                 token = auth_header[7:]
                 # Decode without verification (just for tracking)
                 import jwt
-                # We don't verify here - just extract the sub/username
-                # The actual verification happens in the endpoint
                 payload = jwt.decode(token, options={"verify_signature": False})
                 usuario = payload.get("sub") or payload.get("username") or payload.get("nombre")
         except Exception:
             pass
 
-        # Log to DB en el threadpool: `_log_usage` es bloqueante (abre conexión
-        # e inserta). Llamarlo directo aquí congelaba el event loop y, con 1
-        # vCPU, todas las peticiones esperaban a que terminara el INSERT.
         try:
-            await run_in_threadpool(
-                self._log_usage, path, request.method, usuario,
-                duration_ms, response.status_code,
-            )
+            self._encolar(path, request.method, usuario, duration_ms, response.status_code)
         except Exception as e:
             logger.debug(f"Usage tracking error: {e}")
 
         return response
 
-    def _log_usage(self, path, method, usuario, duration_ms, status_code):
-        """Inserta un registro en HUB_ApiUsage."""
+    # --- cola + escritor en segundo plano -----------------------------------
+
+    def _encolar(self, path, method, usuario, duration_ms, status_code):
+        self._arrancar_escritor()
         try:
-            from api import main as _m
-            conn = _m.get_connection()
+            self._cola.put_nowait((path, method, usuario, duration_ms, status_code))
+        except queue.Full:
+            # Telemetría: mejor perder una fila que bloquear una respuesta.
+            pass
+
+    def _arrancar_escritor(self):
+        if self._hilo is not None:
+            return
+        with self._lock:
+            if self._hilo is None:
+                hilo = threading.Thread(
+                    target=self._bucle_escritor, daemon=True, name="usage-writer"
+                )
+                hilo.start()
+                self._hilo = hilo
+
+    def _bucle_escritor(self):
+        while True:
+            lote = [self._cola.get()]
+            while len(lote) < MAX_LOTE:
+                try:
+                    lote.append(self._cola.get_nowait())
+                except queue.Empty:
+                    break
+            try:
+                self._insertar_lote(lote)
+            except Exception as e:
+                logger.debug(f"DB log error: {e}")
+
+    def _insertar_lote(self, lote):
+        from api import db as _db
+
+        valores = ",".join(["(%s, %s, %s, %s, GETDATE(), %s, %s)"] * len(lote))
+        params = []
+        for path, method, usuario, duration_ms, status_code in lote:
+            params.extend([
+                self.app_name, path[:200], method, usuario,
+                duration_ms, status_code,
+            ])
+        conn = _db.get_connection()
+        try:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO HUB_ApiUsage (App, Endpoint, Metodo, Usuario, Fecha, DuracionMs, StatusCode) "
-                "VALUES (%s, %s, %s, %s, GETDATE(), %s, %s)",
-                (self.app_name, path[:200], method, usuario, duration_ms, status_code),
+                "INSERT INTO HUB_ApiUsage "
+                "(App, Endpoint, Metodo, Usuario, Fecha, DuracionMs, StatusCode) "
+                "VALUES " + valores,
+                tuple(params),
             )
             conn.commit()
+            cursor.close()
+        finally:
             conn.close()
-        except Exception as e:
-            logger.debug(f"DB log error: {e}")

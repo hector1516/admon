@@ -1,12 +1,15 @@
-"""El middleware de uso no debe bloquear el event loop (Fase B) — Admon.
+"""El middleware de uso no debe costar latencia en la respuesta (Fase B) — Admon.
 
-`_log_usage` abre conexión y hace INSERT: si se llama directo desde `dispatch`
-(async), bloquea el servidor entero mientras dura. Con 1 vCPU eso se ve como
-"todas las peticiones van lentas a la vez".
+`HUB_ApiUsage` medía 16-216 ms por INSERT (25k filas, 3 índices, 1 vCPU). Si el
+INSERT se espera en `dispatch`, cada petición paga ese tiempo. Con una cola y un
+escritor en segundo plano que agrupa filas, la respuesta sale sin esperar y la
+BD recibe un INSERT múltiple en vez de 25.
 """
 import asyncio
 import os
+import queue
 import sys
+import threading
 import time
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "api"))
@@ -32,26 +35,54 @@ async def call_next(_request):
     return FakeResponse()
 
 
-def test_dispatch_no_bloquea_el_event_loop():
+def test_dispatch_no_espera_al_insert():
     middleware = UsageTrackingMiddleware(app=None)
-    registros = []
+    insertado = threading.Event()
 
-    def log_lento(*args):
-        time.sleep(0.20)  # simula la ida y vuelta a la BD
-        registros.append(args)
+    def insert_lento(_lote):
+        time.sleep(0.25)
+        insertado.set()
 
-    middleware._log_usage = log_lento
+    middleware._insertar_lote = insert_lento
 
-    async def correr_dos():
+    async def correr():
         inicio = time.monotonic()
         await asyncio.gather(
-            middleware.dispatch(FakeRequest(), call_next),
-            middleware.dispatch(FakeRequest(), call_next),
+            *(middleware.dispatch(FakeRequest(), call_next) for _ in range(5))
         )
         return time.monotonic() - inicio
 
-    transcurrido = asyncio.run(correr_dos())
+    transcurrido = asyncio.run(correr())
 
-    assert len(registros) == 2
-    # Si bloqueara el loop serían ~0.40 s (uno tras otro); en paralelo ~0.20 s.
-    assert transcurrido < 0.35, f"el dispatch bloqueó el event loop: {transcurrido:.2f}s"
+    # El dispatch no espera al INSERT: 5 peticiones deben salir casi al instante.
+    assert transcurrido < 0.10, f"dispatch esperó al INSERT: {transcurrido:.2f}s"
+    assert insertado.wait(timeout=2), "el escritor nunca procesó el lote"
+
+
+def test_agrupa_los_inserts():
+    middleware = UsageTrackingMiddleware(app=None)
+    lotes = []
+    listo = threading.Event()
+
+    def insertar(lote):
+        lotes.append(list(lote))
+        if sum(len(l) for l in lotes) >= 20:
+            listo.set()
+
+    middleware._insertar_lote = insertar
+
+    for _ in range(20):
+        middleware._encolar("/api/x", "GET", "it", 1, 200)
+
+    assert listo.wait(timeout=3), "no se procesaron los 20 registros"
+    assert sum(len(l) for l in lotes) == 20
+    assert len(lotes) < 20, f"no agrupó: {len(lotes)} INSERTs para 20 filas"
+
+
+def test_cola_llena_descarta_sin_romper():
+    middleware = UsageTrackingMiddleware(app=None)
+    middleware._cola = queue.Queue(maxsize=2)
+    middleware._insertar_lote = lambda _lote: time.sleep(2)
+
+    for _ in range(10):
+        middleware._encolar("/api/x", "GET", "it", 1, 200)  # no debe lanzar
