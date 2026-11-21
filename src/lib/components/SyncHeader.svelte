@@ -2,7 +2,7 @@
 <script>
   import { onMount } from 'svelte';
 
-  let { usuario = '', appVersion = '', shellVersion = '', fetcher = null, onsync = null, navItems = null } = $props();
+  let { usuario = '', appVersion = '', shellVersion = '', fetcher = null, onsync = null, navItems = null, destacado = null } = $props();
 
   // --- Nombre del módulo actual ---
   function getModuleName() {
@@ -85,7 +85,7 @@
   const _navItems = [
     { action: () => { if (window.history.length > 1) window.history.back(); else navigate(_navRoutes[0] || '/'); } },
     { action: () => navigate(_navRoutes[0] || '/') },
-    { action: () => navigate(_navRoutes[1] || '/') },
+    { action: () => navigate(destacado || _navRoutes[1] || '/') },
     { action: () => navigate(_navRoutes[2] || '/') },
     { action: () => navigate(_navRoutes[3] || '/') },
   ];
@@ -94,7 +94,7 @@
     const p = typeof window !== 'undefined' ? window.location.pathname : '';
     if (index === 0) return false;
     if (index === 1) return p === (_navRoutes[0] || '/') || p === '/' || p === '';
-    if (index === 2) return p === (_navRoutes[1] || '/');
+    if (index === 2) return p === (destacado || _navRoutes[1] || '/');
     if (index === 3) return p === (_navRoutes[2] || '/');
     if (index === 4) return p === (_navRoutes[3] || '/');
     return false;
@@ -120,13 +120,23 @@
 <!-- Barra inferior -->
 <nav class="bottom-nav" class:hidden={!navVisible}>
   {#each _navItems as item, i}
-    <button class="nav-item" class:active={isActiveNav(i)} onclick={item.action} aria-label="nav">
+    <button
+      class="nav-item"
+      class:active={isActiveNav(i)}
+      class:destacado={!!destacado && i === 2}
+      onclick={item.action}
+      aria-label={i === 2 && destacado ? 'Mi Asistencia' : 'nav'}
+    >
       {#if i === 0}
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
       {:else if i === 1}
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
       {:else if i === 2}
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        {#if destacado}
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        {:else}
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        {/if}
       {:else if i === 3}
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
       {:else}
@@ -206,5 +216,21 @@
   .nav-item.active {
     color: var(--color-primary, var(--color-primary));
     background: rgba(255, 107, 0, 0.1);
+  }
+
+  /* Botón central destacado (Mi Asistencia): más grande, elevado y en acento.
+     Es la acción que la gente hace dos veces al día, así que gana el pulgar. */
+  .nav-item.destacado {
+    width: 3.4rem;
+    height: 3.4rem;
+    min-width: 3.4rem;
+    border-radius: 999px;
+    background: var(--color-primary, #2563eb);
+    color: #fff;
+    transform: translateY(-14px);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
+  }
+  .nav-item.destacado:active {
+    transform: translateY(-12px) scale(0.96);
   }
 </style>
