@@ -10,8 +10,7 @@ import base64
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from tz_mx import now_mx
-import rostro
-import stepup
+from api import rostro, stepup
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
@@ -63,7 +62,7 @@ def marcar_asistencia(req: MarcarReq, current_user: dict = Depends(get_current_u
     user_id = current_user.get("id") or current_user.get("Id")
     if not user_id:
         raise HTTPException(status_code=401, detail="Usuario no identificado")
-    from routers import passkeys as _pk
+    from api.routers import passkeys as _pk
     try:
         credencial = stepup.validar(req.stepup_token, user_id, _pk._passkey_secret())
     except ValueError:
@@ -493,7 +492,7 @@ class FacialVerificarReq(BaseModel):
 def passkey_options(req: Optional[PasskeyOptionsReq] = None,
                     current_user: dict = Depends(get_current_user)):
     """Desafío para firmar con la passkey del usuario (paso previo al marcado)."""
-    from routers import passkeys as _pk
+    from api.routers import passkeys as _pk
     rp = (req.rp if req else None) or _pk.RP_ID_OLD
     if rp not in _pk.ALLOWED_RP_IDS:
         rp = _pk.RP_ID_OLD
@@ -506,7 +505,7 @@ def passkey_options(req: Optional[PasskeyOptionsReq] = None,
 def passkey_verify(req: PasskeyVerifyReq, request: Request,
                    current_user: dict = Depends(get_current_user)):
     """Valida la firma del autenticador y devuelve el token de paso (2 min)."""
-    from routers import passkeys as _pk
+    from api.routers import passkeys as _pk
     user_id = int(current_user.get("id") or current_user.get("Id"))
     challenge = _pk._read_challenge(req.state, "marcado")
     cred_id = req.credential.get("id", "")
