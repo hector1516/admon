@@ -83,6 +83,11 @@ jobs:
           print(f"OK · popup en v{popup['version']} con {len(cambios)} cambios")
           PY
 
+      - name: Ningún color de la paleta hardcodeado
+        run: |
+          set -euo pipefail
+          python3 scripts/check_tokens.py --verbose
+
       - name: El front compila
         run: |
           set -euo pipefail

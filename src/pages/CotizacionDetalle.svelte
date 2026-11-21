@@ -447,7 +447,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 		</div>
 		<div class="grid-2" style="margin-bottom: 0.5rem;">
 			<button class="btn btn-block" on:click={onGuardarPdfShare} disabled={guardandoPdf || busy || bloqueado}
-				style={pdfEnSmb === true ? 'background: #16a34a; color: #fff;' : pdfEnSmb === false ? 'background: #d97706; color: #fff;' : ''}>
+				style={pdfEnSmb === true ? 'background: var(--color-success); color: var(--color-white);' : pdfEnSmb === false ? 'background: var(--color-warning); color: var(--color-surface);' : ''}>
 				{guardandoPdf ? 'Guardando...' : 'Guardar PDF en share'}
 			</button>
 		</div>
