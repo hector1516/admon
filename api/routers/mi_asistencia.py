@@ -68,10 +68,6 @@ def marcar_asistencia(req: MarcarReq, current_user: dict = Depends(get_current_u
         raise HTTPException(
             status_code=401,
             detail="La verificación con passkey expiró o no es válida. Vuelve a intentarlo.")
-    if not req.verificacion_facial:
-        raise HTTPException(
-            status_code=400,
-            detail="Falta la verificación facial para marcar.")
     ahora = now_mx()
     conn = get_connection()
     cur = conn.cursor()
