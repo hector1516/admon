@@ -124,7 +124,21 @@ def historial_asistencia(dias: int = 30, current_user: dict = Depends(get_curren
                 r['Fecha'] = r['Fecha'].strftime('%Y-%m-%d')
             if r.get('FechaRegistro') is not None and hasattr(r['FechaRegistro'], 'strftime'):
                 r['FechaRegistro'] = r['FechaRegistro'].strftime('%Y-%m-%d %H:%M:%S')
-        return {"registros": rows, "total": len(rows)}
+        # Config LFT vigente: la tarjeta del ciclo calcula las horas extra con
+        # estos valores, no con números escritos a mano en el frontend.
+        cur.execute("""
+            SELECT TOP 1 HorasJornada, LimiteHorasExtrasDia, HorasExtrasDoblesMax
+            FROM HUB_AsistenciaConfigLFT
+            WHERE Activo = 1
+            ORDER BY Anio DESC
+        """)
+        cfg = cur.fetchone() or {}
+        config_lft = {
+            "horas_jornada": float(cfg.get("HorasJornada") or 8),
+            "extras_max_dia": float(cfg.get("LimiteHorasExtrasDia") or 3),
+            "extras_dobles_semana": float(cfg.get("HorasExtrasDoblesMax") or 9),
+        }
+        return {"registros": rows, "total": len(rows), "config_lft": config_lft}
     finally:
         cur.close()
         conn.close()

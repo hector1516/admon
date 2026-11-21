@@ -7,7 +7,8 @@
 	let msg = $state('');
 	import { online } from '$lib/stores/online';
 	import { Clock, MapPin, HelpCircle, FileText, ArrowLeft, CheckCircle, XCircle, Loader2, Timer, Download, Camera } from 'lucide-svelte';
-	import MarcadoCard from '$lib/components/asistencia/MarcadoCard.svelte';
+	import CicloCard from '$lib/components/asistencia/CicloCard.svelte';
+	import { agruparCiclos } from '$lib/components/asistencia/ciclos.js';
 	import { cargarModelo, describir } from '$lib/components/asistencia/rostro.js';
 	import { pasoAsistencia } from '$lib/passkey.js';
 
@@ -48,6 +49,18 @@
 	let intentosRostro = $state(0);
 	let procesando = $state(false);
 
+	// Tarjetas por ciclo (entrada + salida) con horas extra según la LFT.
+	let configLft = $state({ horas_jornada: 8, extras_max_dia: 3, extras_dobles_semana: 9 });
+	let relojMs = $state(Date.now());
+	let ciclos = $derived(
+		agruparCiclos(marcados, {
+			horasJornada: Number(configLft.horas_jornada) || 8,
+			extrasMaxDia: Number(configLft.extras_max_dia) || 3,
+			extrasDoblesSemana: Number(configLft.extras_dobles_semana) || 9,
+			ahora: new Date(relojMs)
+		})
+	);
+
 	const frases = [
 		{ min: 0, max: 1, text: 'Apenas calentando motores... ☕' },
 		{ min: 1, max: 2, text: 'Todavía no es hora de quejarse... 😏' },
@@ -69,6 +82,7 @@
 	}
 
 	function actualizarTimer() {
+		relojMs = Date.now();
 		if (!horaEntradaActual) return;
 		const ahora = new Date();
 		const diff = (ahora.getTime() - horaEntradaActual.getTime()) / 3600000;
@@ -94,6 +108,7 @@
 		try {
 			const hist = await api.get('/mi-asistencia/historial?dias=30');
 			marcados = hist.registros || [];
+			if (hist.config_lft) configLft = hist.config_lft;
 			const he = await api.get('/mi-asistencia/horas-extras');
 			horasExtras = he;
 			if (marcados.length > 0 && marcados[0].Tipo === 'Entrada') {
@@ -442,12 +457,12 @@
 		<!-- Recent markings -->
 		<div class="card">
 			<h2>Últimos Marcados</h2>
-			{#if marcados.length === 0}
+			{#if ciclos.length === 0}
 				<p class="empty">Sin marcados recientes</p>
 			{:else}
 				<div class="marking-list">
-					{#each marcados.slice(0, 10) as m}
-						<MarcadoCard marcado={m} />
+					{#each ciclos.slice(0, 10) as ciclo}
+						<CicloCard {ciclo} horasJornada={Number(configLft.horas_jornada) || 8} />
 					{/each}
 				</div>
 			{/if}

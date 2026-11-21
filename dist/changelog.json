@@ -1,10 +1,11 @@
 {
   "app": "admon",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "cambios": [
     "🔐 Mi Asistencia ahora pide tu rostro y tu passkey: nadie más puede marcar por ti.",
     "📸 Si no te reconoce el rostro tienes 3 intentos; luego te ofrece registrarlo.",
-    "🗺️ Cada marcado muestra la hora, el rostro, la passkey y un mapa de dónde se hizo.",
+    "🧾 Los marcados se ven por ciclo: entrada, salida, horas totales y horas extra calculadas con la LFT.",
+    "🗺️ Cada ciclo muestra el rostro, la passkey y un mapa de dónde se hizo.",
     "🏆 Legends se rediseñó en Admon: ranking semanal, temporada, racha y 20 logros.",
     "💵 Ahora los puntos siguen el dinero: cotización pagada +15 a +75 según el subtotal, entregada +10, cliente nuevo cotizado +5 y cobranza +3.",
     "📸 El reporte suma por fotos de evidencia y por cerrarse el mismo día del servicio.",
