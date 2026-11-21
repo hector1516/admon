@@ -5,10 +5,18 @@
  * contra `HUB_UsuariosFaciales.Embedding`. La foto nunca sale del teléfono.
  *
  * Requiere `@vladmandic/face-api` instalado y los modelos en `/models`:
- *   tiny_face_detector, face_landmark_68, face_recognition (~6 MB).
+ *   tiny_face_detector, face_landmark_68, face_recognition (~6,7 MB).
+ *
+ * Dos guardas que costaron un bug:
+ *   - `videoListo()`: no se analiza un <video> sin imagen (la inferencia se
+ *     queda colgada para siempre en un fotograma de 0×0).
+ *   - `conTiempo()`: si el modelo tarda o el backend de tfjs no arranca, el
+ *     flujo sigue (cuenta el intento) en vez de congelar la pantalla.
  */
 
 export const UMBRAL = 0.55;
+export const TIEMPO_MAX_DETECCION_MS = 8000;
+export const ESPERA_VIDEO_MS = 2000;
 
 let faceapi = null;
 let cargado = false;
@@ -25,14 +33,44 @@ export async function cargarModelo(base = '/models') {
 	cargado = true;
 }
 
-/** Devuelve el descriptor de la cara en el <video>, o null si no ve una cara. */
-export async function describir(videoEl) {
+/** True si el <video> ya tiene imagen decodificada (readyState >= 2). */
+export function videoListo(video) {
+	if (!video) return false;
+	if (!video.videoWidth || !video.videoHeight) return false;
+	return Number(video.readyState) >= 2;
+}
+
+/** Resuelve con el valor de la promesa, o null si tarda más de `ms`. */
+export async function conTiempo(promesa, ms) {
+	let temporizador;
+	const tope = new Promise((resolve) => {
+		temporizador = setTimeout(() => resolve(null), ms);
+	});
+	try {
+		return await Promise.race([promesa, tope]);
+	} finally {
+		clearTimeout(temporizador);
+	}
+}
+
+/** Devuelve el descriptor de la cara en el <video>, o null si no hay cara. */
+export async function describir(videoEl, { esperaMaxima = ESPERA_VIDEO_MS } = {}) {
 	if (!videoEl) return null;
+
+	const limite = Date.now() + esperaMaxima;
+	while (!videoListo(videoEl) && Date.now() < limite) {
+		await new Promise((r) => setTimeout(r, 100));
+	}
+	if (!videoListo(videoEl)) return null;
+
 	if (!cargado) await cargarModelo();
-	const deteccion = await faceapi
-		.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions({ inputSize: 224 }))
-		.withFaceLandmarks()
-		.withFaceDescriptor();
+	const deteccion = await conTiempo(
+		faceapi
+			.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions({ inputSize: 224 }))
+			.withFaceLandmarks()
+			.withFaceDescriptor(),
+		TIEMPO_MAX_DETECCION_MS
+	);
 	if (!deteccion) return null;
 	return Array.from(deteccion.descriptor);
 }

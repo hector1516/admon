@@ -1,7 +1,8 @@
 {
   "app": "admon",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "cambios": [
+    "🐛 La cámara de Mi Asistencia ahora arranca de verdad: antes se abría el cuadro pero el video quedaba en negro y no pasaba nada.",
     "🔐 Mi Asistencia ahora pide tu rostro y tu passkey: nadie más puede marcar por ti.",
     "📸 Si no te reconoce el rostro tienes 3 intentos; luego te ofrece registrarlo.",
     "🧾 Los marcados se ven por ciclo: entrada, salida, horas totales y horas extra calculadas con la LFT.",

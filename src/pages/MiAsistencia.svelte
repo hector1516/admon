@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { fechaLocal } from '$lib/fechas';
 	import { navigate } from '$lib/router.js';
 	import { api } from '$lib/api';
@@ -137,7 +137,11 @@
 		}
 	}
 
-	async function iniciarCamara() {
+	async function abrirCamara(modo: 'verificar' | 'registro') {
+		modoCamara = modo;
+		mostrarCamara = true;
+		await tick(); // el <video> tiene que existir antes de engancharle el stream
+		if (stream) return;
 		try {
 			stream = await navigator.mediaDevices.getUserMedia({
 				video: { facingMode: 'user', width: 320, height: 240 }
@@ -147,6 +151,7 @@
 				await videoEl.play();
 			}
 		} catch {
+			mostrarCamara = false;
 			throw new Error('No se pudo abrir la cámara');
 		}
 	}
@@ -176,13 +181,11 @@
 
 	async function abrirRegistroRostro() {
 		try {
-			await iniciarCamara();
+			await abrirCamara('registro');
 		} catch (e: any) {
 			error = e.message;
 			return;
 		}
-		modoCamara = 'registro';
-		mostrarCamara = true;
 		pasoRostro = 'Mira a la cámara y toca Guardar';
 	}
 
@@ -213,13 +216,11 @@
 	/** Verifica el rostro hasta 3 veces (D2 A). */
 	async function flujoRostro(): Promise<boolean> {
 		try {
-			await iniciarCamara();
+			await abrirCamara('verificar');
 		} catch (e: any) {
 			error = e.message;
 			return false;
 		}
-		modoCamara = 'verificar';
-		mostrarCamara = true;
 		intentosRostro = 0;
 		try {
 			await cargarModelo();
