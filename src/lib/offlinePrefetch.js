@@ -104,7 +104,7 @@ export async function prefetchOffline({ force = false } = {}) {
 				try {
 					const list = await api.get(mod.list, { signal: ac.signal });
 					clearTimeout(timer);
-					const details = mod.details ? mod.details(list).slice(0, LIMIT * 3) : [];
+					const details = mod.details ? mod.details(list).slice(0, LIMIT) : [];
 					for (const p of details) {
 						if (!localStorage.getItem('admon_token')) break;
 						const ac2 = new AbortController();
@@ -134,5 +134,5 @@ export async function prefetchOffline({ force = false } = {}) {
 // Auto-disparo: al cargar (App.svelte también lo llama vía $effect cuando
 // hay sesión) y al recuperar la conexión.
 if (typeof window !== 'undefined') {
-	window.addEventListener('online', () => prefetchOffline({ force: true }));
+	window.addEventListener('online', () => prefetchOffline());
 }

@@ -55,7 +55,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 	// Tab firmados: solo firmados (FirmaConformidad no vacío) y no eliminados
 	let firmados = $derived(filtrados.filter(r => 
-		r.FirmaConformidad && String(r.FirmaConformidad).trim() !== '' && 
+		r.TieneFirma && 
 		(r.Eliminado === 0 || r.Eliminado === false || r.Eliminado === null || r.Eliminado === undefined)
 	));
 

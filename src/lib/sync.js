@@ -142,8 +142,16 @@ export async function syncPush() {
 	return { ok, failed };
 }
 
+// Throttle: App.svelte y la suscripción a `online` llaman a syncPull casi al
+// mismo tiempo al arrancar. Sin esto se hacían 2 peticiones /sync/pull por
+// página. 10 s es de sobra para deduplicar el arranque.
+let _lastPullAt = 0;
+
 export async function syncPull() {
 	if (!token()) return;
+	const _now = Date.now();
+	if (_now - _lastPullAt < 10000) return;
+	_lastPullAt = _now;
 	try {
 		const res = await fetch('/api/sync/pull', { headers: headers() });
 		if (!res.ok) return;

@@ -622,7 +622,10 @@ def get_user_foto(user_id: int, current_user: dict = Depends(get_current_user)):
     foto = _foto_usuario.leer_foto_usuario(get_connection, user_id)
     if not foto:
         raise HTTPException(status_code=404, detail="Este usuario no tiene foto.")
-    return Response(content=foto["bytes"], media_type=foto["content_type"])
+    # Cache-Control: la foto cambia poco; 5 min en el navegador evita volver a
+    # pedirla en cada carga de /admin (se medían ~1.9 s por foto).
+    return Response(content=foto["bytes"], media_type=foto["content_type"],
+                    headers={"Cache-Control": "private, max-age=300"})
 
 
 @router.put("/api/users/{user_id:int}/foto")

@@ -74,8 +74,11 @@ def api_list_reportes(
         if tecnico:
             cursor.execute(f"""
                 SELECT IdReporte, Folio, Cliente, Contacto, CorreoContacto, Fecha, Tecnico,
-                       DescripcionServicio, Estatus, Notas, MaquinaLinea, FechaHoraInicio, FechaHoraFin,
-                       TiempoTraslado, TiempoComida, FirmaConformidad, Cotizacion, Eliminado, FechaEliminado
+                       LEFT(DescripcionServicio, 200) AS DescripcionServicio, Estatus, MaquinaLinea,
+                       FechaHoraInicio, FechaHoraFin, TiempoTraslado, TiempoComida,
+                       CASE WHEN FirmaConformidad IS NULL OR DATALENGTH(FirmaConformidad) = 0
+                            THEN 0 ELSE 1 END AS TieneFirma,
+                       Cotizacion, Eliminado, FechaEliminado
                 FROM ReportesServicio
                 WHERE (Tecnico = %s
                    OR IdReporte IN (SELECT IdReporte FROM ReportesServicioTecnicos
@@ -88,8 +91,11 @@ def api_list_reportes(
         else:
             cursor.execute(f"""
                 SELECT IdReporte, Folio, Cliente, Contacto, CorreoContacto, Fecha, Tecnico,
-                       DescripcionServicio, Estatus, Notas, MaquinaLinea, FechaHoraInicio, FechaHoraFin,
-                       TiempoTraslado, TiempoComida, FirmaConformidad, Cotizacion, Eliminado, FechaEliminado
+                       LEFT(DescripcionServicio, 200) AS DescripcionServicio, Estatus, MaquinaLinea,
+                       FechaHoraInicio, FechaHoraFin, TiempoTraslado, TiempoComida,
+                       CASE WHEN FirmaConformidad IS NULL OR DATALENGTH(FirmaConformidad) = 0
+                            THEN 0 ELSE 1 END AS TieneFirma,
+                       Cotizacion, Eliminado, FechaEliminado
                 FROM ReportesServicio
                 WHERE 1=1 {where_eliminado}
                 ORDER BY Fecha DESC, IdReporte DESC
