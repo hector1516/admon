@@ -1,5 +1,5 @@
 <script>
-	import { Check, ClipboardList, Save, Siren, Trash2, ArrowLeft, Pencil } from 'lucide-svelte';
+	import { Check, ClipboardList, Save, Siren, Trash2, ArrowLeft, Pencil, FilePen, Key, Smartphone, User, Wifi } from 'lucide-svelte';
 
 	import { onMount, onDestroy } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -384,7 +384,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		<div class="card"><p style="color: var(--color-danger); margin: 0;">{error}</p></div>
 	{:else}
 		<div class="card" style="margin-bottom: 0.75rem;">
-			<div class="card-title">👤 Foto</div>
+			<div class="card-title"><User size={16} /> Foto</div>
 			<div class="foto-row">
 				<div class="avatar">
 					{#if fotoUrl}
@@ -459,7 +459,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		</div>
 
 		<div class="card" style="margin-bottom: 0.75rem;">
-			<div class="card-title">📝 Datos</div>
+			<div class="card-title"><FilePen size={16} /> Datos</div>
 			<div class="grid2">
 				<div class="field">
 					<label for="ud-nombre">Nombre completo:</label>
@@ -507,9 +507,9 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		</div>
 
 		<div class="card" style="margin-bottom: 0.75rem;">
-			<div class="card-title">📱 MAC del teléfono</div>
+			<div class="card-title"><Smartphone size={16} /> MAC del teléfono</div>
 			<p class="hint" style="margin: 0 0 0.6rem;">
-				📡 Detección de Red: con esta MAC el escáner mide las <b>entradas y salidas</b> de la
+				 Detección de Red: con esta MAC el escáner mide las <b>entradas y salidas</b> de la
 				oficina. Los iPhone con “dirección Wi-Fi privada” rotan su MAC: si deja de detectarse,
 				vuelve a anotarla aquí.
 			</p>
@@ -542,11 +542,11 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 						</span>
 					{/if}
 					{#if tel.ultima_vez_en_red}
-						<span class="tel-chip">📶 Visto: {fmtFecha(tel.ultima_vez_en_red)}</span>
+						<span class="tel-chip"><Wifi size={13} /> Visto: {fmtFecha(tel.ultima_vez_en_red)}</span>
 					{/if}
 				</div>
 			{:else}
-				<p class="hint" style="margin: 0 0 0.6rem;">➕ Sin MAC registrada — anóntala para empezar a medir su asistencia.</p>
+				<p class="hint" style="margin: 0 0 0.6rem;"> Sin MAC registrada — anóntala para empezar a medir su asistencia.</p>
 			{/if}
 
 			{#if errMac}<div class="msg err">{errMac}</div>{/if}
@@ -558,7 +558,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		</div>
 
 		<div class="card" style="margin-bottom: 0.75rem;">
-			<div class="card-title">🔑 Permisos</div>
+			<div class="card-title"><Key size={16} /> Permisos</div>
 			<div class="perm-grid">
 				{#each Object.entries(PERM_GROUPS) as [grupo, perms]}
 					<div class="perm-grupo">

@@ -1,5 +1,5 @@
 <script>
-	import { Upload , Clock, Play, Recycle, SkipForward } from 'lucide-svelte';
+	import { Upload, Clock, Play, Recycle, SkipForward, AlertTriangle, ImageIcon } from 'lucide-svelte';
 
 	import { onMount, onDestroy } from 'svelte';
 	import { auth } from '$lib/stores/auth.js';
@@ -180,7 +180,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 <div class="pantalla-tv">
 	{#if aviso}<div class="msg ok">{aviso}</div>{/if}
-	{#if error}<div class="msg err">⚠️ {error}</div>{/if}
+	{#if error}<div class="msg err"><AlertTriangle size={15} /> {error}</div>{/if}
 
 	<!-- ─────────── Control remoto ─────────── -->
 	<div class="card">
@@ -239,7 +239,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 	<!-- ─────────── Imagen de portada ─────────── -->
 	<div class="card">
-		<div class="card-title">🖼️ Imagen de portada</div>
+		<div class="card-title"><ImageIcon size={16} /> Imagen de portada</div>
 		<p class="hint">
 			Imagen a pantalla completa que la TV muestra con un título encima
 			(dimensiones ideales 1920×1080). No se manda a la TV: se guarda y la

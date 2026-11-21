@@ -1,5 +1,5 @@
 <script>
-	import { Save, Trash2, Upload, Brush, FileText, X, ArrowLeft, Pencil, ClipboardList } from 'lucide-svelte';
+	import { Save, Trash2, Upload, Brush, FileText, X, ArrowLeft, Pencil, ClipboardList, Camera, Mail, Users } from 'lucide-svelte';
 import HoldButton from '$lib/components/HoldButton.svelte';
 
 	import { onMount } from 'svelte';
@@ -465,7 +465,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 		<!-- Ingenieros adicionales -->
 		<div class="card" style="margin-bottom: 0.75rem;">
-			<div class="card-title">👥 Ingenieros del reporte</div>
+			<div class="card-title"><Users size={16} /> Ingenieros del reporte</div>
 			<div style="font-size: var(--font-size-sm);">
 				<strong>Responsable:</strong> {reporte.Tecnico}
 			</div>
@@ -485,7 +485,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 		<!-- Fotos -->
 		<div class="card" style="margin-bottom: 0.75rem;">
-			<div class="card-title">📸 Fotos ({fotos.length})</div>
+			<div class="card-title"><Camera size={16} /> Fotos ({fotos.length})</div>
 			<div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.5rem;">
 				<input type="file" accept="image/*" on:change={handleFileSelect} class="input" style="flex: 1; min-width: 180px;" disabled={busy} />
 				<button class="btn btn-primary btn-sm" on:click={subirFoto} disabled={busy || !nuevaFoto}><Upload size={16} /> Subir</button>
@@ -528,7 +528,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 		<!-- Enviar PDF -->
 		<div class="card">
-			<div class="card-title">📧 Enviar PDF por email</div>
+			<div class="card-title"><Mail size={16} /> Enviar PDF por email</div>
 			<div class="grid-2" style="align-items: end;">
 				<div class="field" style="margin-bottom: 0;">
 					<label for="email_env">Destinatario</label>

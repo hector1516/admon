@@ -1,5 +1,5 @@
 <script>
-	import { Bell, BellOff, FlaskConical, Megaphone, Save, Smartphone, ArrowLeft, Plus, Settings } from 'lucide-svelte';
+	import { Bell, BellOff, FlaskConical, Megaphone, Save, Smartphone, ArrowLeft, Plus, Settings, Key, KeyRound } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -314,7 +314,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 	<div class="card">
 		<div class="card-title">📲 Instalar app</div>
 		{#if isStandalone}
-			<p class="hint">✅ App instalada. Las notificaciones push funcionan en este equipo.</p>
+			<p class="hint"> App instalada. Las notificaciones push funcionan en este equipo.</p>
 		{:else if canInstall}
 			<p class="hint">Instala Admon para notificaciones push y acceso directo.</p>
 			<button class="btn btn-primary btn-block" on:click={installApp}><Smartphone size={16} /> Instalar Admon</button>
@@ -326,7 +326,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 	</div>
 
 	<div class="card">
-		<div class="card-title">🔔 Avisos en este equipo</div>
+		<div class="card-title"><Bell size={16} /> Avisos en este equipo</div>
 
 		{#if !pushEstado}
 			<p class="hint">Este navegador no soporta notificaciones push.</p>
@@ -338,7 +338,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 				<p class="hint">Compártela desde Safari y el ícono aparece en tu pantalla de inicio.</p>
 			{/if}
 		{:else if pushEstado.suscrito}
-			<p class="hint">✅ Las notificaciones están activas en este equipo.</p>
+			<p class="hint"> Las notificaciones están activas en este equipo.</p>
 
 			{#if pushDispositivos.length}
 				<div class="field">
@@ -397,7 +397,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 
 	{#if isAdmin}
 		<div class="card">
-			<div class="card-title">📣 Enviar aviso push</div>
+			<div class="card-title"><Megaphone size={16} /> Enviar aviso push</div>
 			<p class="hint">Llega a los equipos con la app instalada y notificaciones aceptadas.</p>
 			<div class="field">
 				<label for="avTitle">Título:</label>
@@ -429,7 +429,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 
 	{#if pkSupported}
 		<div class="card">
-			<div class="card-title">🔐 Mis passkeys</div>
+			<div class="card-title"><KeyRound size={16} /> Mis passkeys</div>
 			<p class="hint">Entra con huella o Face ID. Las nuevas funcionan en cualquier subdominio de ecc-sa.com.mx; las legacy solo en Field/HUB.</p>
 			{#if myKeys.length === 0}
 				<div class="empty-sm">Sin passkeys registradas</div>
@@ -454,7 +454,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 	{/if}
 
 	<div class="card">
-		<div class="card-title">🔑 Cambiar contraseña</div>
+		<div class="card-title"><Key size={16} /> Cambiar contraseña</div>
 		<div class="field">
 			<label for="pwActual">Contraseña actual:</label>
 			<input id="pwActual" type="password" class="input" autocomplete="current-password" bind:value={actual} />
@@ -479,7 +479,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 	</div>
 
 	<div class="card">
-		<div class="card-title">📱 Este dispositivo</div>
+		<div class="card-title"><Smartphone size={16} /> Este dispositivo</div>
 		<div class="dev-row"><span>Navegador</span><strong>{getBrowser()}</strong></div>
 		<div class="dev-row"><span>Sistema operativo</span><strong>{getOS()}</strong></div>
 		<div class="dev-row"><span>Tipo de dispositivo</span><strong>{getDeviceType()}</strong></div>

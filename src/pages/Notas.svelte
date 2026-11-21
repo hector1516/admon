@@ -1,5 +1,5 @@
 <script>
-	import { Save, Plus, ArrowLeft, Clock, Pencil, FilePen } from 'lucide-svelte';
+	import { Save, Plus, ArrowLeft, Clock, Pencil, FilePen, AlertTriangle } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -169,7 +169,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		<div class="nota-aviso">{aviso}</div>
 	{/if}
 	{#if error}
-		<div class="state err">⚠️ {error}</div>
+		<div class="state err"><AlertTriangle size={15} /> {error}</div>
 	{/if}
 
 	<!-- Editor en panel (sin popup): se abre arriba de la lista -->
@@ -218,7 +218,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	{:else if error}
 		<ErrorState message={error} onRetry={cargar} />
 	{:else if notas.length === 0}
-		<div class="state">📝 No hay notas todavía. ¡Crea la primera con “➕ Nueva nota”!</div>
+		<div class="state"><FilePen size={15} /> No hay notas todavía. ¡Crea la primera con “➕ Nueva nota”!</div>
 	{:else}
 		<div class="notas-lista">
 			{#each pagActual as n (n.id)}

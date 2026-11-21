@@ -194,14 +194,14 @@
 	</div>
 
 	<div class="field">
-		<input class="input" placeholder="🔍 Buscar por ID o razón social…" bind:value={busqueda} on:input={() => { paginaActual = 1; cargar(); }} />
+		<input class="input" placeholder="Buscar por ID o razón social…" bind:value={busqueda} on:input={() => { paginaActual = 1; cargar(); }} />
 	</div>
 
 	<OfflineNotice />
 
 	{#if mostrandoNuevo}
 		<div class="card" style="margin-bottom: 0.75rem; border-color: rgba(255,107,0,0.35);">
-			<div class="card-title">➕ Registrar nuevo cliente</div>
+			<div class="card-title"><Plus size={16} /> Registrar nuevo cliente</div>
 			<div class="field">
 				<label for="nc-id">ID (máximo 4 letras):</label>
 				<input id="nc-id" class="input" maxlength="4" placeholder="Ej: HUSA" bind:value={newId} on:input={() => (newId = newId.toUpperCase().slice(0, 4))} />

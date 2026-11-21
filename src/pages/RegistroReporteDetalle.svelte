@@ -1,5 +1,5 @@
 <script>
-	import { Download, Eye, Save, Trash2, Upload, Skull, X, ArrowLeft, Clock, Pencil, Recycle, ClipboardList } from 'lucide-svelte';
+	import { Download, Eye, Save, Trash2, Upload, Skull, X, ArrowLeft, Clock, Pencil, Recycle, ClipboardList, Camera, FileText } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -394,7 +394,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 		<!-- Datos principales -->
 		<div class="card" style="margin-bottom: 0.75rem;">
-			<div class="card-title">📄 Datos del reporte</div>
+			<div class="card-title"><FileText size={16} /> Datos del reporte</div>
 
 			{#if editando}
 				<div class="grid-2">
@@ -510,7 +510,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 		<!-- Fotos -->
 		<div class="card" style="margin-bottom: 0.75rem;">
-			<div class="card-title">📸 Evidencia Fotográfica ({(reporte._fotos?.length || 0)}/6)</div>
+			<div class="card-title"><Camera size={16} /> Evidencia Fotográfica ({(reporte._fotos?.length || 0)}/6)</div>
 
 			{#if (reporte._fotos?.length || 0) < maxFotos}
 				<input type="file" accept="image/*" multiple onchange={handleFotosSelect} class="input" style="margin: 0.5rem 0;" />

@@ -1,5 +1,5 @@
 <script>
-	import { BarChart3, Save, User, Wrench, ArrowUp, Fuel, Ticket, ArrowDown, ArrowRight, ArrowLeft, Minus, Pencil, Play, ArrowLeftRight, Route } from 'lucide-svelte';
+	import { BarChart3, Save, User, Wrench, ArrowUp, Fuel, Ticket, ArrowDown, ArrowRight, ArrowLeft, Minus, Pencil, Play, ArrowLeftRight, Route, AlertTriangle, Clock } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -206,7 +206,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		<button class="tab" class:active={tab === 'captura'} onclick={() => (tab = 'captura')}><Pencil size={16} /> Capturar kilómetros</button>
 	</div>
 
-	{#if error}<div class="msg err">⚠️ {error}</div>{/if}
+	{#if error}<div class="msg err"><AlertTriangle size={15} /> {error}</div>{/if}
 	{#if msg}<div class="msg ok">{msg}</div>{/if}
 
 	{#if loading}
@@ -314,7 +314,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 			</div>
 
 			{#if recientes.length}
-				<h2 class="sub">🕐 Últimas capturas</h2>
+				<h2 class="sub"><Clock size={15} /> Últimas capturas</h2>
 				<div class="grid grid-chicas">
 					{#each recientes as k (k.id)}
 						<div class="card-auto">

@@ -1,5 +1,5 @@
 <script>
-	import { Save, ArrowLeft, Pencil } from 'lucide-svelte';
+	import { Save, ArrowLeft, Pencil, CheckCircle, XCircle } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -139,9 +139,9 @@ import { logClick } from '$lib/audit.js';
 			{#if buscando}
 				<p class="hint">Buscando cliente…</p>
 			{:else if idCliente.trim() && nombreCliente === null}
-				<div class="msg err">❌ El ID de cliente no existe en la base de datos.</div>
+				<div class="msg err"><XCircle size={15} /> El ID de cliente no existe en la base de datos.</div>
 			{:else if nombreCliente}
-				<div class="msg ok">✅ Cliente: <strong>{nombreCliente}</strong></div>
+				<div class="msg ok"><CheckCircle size={15} /> Cliente: <strong>{nombreCliente}</strong></div>
 			{/if}
 
 			{#if nombreCliente}

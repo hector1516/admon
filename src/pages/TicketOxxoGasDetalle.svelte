@@ -1,5 +1,5 @@
 <script>
-	import { Search, X, ArrowLeft, Minus, Plus, RefreshCw, Ticket } from 'lucide-svelte';
+	import { Search, X, ArrowLeft, Minus, Plus, RefreshCw, Ticket, AlertTriangle } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -204,7 +204,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	{:else if error}
 		<ErrorState message={error} onRetry={cargar} />
 	{:else if error}
-		<div class="state err">⚠️ {error}</div>
+		<div class="state err"><AlertTriangle size={15} /> {error}</div>
 	{:else if t}
 		<div class="grid">
 			<div class="img-box" class:has-zoom={t.tiene_foto && !imgError}>
@@ -244,7 +244,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 				    factura enlazada, queda "Pendiente"
 				-->
 				<div class="info-box">
-					<div class="info-label">🎫 Datos del ticket</div>
+					<div class="info-label"><Ticket size={14} /> Datos del ticket</div>
 					<div class="info-line">
 						<span>🕐 Registro del vale</span>
 						<strong>{t.fecha_vale ? fmtFecha(t.fecha_vale) : '—'}{#if !t.fecha_vale}<i class="tag-ticket">sin vale</i>{/if}</strong>

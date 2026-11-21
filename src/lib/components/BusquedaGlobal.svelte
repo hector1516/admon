@@ -141,7 +141,7 @@
 			<input
 				bind:this={inputRef}
 				class="search-input"
-				placeholder="🔍 Buscar en todos los módulos…"
+				placeholder="Buscar en todos los módulos…"
 				bind:value={query}
 			/>
 			{#if buscando}

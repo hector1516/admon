@@ -108,7 +108,7 @@ import { ArrowLeft, Plus, Clock, Minus, Scale, ClipboardList } from 'lucide-svel
 	<div class="field">
 		<input
 			class="input"
-			placeholder="🔍 folio, cliente, contacto, autor, descripción o monto"
+			placeholder="folio, cliente, contacto, autor, descripción o monto"
 			bind:value={busqueda}
 		/>
 	</div>

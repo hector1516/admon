@@ -1,5 +1,5 @@
 <script>
-	import { Key, Lock , ArrowLeft } from 'lucide-svelte';
+	import { Key, Lock, ArrowLeft, AlertTriangle } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -125,7 +125,7 @@ import TextGenerate from '$lib/components/effects/TextGenerate.svelte';
 		<p class="subtitle">ECCSA AUTOMATION</p>
 
 		{#if privateMode}
-			<div class="error">⚠️ Estás en navegación privada: la sesión NO se guardará al cerrar el navegador. Abre en una pestaña normal para mantener la sesión.</div>
+			<div class="error"><AlertTriangle size={15} /> Estás en navegación privada: la sesión NO se guardará al cerrar el navegador. Abre en una pestaña normal para mantener la sesión.</div>
 		{/if}
 
 		{#if mode === 'auto'}

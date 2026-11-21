@@ -1,5 +1,5 @@
 <script>
-	import { Save, Siren, Trash2, X, ArrowLeft, Pencil, Contact } from 'lucide-svelte';
+	import { Save, Siren, Trash2, X, ArrowLeft, Pencil, Contact, FileText, Folder, Users } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -222,7 +222,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		</div>
 
 		<div class="card">
-			<div class="card-title">👥 Contactos del cliente ({contactos.length})</div>
+			<div class="card-title"><Users size={16} /> Contactos del cliente ({contactos.length})</div>
 			<p class="hint">
 				Catálogo + historial de cotizaciones. ✏️ renombra el contacto en todas sus cotizaciones;
 				🗑️ lo quita solo del catálogo (las cotizaciones no cambian).
@@ -247,9 +247,9 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 							{:else}
 								<span style="flex: 1; min-width: 0;">
 									{c.contacto}
-									{#if c.en_catalogo}<span class="tag" title="En el catálogo de contactos">📁</span>{/if}
+									{#if c.en_catalogo}<span class="tag" title="En el catálogo de contactos"><Folder size={13} /></span>{/if}
 									{#if c.n_cotizaciones > 0}
-										<span class="tag" title="Usado en {c.n_cotizaciones} cotización(es)">📄 {c.n_cotizaciones}</span>
+										<span class="tag" title="Usado en {c.n_cotizaciones} cotización(es)"><FileText size={13} /> {c.n_cotizaciones}</span>
 									{/if}
 								</span>
 								{#if c.en_catalogo}

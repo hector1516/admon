@@ -1,5 +1,5 @@
 <script>
-	import { ArrowLeft, CircleDot } from 'lucide-svelte';
+	import { ArrowLeft, CircleDot, AlertTriangle, Ticket } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -82,7 +82,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	{:else if error}
 		<ErrorState message={error} onRetry={cargar} />
 	{:else if error}
-		<div class="state err">⚠️ {error}</div>
+		<div class="state err"><AlertTriangle size={15} /> {error}</div>
 	{:else if d}
 		{@const v = d.vehiculo}
 		<div class="folio grande">{v.placas || 'SIN PLACAS'}</div>
@@ -95,7 +95,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		</div>
 		{#if v.kms_desde_servicio !== null}
 			<p class="hint" style="margin: 0.4rem 0 0;">
-				🔧 {fmtNum(v.kms_desde_servicio)} km desde el último servicio
+				 {fmtNum(v.kms_desde_servicio)} km desde el último servicio
 				{#if v.requiere_servicio}<span class="chip warn" style="margin-left:.4rem;">requiere servicio</span>{/if}
 				{#if v.poliza} · Póliza {v.poliza}{/if}
 			</p>
@@ -116,7 +116,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 			</div>
 		{/if}
 
-		<h3 class="sub">🎫 Tickets registrados ({d.tickets.length})</h3>
+		<h3 class="sub"><Ticket size={15} /> Tickets registrados ({d.tickets.length})</h3>
 		{#if d.tickets.length === 0}
 			<p class="hint">Sin tickets registrados para este vehículo.</p>
 		{:else}

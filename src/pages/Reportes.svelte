@@ -112,8 +112,8 @@ import { Phone, ArrowLeft, Plus, Timer, Wrench } from 'lucide-svelte';
 
 	<div class="card" style="margin-bottom: 0.75rem;">
 		<div class="grid-2" style="gap: 0.5rem;">
-			<input class="input" placeholder="🔍 Buscar folio, cliente, contacto…" bind:value={busqueda} />
-			<input class="input" placeholder="👤 Filtrar por ingeniero…" bind:value={filtroTecnico} on:input={() => cargar()} />
+			<input class="input" placeholder="Buscar folio, cliente, contacto…" bind:value={busqueda} />
+			<input class="input" placeholder="Filtrar por ingeniero…" bind:value={filtroTecnico} on:input={() => cargar()} />
 		</div>
 	</div>
 

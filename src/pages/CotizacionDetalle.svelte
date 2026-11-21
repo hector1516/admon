@@ -1,5 +1,5 @@
 <script>
-	import { Trash2 , Copy, Download, Eye, FileEdit, FileText, Mail, Plus, Save, Settings, UserPlus , X , Pencil } from 'lucide-svelte';
+	import { Trash2, Copy, Download, Eye, FileEdit, FileText, Mail, Plus, Save, Settings, UserPlus, X, Pencil, FilePen, Package, Receipt } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -326,7 +326,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 		</div>
 
 		<div class="card" style="margin-bottom: 0.75rem;">
-			<div class="card-title">📝 Nota interna</div>
+			<div class="card-title"><FilePen size={16} /> Nota interna</div>
 			{#if (h.nota || '').trim()}
 				<p style="margin: 0; font-size: var(--font-size-sm);">{h.nota}</p>
 			{:else}
@@ -335,7 +335,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 		</div>
 
 		<div class="card" style="margin-bottom: 0.75rem;">
-			<div class="card-title">📦 Partidas ({items.length})</div>
+			<div class="card-title"><Package size={16} /> Partidas ({items.length})</div>
 			{#if items.length === 0}
 				<p style="margin: 0; font-size: var(--font-size-sm); color: var(--color-text-muted);">Sin partidas registradas.</p>
 			{:else}
@@ -363,7 +363,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 		</div>
 
 		<div class="card" style="margin-bottom: 0.75rem;">
-			<div class="card-title">🧾 Remisiones ({rems.length})</div>
+			<div class="card-title"><Receipt size={16} /> Remisiones ({rems.length})</div>
 			<p class="hint">Documento sin precios para entrega; el cliente lo firma en Field.</p>
 
 			{#if mostrandoCrear}
@@ -397,11 +397,11 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 										<div style="font-weight: 700; font-size: var(--font-size-sm);">{r.folio}</div>
 										<div class="hint">Creado por: {r.creado_por} · {r.fecha}</div>
 										{#if r.firmada}
-											<div class="hint">✅ Firmada {r.fecha_firma}</div>
+											<div class="hint"> Firmada {r.fecha_firma}</div>
 										{:else if r.asignado_nombre}
-											<div class="hint">✍️ Firmará: <strong>{r.asignado_nombre}</strong></div>
+											<div class="hint"> Firmará: <strong>{r.asignado_nombre}</strong></div>
 										{:else}
-											<div class="hint">👤 Sin asignar (Field)</div>
+											<div class="hint"> Sin asignar (Field)</div>
 										{/if}
 									</div>
 									<div style="display: flex; gap: 0.35rem; flex-shrink: 0; align-items: flex-start;">
@@ -463,7 +463,7 @@ import { header, partidas, borrar, clonar, remisiones, remisionCrear, remisionBo
 		<button class="btn btn-secondary btn-block" style="margin-bottom: 0.5rem;" on:click={abrirHistorial} disabled={busy}>Historial de cambios</button>
 		<HoldButton label="Eliminar cotización" onConfirm={onBorrar} disabled={bloqueado} size="md" block={true} />
 		{#if bloqueado}
-			<p class="hint" style="margin-top: 0.5rem;">🔒 Bloqueada (lista para facturar / facturada).</p>
+			<p class="hint" style="margin-top: 0.5rem;"> Bloqueada (lista para facturar / facturada).</p>
 		{/if}
 	{/if}
 	{#if mostrandoHistorial}

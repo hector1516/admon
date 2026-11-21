@@ -1,5 +1,5 @@
 <script>
-	import { User , Building2, Car, Receipt, Ticket , Plus , ArrowLeft, Clock , Fuel } from 'lucide-svelte';
+	import { User, Building2, Car, Receipt, Ticket, Plus, ArrowLeft, Clock, Fuel, AlertTriangle } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -151,7 +151,7 @@
 	{/if}
 
 	<div class="field">
-		<input class="input" placeholder="🔍 Buscar por folio, cliente, estación, vehículo, factura…" bind:value={busqueda} />
+		<input class="input" placeholder="Buscar por folio, cliente, estación, vehículo, factura…" bind:value={busqueda} />
 	</div>
 
 	<p class="hint">Tickets capturados desde Field/HUB · orden por fecha y hora de captura (más reciente arriba) · escribe <strong>pendiente</strong> para filtrar los que faltan</p>
@@ -160,7 +160,7 @@
 		<LoadingState message="Cargando tickets..." />
 	{:else if error}
 		<ErrorState message={error} onRetry={cargar} />
-		<div class="state err">⚠️ {error}</div>
+		<div class="state err"><AlertTriangle size={15} /> {error}</div>
 	{:else if filtrados.length === 0}
 		<div class="state"><Ticket size={16} /> No hay tickets{busqueda.trim() ? ` que coincidan con “${busqueda.trim()}”` : ''}.</div>
 	{:else}
