@@ -40,6 +40,22 @@ export function videoListo(video) {
 	return Number(video.readyState) >= 2;
 }
 
+/**
+ * Espera hasta `ms` a que el <video> tenga imagen. Devuelve si la tiene.
+ *
+ * Sirve para separar dos fallos que se veían iguales: «la cámara no entrega
+ * imagen» (permiso, otra app usándola, iOS que no arranca el stream) y «no hay
+ * cara en el encuadre». Antes los dos decían «No veo tu cara».
+ */
+export async function esperarVideo(video, ms = ESPERA_VIDEO_MS) {
+	const limite = Date.now() + ms;
+	while (Date.now() < limite) {
+		if (videoListo(video)) return true;
+		await new Promise((r) => setTimeout(r, 100));
+	}
+	return videoListo(video);
+}
+
 /** Resuelve con el valor de la promesa, o null si tarda más de `ms`. */
 export async function conTiempo(promesa, ms) {
 	let temporizador;
@@ -56,12 +72,7 @@ export async function conTiempo(promesa, ms) {
 /** Devuelve el descriptor de la cara en el <video>, o null si no hay cara. */
 export async function describir(videoEl, { esperaMaxima = ESPERA_VIDEO_MS } = {}) {
 	if (!videoEl) return null;
-
-	const limite = Date.now() + esperaMaxima;
-	while (!videoListo(videoEl) && Date.now() < limite) {
-		await new Promise((r) => setTimeout(r, 100));
-	}
-	if (!videoListo(videoEl)) return null;
+	if (!(await esperarVideo(videoEl, esperaMaxima))) return null;
 
 	if (!cargado) await cargarModelo();
 	const deteccion = await conTiempo(

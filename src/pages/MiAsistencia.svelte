@@ -9,7 +9,7 @@
 	import { Clock, MapPin, HelpCircle, FileText, ArrowLeft, CheckCircle, XCircle, Loader2, Timer, Download, Camera } from 'lucide-svelte';
 	import CicloCard from '$lib/components/asistencia/CicloCard.svelte';
 	import { agruparCiclos } from '$lib/components/asistencia/ciclos.js';
-	import { cargarModelo, describir } from '$lib/components/asistencia/rostro.js';
+	import { cargarModelo, describir, esperarVideo } from '$lib/components/asistencia/rostro.js';
 	import { pasoAsistencia } from '$lib/passkey.js';
 
 	let loading = $state(true);
@@ -48,6 +48,10 @@
 	let pasoRostro = $state('');
 	let intentosRostro = $state(0);
 	let procesando = $state(false);
+	// Se sabe al cargar la página para no preguntarlo dentro del gesto: en iOS
+	// pedir la cámara después de un `await` la deja en negro.
+	let passkeyOk = $state<boolean | null>(null);
+	let pedidoCamara: Promise<MediaStream> | null = null;
 
 	// Tarjetas por ciclo (entrada + salida) con horas extra según la LFT.
 	let configLft = $state({ horas_jornada: 8, extras_max_dia: 3, extras_dobles_semana: 9 });
@@ -102,6 +106,16 @@
 		} catch {}
 	}
 
+	/** Deja `passkeyOk` resuelto antes de que el usuario toque el botón. */
+	async function verificarPasskey() {
+		try {
+			const pks = await api.get('/passkeys/mine');
+			passkeyOk = !!pks?.passkeys?.length;
+		} catch {
+			passkeyOk = null;
+		}
+	}
+
 	async function cargarDatos() {
 		loading = true;
 		error = '';
@@ -137,22 +151,51 @@
 		}
 	}
 
+	/** Pide la cámara DENTRO del gesto del usuario y reusa la misma promesa. */
+	function pedirCamara(): Promise<MediaStream> {
+		if (!pedidoCamara) {
+			pedidoCamara = navigator.mediaDevices
+				.getUserMedia({ video: { facingMode: 'user' } })
+				.catch((e) => {
+					pedidoCamara = null;
+					throw e;
+				});
+		}
+		return pedidoCamara;
+	}
+
+	function mensajeDeCamara(e: any): string {
+		const nombre = e?.name || '';
+		if (nombre === 'NotAllowedError' || nombre === 'SecurityError')
+			return 'El teléfono bloqueó la cámara. Revisa los permisos de la app.';
+		if (nombre === 'NotFoundError' || nombre === 'OverconstrainedError')
+			return 'No encontré una cámara en este equipo.';
+		if (nombre === 'NotReadableError' || nombre === 'AbortError')
+			return 'La cámara está ocupada por otra app. Ciérrala y vuelve a intentar.';
+		return e?.message || 'No se pudo abrir la cámara';
+	}
+
 	async function abrirCamara(modo: 'verificar' | 'registro') {
 		modoCamara = modo;
 		mostrarCamara = true;
 		await tick(); // el <video> tiene que existir antes de engancharle el stream
-		if (stream) return;
 		try {
-			stream = await navigator.mediaDevices.getUserMedia({
-				video: { facingMode: 'user', width: 320, height: 240 }
-			});
-			if (videoEl) {
-				videoEl.srcObject = stream;
-				await videoEl.play();
+			const vivo = !!stream && stream.getTracks().some((t) => t.readyState === 'live');
+			if (!vivo) stream = await pedirCamara();
+			if (!videoEl) throw new Error('No se pudo montar el video');
+			videoEl.srcObject = stream;
+			videoEl.muted = true;
+			await videoEl.play().catch(() => {});
+			if (!(await esperarVideo(videoEl, 4000))) {
+				throw new Error(
+					'La cámara abrió pero no entrega imagen. Cierra la app del todo y vuelve a abrirla.'
+				);
 			}
-		} catch {
+		} catch (e: any) {
 			mostrarCamara = false;
-			throw new Error('No se pudo abrir la cámara');
+			detenerCamara();
+			pedidoCamara = null;
+			throw new Error(mensajeDeCamara(e));
 		}
 	}
 
@@ -167,6 +210,16 @@
 		detenerCamara();
 		mostrarCamara = false;
 		pasoRostro = '';
+	}
+
+	/** Suelta la cámara si se pidió y al final no se usó (sin passkey, etc.). */
+	async function soltarCamara() {
+		try {
+			const s = await pedidoCamara;
+			s?.getTracks().forEach((t) => t.stop());
+		} catch {}
+		pedidoCamara = null;
+		stream = null;
 	}
 
 	async function capturarFoto(): Promise<string | null> {
@@ -262,17 +315,31 @@
 		if (marking) return;
 		marking = true;
 		error = '';
+		// iOS solo entrega la cámara si se pide dentro del gesto: va aquí, antes
+		// de cualquier `await`. Si luego no hace falta, se suelta.
+		const pedido = pedirCamara();
+		void pedido;
 		try {
+			if (passkeyOk === false) {
+				await soltarCamara();
+				error = 'Registra una passkey en Configuración para poder marcar.';
+				return;
+			}
 			// D3 B: sin passkey registrada no se puede marcar.
-			try {
-				const pks = await api.get('/passkeys/mine');
-				if (!pks?.passkeys?.length) {
-					error = 'Registra una passkey en Configuración para poder marcar.';
+			if (passkeyOk !== true) {
+				try {
+					const pks = await api.get('/passkeys/mine');
+					passkeyOk = !!pks?.passkeys?.length;
+					if (!passkeyOk) {
+						await soltarCamara();
+						error = 'Registra una passkey en Configuración para poder marcar.';
+						return;
+					}
+				} catch {
+					await soltarCamara();
+					error = 'No se pudo comprobar tu passkey. Revisa tu conexión.';
 					return;
 				}
-			} catch {
-				error = 'No se pudo comprobar tu passkey. Revisa tu conexión.';
-				return;
 			}
 			try {
 				await obtenerGPS();
@@ -349,6 +416,7 @@
 		cargarDatos();
 		cargarReportes();
 		obtenerGPS();
+		verificarPasskey();
 		return () => { if (timerInterval) clearInterval(timerInterval); };
 	});
 </script>

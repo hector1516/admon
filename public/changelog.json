@@ -1,7 +1,8 @@
 {
   "app": "admon",
-  "version": "1.9.3",
+  "version": "1.9.4",
   "cambios": [
+    "📷 La cámara de Mi Asistencia ya muestra la imagen en el teléfono: antes se veía negra y decía que no te reconocía.",
     "⚡ Admon carga más rápido: las imágenes pesaban 15 MB y ahora pesan menos de 1 MB.",
     "🐛 La cámara de Mi Asistencia ahora arranca de verdad: antes se abría el cuadro pero el video quedaba en negro y no pasaba nada.",
     "🔐 Mi Asistencia ahora pide tu rostro y tu passkey: nadie más puede marcar por ti.",
