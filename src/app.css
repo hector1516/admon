@@ -166,6 +166,21 @@ h1:has(> svg) > svg, h2:has(> svg) > svg, h3:has(> svg) > svg {
 	margin-right: 0;
 }
 
+/* Iconos de lucide dentro de textos cortos (etiquetas, avisos, tarjetas).
+   Tailwind pone `svg { display: block }` en su preflight, así que sin esto el
+   icono se va solo a la línea de arriba y deja el texto huérfano abajo. */
+label > svg, .label > svg, .info-label > svg, .section-label > svg,
+.card-title > svg, .editor-title > svg, .section-title > svg,
+.blocker > svg, .error > svg, .state > svg, .msg > svg,
+.aviso-tiempo > svg, .aviso > svg, .nota > svg, .alerta > svg,
+.alerta-ic > svg, .aviso-ic > svg, .tag > svg, .tel-chip > svg,
+.chip > svg, .badge > svg, .saldo-alerta > svg, .fecha-head > svg,
+.no-photo > svg {
+	display: inline-block;
+	vertical-align: -0.15em;
+	margin-right: 0.35em;
+}
+
 /* Buttons */
 .btn {
 	display: inline-flex;
