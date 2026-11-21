@@ -1,6 +1,6 @@
 {
   "app": "admon",
-  "version": "1.9.5",
+  "version": "1.9.6",
   "cambios": [
     "🔐 Para marcar ahora solo usas la huella o Face ID del teléfono: si no tienes passkey se crea en ese momento, y ya no hay que capturar el rostro.",
     "📷 La cámara de Mi Asistencia ya muestra la imagen en el teléfono: antes se veía negra y decía que no te reconocía.",
