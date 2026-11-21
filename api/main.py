@@ -249,8 +249,10 @@ from api.routers import pdf as pdf_router
 app.include_router(pdf_router.router)
 from api.routers import asistencia as asistencia_router
 from api.routers import mi_asistencia as mi_asistencia_router
+from api.routers import vales_salud as vales_salud_router
 app.include_router(asistencia_router.router)
 app.include_router(mi_asistencia_router.router, prefix="/api/mi-asistencia", tags=["mi-asistencia"])
+app.include_router(vales_salud_router.router, tags=["vales-salud"])
 from api.routers import automoviles as automoviles_router
 app.include_router(automoviles_router.router)
 from api.routers import perfil as perfil_router
