@@ -5,6 +5,7 @@ from api.pdf_reporte import build_service_report_pdf
 from api.pdf_remision import build_remision_pdf
 from api.lugar import lugar_de
 from api import sat_helper
+from api import db as _db
 from api import usuarios_foto as _foto_usuario
 from api import ficha_nfc as _ficha_nfc
 from api import legends_core as _legends_core
@@ -31,33 +32,15 @@ except Exception as e:
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
-# IP LOCAL del servidor SQL: la misma que usan Field y workersadmon. Antes el
-# default era la IP de la VPN (172.26.117.220) y, como el contenedor se clonaba
-# con 'docker inspect', esa IP se venía arrastrando. La variable de entorno gana
-# siempre; este default solo aplica si faltara.
-DB_SERVER = os.getenv("HUB_DB_SERVER", "10.188.141.15")
-DB_USER = os.getenv("HUB_DB_USER", "sa")
-DB_PASSWORD = os.getenv("HUB_DB_PASSWORD", "")
-if not DB_PASSWORD:
-    raise RuntimeError("HUB_DB_PASSWORD no definida — no se puede conectar a la BD")
-DB_DATABASE = os.getenv("HUB_DB_DATABASE", "ECCSA_Admon")
+# La configuración de la BD y el pool viven en api/db.py (Fase B). Este módulo
+# conserva el nombre `get_connection` porque los routers hacen
+# `from api import main as _m` y llaman `_m.get_connection()`.
+# Falla al arrancar si falta HUB_DB_PASSWORD, igual que antes.
+_db.db_config()
 
 
 def get_connection():
-    last_err = None
-    for intento in range(3):
-        try:
-            conn = pymssql.connect(server=DB_SERVER, user=DB_USER, password=DB_PASSWORD, database=DB_DATABASE, autocommit=True, login_timeout=15, timeout=30)
-            cur = conn.cursor()
-            cur.execute('SELECT 1')
-            cur.close()
-            return conn
-        except Exception as e:
-            last_err = e
-            if intento < 2:
-                import time
-                time.sleep(2 * (intento + 1))
-    raise last_err
+    return _db.get_connection()
 
 
 # --- Helper Functions (usados por IA Tools) ---

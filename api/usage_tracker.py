@@ -12,6 +12,7 @@ import time
 import logging
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
+from starlette.concurrency import run_in_threadpool
 
 logger = logging.getLogger("usage_tracker")
 
@@ -64,9 +65,14 @@ class UsageTrackingMiddleware(BaseHTTPMiddleware):
         except Exception:
             pass
 
-        # Log to DB (fire and forget, don't block response)
+        # Log to DB en el threadpool: `_log_usage` es bloqueante (abre conexión
+        # e inserta). Llamarlo directo aquí congelaba el event loop y, con 1
+        # vCPU, todas las peticiones esperaban a que terminara el INSERT.
         try:
-            self._log_usage(path, request.method, usuario, duration_ms, response.status_code)
+            await run_in_threadpool(
+                self._log_usage, path, request.method, usuario,
+                duration_ms, response.status_code,
+            )
         except Exception as e:
             logger.debug(f"Usage tracking error: {e}")
 
