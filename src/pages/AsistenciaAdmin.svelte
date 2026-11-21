@@ -17,7 +17,7 @@
 	la red y no de un checador.
 -->
 <script>
-	import { RefreshCw } from 'lucide-svelte';
+	import { RefreshCw, AlertTriangle } from 'lucide-svelte';
 
 	import { onMount, onDestroy } from 'svelte';
 	import { auth } from '$lib/stores/auth.js';
@@ -175,7 +175,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 -->
 {#if congelado}
 	<div class="alerta">
-		<span class="alerta-ic">⚠️</span>
+		<span class="alerta-ic"><AlertTriangle size={14} /></span>
 		<span>
 			<b>El escáner de red no corre desde hace {antiguedad(datos.minutos_sin_scan)}</b>
 			{#if datos.ciclo_scan}(último ciclo a las {datos.ciclo_scan.slice(11)}){:else}(nunca ha registrado un ciclo){/if}.
@@ -186,7 +186,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	</div>
 {:else if inestable}
 	<div class="alerta">
-		<span class="alerta-ic">⚠️</span>
+		<span class="alerta-ic"><AlertTriangle size={14} /></span>
 		<span>
 			<b>El detector cambió el estado de {datos.marcha?.personas} personas de un jalón</b>
 			({datos.marcha?.tipo === 'SALIDA' ? 'salidas' : 'entradas'} entre las
@@ -197,7 +197,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	</div>
 {:else if futuro}
 	<div class="alerta">
-		<span class="alerta-ic">⚠️</span>
+		<span class="alerta-ic"><AlertTriangle size={14} /></span>
 		<span>
 			<b>Hay registros con fecha que todavía no llega</b> (el escáner escribió un
 			ciclo con hora {datos.ciclo_scan?.slice(11)}). Los relojes no coinciden, así que

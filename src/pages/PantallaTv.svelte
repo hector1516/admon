@@ -1,5 +1,5 @@
 <script>
-	import { Upload, Clock, Play, Recycle, SkipForward, AlertTriangle, ImageIcon } from 'lucide-svelte';
+	import { Upload, Clock, Play, Recycle, SkipForward, AlertTriangle, ImageIcon, CheckCircle } from 'lucide-svelte';
 
 	import { onMount, onDestroy } from 'svelte';
 	import { auth } from '$lib/stores/auth.js';
@@ -201,7 +201,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					<span class="chip">Último: {estado.comando.accion}{estado.comando.pantalla ? ` → ${estado.comando.pantalla}` : ''}</span>
 				{/if}
 				{#if estado.confirmado}
-					<span class="chip chip-ok">✅ Confirmado {estado.confirmado.hecho ? fmtFecha(estado.confirmado.hecho) : ''}</span>
+					<span class="chip chip-ok"><CheckCircle size={13} /> Confirmado {estado.confirmado.hecho ? fmtFecha(estado.confirmado.hecho) : ''}</span>
 				{/if}
 			</div>
 

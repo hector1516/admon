@@ -1,5 +1,5 @@
 <script>
-	import { Search, X, ArrowLeft, Minus, Plus, RefreshCw, Ticket, AlertTriangle } from 'lucide-svelte';
+	import { Search, X, ArrowLeft, Minus, Plus, RefreshCw, Ticket, AlertTriangle, Receipt } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -194,8 +194,8 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		<h1><Ticket size={20} /> Ticket {t ? `#${t.folio}` : ''}</h1>
 		<div style="flex:1"></div>
 		{#if t}
-			<span class="fecha-head">🎫 Vale: {t.fecha_vale ? fmtFecha(t.fecha_vale) : '—'}</span>
-			<span class="fecha-head">🧾 Ticket: {fmtFecha(t.fecha)}</span>
+			<span class="fecha-head"><Ticket size={14} /> Vale: {t.fecha_vale ? fmtFecha(t.fecha_vale) : '—'}</span>
+			<span class="fecha-head"><Receipt size={14} /> Ticket: {fmtFecha(t.fecha)}</span>
 		{/if}
 	</div>
 
@@ -226,7 +226,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 				{:else if t.tiene_foto}
 					<div class="no-photo">📴<span>Foto no disponible sin conexión</span></div>
 				{:else}
-					<div class="no-photo">🎫<span>Sin foto registrada</span></div>
+					<div class="no-photo"><Ticket size={14} /><span>Sin foto registrada</span></div>
 				{/if}
 			</div>
 

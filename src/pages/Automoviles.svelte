@@ -1,5 +1,5 @@
 <script>
-	import { Hammer, Unlock, Wrench, Ruler, ArrowLeft, X, Pencil, Car } from 'lucide-svelte';
+	import { Hammer, Unlock, Wrench, Ruler, ArrowLeft, X, Pencil, Car, User } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -235,7 +235,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					</div>
 					<div class="auto-info">
 						{#if a.usuario_asignado}
-							<span class="badge badge-info">👤 {a.usuario_asignado}</span>
+							<span class="badge badge-info"><User size={13} /> {a.usuario_asignado}</span>
 						{:else}
 							<span class="badge badge-warning">Sin asignar</span>
 						{/if}

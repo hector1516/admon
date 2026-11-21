@@ -1,5 +1,5 @@
 <script>
-	import { Brain, Save, X, ArrowLeft, Clock, Ticket } from 'lucide-svelte';
+	import { Brain, Save, X, ArrowLeft, Clock, Ticket, Building2, Camera, Car, FilePen, Fuel } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -179,7 +179,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 	<div class="card">
 		<div class="field">
-			<label>🚗 Vehículo:</label>
+			<label><Car size={14} /> Vehículo:</label>
 			<select class="input" bind:value={form.id_vehiculo}>
 				<option value="">Seleccione un vehículo...</option>
 				{#each vehiculos as v}
@@ -189,7 +189,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		</div>
 
 		<div class="field">
-			<label>🏢 Cliente / Empresa:</label>
+			<label><Building2 size={14} /> Cliente / Empresa:</label>
 			<select class="input" bind:value={form.id_cliente}>
 				<option value="">Seleccione un cliente...</option>
 				{#each clientes as c}
@@ -200,7 +200,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 
 		{#if valesAbiertos.length > 0}
 			<div class="field">
-				<label>🎫 Vale a consumir:</label>
+				<label><Ticket size={14} /> Vale a consumir:</label>
 				<select class="input" bind:value={form.id_solicitud_vale}>
 					<option value="">-- Sin vale (carga manual) --</option>
 					{#each valesAbiertos as v (v.Id)}
@@ -214,7 +214,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		{/if}
 
 		<div class="field">
-			<label>📸 Foto del Ticket:</label>
+			<label><Camera size={14} /> Foto del Ticket:</label>
 			<div class="photo-btns">
 				<label class="add-photo-btn camera">
 					<input type="file" accept="image/*" capture="environment" onchange={onFoto} hidden />
@@ -244,7 +244,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		</div>
 
 		<div class="field">
-			<label>⛽ Estación:</label>
+			<label><Fuel size={14} /> Estación:</label>
 			<input class="input" placeholder="Ej. ESTACION CENTRO" list="estaciones-list" bind:value={form.estacion} />
 			<datalist id="estaciones-list">
 				{#each estaciones as e}
@@ -254,7 +254,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		</div>
 
 		<div class="field">
-			<label>📝 Servicio / Proyecto:</label>
+			<label><FilePen size={14} /> Servicio / Proyecto:</label>
 			<textarea class="input" rows="3" placeholder="Describa el servicio o proyecto..." bind:value={form.descripcion}></textarea>
 		</div>
 

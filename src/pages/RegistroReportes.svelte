@@ -1,5 +1,5 @@
 <script>
-	import { BarChart3, RefreshCw, Trash2, Circle, X, ArrowLeft, Clock, ArrowDown, ClipboardList } from 'lucide-svelte';
+	import { BarChart3, RefreshCw, Trash2, Circle, X, ArrowLeft, Clock, ArrowDown, ClipboardList, User } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -337,7 +337,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 		<div class="excel-bar">
 			{#if clienteSel}
 				<span class="chip" title="Cliente de la selección">
-					👤 {clienteSel}
+					<User size={13} /> {clienteSel}
 					<button class="chip-x" on:click={limpiarSeleccion} title="Vaciar selección"><X size={16} /></button>
 				</span>
 			{/if}
@@ -389,7 +389,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 					<span style="font-weight: 800; color: var(--color-primary-light);">{r.Folio}</span>
 					{@html estatusHtml(r.Estatus)}
 					{#if r.Eliminado === 1 || r.Eliminado === true}
-						<span class="badge" style="background:var(--color-danger);">🗑️ Papelera</span>
+						<span class="badge" style="background:var(--color-danger);"><Trash2 size={13} /> Papelera</span>
 					{/if}
 				</div>
 				<div style="font-size: var(--font-size-sm); margin-top: 0.15rem;">{r.Cliente}</div>
