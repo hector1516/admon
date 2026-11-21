@@ -24,6 +24,7 @@
 	                       texto se puede editar sin recompilar la app.
 	*/
 	import { onMount } from 'svelte';
+	import { Sparkles } from 'lucide-svelte';
 	import {
 		changelogAbierto,
 		cerrarChangelog,
@@ -86,7 +87,7 @@
 	     aria-label="Novedades de {appName}" onclick={alTocarFuera}>
 		<div class="shell-modal-card">
 			<div class="shell-modal-hd">
-				<h2>📋 Novedades</h2>
+				<h2><Sparkles size={18} /> Novedades</h2>
 				{#if versionLocal}<span class="shell-modal-ver">v{versionLocal}</span>{/if}
 			</div>
 			<p class="shell-modal-sub">

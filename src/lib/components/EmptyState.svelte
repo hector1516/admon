@@ -1,12 +1,29 @@
 <!-- EmptyState — componente estándar del shell -->
 <script>
-  import { onMount } from 'svelte';
+  import { Inbox, Search, BookOpen, Monitor, Package } from 'lucide-svelte';
 
-  let { icon = '📋', title = 'Sin datos', description = '', actionLabel = '', action = null } = $props();
+  let { icon = '📭', icono = null, title = 'Sin datos', description = '', actionLabel = '', action = null } = $props();
+
+  // Los emojis que hoy pasan las apps se dibujan como icono de lucide, para
+  // que el estado vacío hable el mismo idioma visual que el resto de la UI.
+  // `icono` permite pasar un componente propio cuando haga falta.
+  const MAPA = {
+    '📭': Inbox, '📥': Inbox, '🔍': Search, '🔎': Search,
+    '📖': BookOpen, '📚': BookOpen, '🖥️': Monitor, '🖥': Monitor,
+    '📦': Package
+  };
+
+  let Icono = $derived(icono || MAPA[icon] || null);
 </script>
 
 <div class="empty-state">
-  <div class="empty-icon">{icon}</div>
+  <div class="empty-icon">
+    {#if Icono}
+      <svelte:component this={Icono} size={48} strokeWidth={1.5} />
+    {:else}
+      {icon}
+    {/if}
+  </div>
   <h3 class="empty-title">{title}</h3>
   {#if description}
     <p class="empty-desc">{description}</p>

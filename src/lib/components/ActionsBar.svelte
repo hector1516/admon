@@ -30,6 +30,7 @@
 	     onlogout       () => any   🚪  (null = no se pinta)
 	*/
 	import { abrirChangelog } from '$lib/changelog.js';
+	import { Users, Sparkles, Settings, LogOut } from 'lucide-svelte';
 
 	let {
 		enLinea = 0,
@@ -47,16 +48,16 @@
 <div class="shell-actions">
 	{#if ononline}
 		<button class="btn btn-sm btn-secondary act-btn" onclick={ononline} title="Usuarios en línea">
-			👥{#if enLinea > 0}<span class="act-badge">{enLinea}</span>{/if}
+			<Users size={16} />{#if enLinea > 0}<span class="act-badge">{enLinea}</span>{/if}
 		</button>
 	{/if}
 	{#if onchangelog}
-		<button class="btn btn-sm btn-secondary" onclick={onchangelog} title="Novedades">📋</button>
+		<button class="btn btn-sm btn-secondary" onclick={onchangelog} title="Novedades" aria-label="Novedades"><Sparkles size={16} /></button>
 	{/if}
 	{#if onconfig}
-		<button class="btn btn-sm btn-secondary" onclick={onconfig} title="Configuración">⚙️</button>
+		<button class="btn btn-sm btn-secondary" onclick={onconfig} title="Configuración" aria-label="Configuración"><Settings size={16} /></button>
 	{/if}
 	{#if onlogout}
-		<button class="btn btn-sm btn-secondary" onclick={onlogout} title="Cerrar sesión">🚪 Salir</button>
+		<button class="btn btn-sm btn-secondary" onclick={onlogout} title="Cerrar sesión"><LogOut size={16} /> Salir</button>
 	{/if}
 </div>

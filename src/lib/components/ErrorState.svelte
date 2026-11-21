@@ -1,10 +1,12 @@
 <!-- ErrorState — componente estándar del shell -->
 <script>
+  import { AlertTriangle } from 'lucide-svelte';
+
   let { message = 'Error al cargar', onRetry = null } = $props();
 </script>
 
 <div class="error-state">
-  <div class="error-icon">⚠️</div>
+  <div class="error-icon"><AlertTriangle size={40} strokeWidth={1.5} /></div>
   <p class="error-msg">{message}</p>
   {#if onRetry}
     <button class="btn btn-sm btn-secondary" onclick={onRetry}>Reintentar</button>
