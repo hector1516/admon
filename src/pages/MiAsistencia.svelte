@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { fechaLocal } from '$lib/fechas';
 	import { navigate } from '$lib/router.js';
 	import { api } from '$lib/api';
 	import { auth } from '$lib/stores/auth';
@@ -155,8 +156,8 @@
 	async function generarReporte() {
 		generandoReporte = true;
 		try {
-			const hoy = new Date().toISOString().split('T')[0];
-			const hace7 = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+			const hoy = fechaLocal();
+			const hace7 = fechaLocal(new Date(Date.now() - 7 * 86400000));
 			const res = await api.post('/mi-asistencia/horas-extras/generar-reporte', {
 				periodo_inicio: hace7, periodo_fin: hoy, notas: ''
 			});

@@ -1,5 +1,6 @@
 <script>
 	import { Save, X, ArrowLeft, FilePen } from 'lucide-svelte';
+	import { fechaLocal } from '$lib/fechas';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -19,7 +20,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		cliente: '',
 		contacto: '',
 		correo_contacto: '',
-		fecha: new Date().toISOString().split('T')[0],
+		fecha: fechaLocal(),
 		tecnico: '',
 		descripcion: '',
 		notas: '',

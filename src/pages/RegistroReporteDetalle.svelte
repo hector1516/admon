@@ -1,5 +1,6 @@
 <script>
 	import { Download, Eye, Save, Trash2, Upload, Skull, X, ArrowLeft, Clock, Pencil, Recycle, ClipboardList, Camera, FileText } from 'lucide-svelte';
+	import { fechaLocal, isoLocal } from '$lib/fechas';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -110,7 +111,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		if (!val) return '';
 		const d = new Date(val);
 		if (isNaN(d)) return '';
-		return d.toISOString().split('T')[0];
+		return fechaLocal(d);
 	}
 
 	// Para <input type="datetime-local">: "YYYY-MM-DDTHH:MM" en hora LOCAL

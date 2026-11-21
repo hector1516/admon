@@ -1,5 +1,6 @@
 <script>
 	import { Smartphone, Trash2 , ArrowLeft, ArrowRight } from 'lucide-svelte';
+	import { isoLocal } from '$lib/fechas';
 
 	import { onMount, tick } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -117,7 +118,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 			Id: Date.now(),
 			Role: 'user',
 			Contenido: texto,
-			FechaRegistro: new Date().toISOString()
+			FechaRegistro: isoLocal()
 		};
 		mensajes = [...mensajes, msgUsuario];
 		autoScroll();
