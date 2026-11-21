@@ -110,7 +110,8 @@ def historial_asistencia(dias: int = 30, current_user: dict = Depends(get_curren
     try:
         cur.execute("""
             SELECT Id, Fecha, Tipo, Hora, Latitud, Longitud, Precision,
-                   VerificacionFacial, Dispositivo, Estado, FechaRegistro
+                   VerificacionFacial, PasskeyCredentialId, Dispositivo, Estado,
+                   FechaRegistro
             FROM HUB_AsistenciaMarcado
             WHERE IdUsuario = %s
               AND Fecha >= DATEADD(day, -%s, GETDATE())
