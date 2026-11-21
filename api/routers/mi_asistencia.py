@@ -493,12 +493,10 @@ def passkey_options(req: Optional[PasskeyOptionsReq] = None,
                     current_user: dict = Depends(get_current_user)):
     """Desafío para firmar con la passkey del usuario (paso previo al marcado)."""
     from api.routers import passkeys as _pk
-    rp = (req.rp if req else None) or _pk.RP_ID_OLD
-    if rp not in _pk.ALLOWED_RP_IDS:
-        rp = _pk.RP_ID_OLD
+    # Admon solo permite el RP raíz: aquí no hay RP legacy como en Field.
     state, challenge = _pk._issue_challenge("marcado")
-    options = _pk.generate_authentication_options(rp_id=rp, challenge=challenge)
-    return {"options": _pk.options_to_json(options), "state": state, "rp": rp}
+    options = _pk.generate_authentication_options(rp_id=_pk.RP_ID, challenge=challenge)
+    return {"options": _pk.options_to_json(options), "state": state, "rp": _pk.RP_ID}
 
 
 @router.post("/passkey/verify")
@@ -518,15 +516,12 @@ def passkey_verify(req: PasskeyVerifyReq, request: Request,
             raise HTTPException(status_code=404, detail="Passkey no reconocida")
         if int(fila["IdUsuario"]) != user_id:
             raise HTTPException(status_code=403, detail="Esa passkey no es tuya")
-        cred_rp = (fila.get("RpId") or _pk.RP_ID_OLD).strip() or _pk.RP_ID_OLD
-        if cred_rp not in _pk.ALLOWED_RP_IDS:
-            cred_rp = _pk.RP_ID_OLD
-        expected_origin = _pk._origin_for_request(request, cred_rp)
+        expected_origin = _pk._origin_for_request(request)
         try:
             v = _pk.verify_authentication_response(
                 credential=req.credential,
                 expected_challenge=challenge,
-                expected_rp_id=cred_rp,
+                expected_rp_id=_pk.RP_ID,
                 expected_origin=expected_origin,
                 credential_public_key=base64.urlsafe_b64decode(fila["PublicKey"] + "=="),
                 credential_current_sign_count=fila["SignCount"],
