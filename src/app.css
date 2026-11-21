@@ -891,9 +891,6 @@ animation: pulse-offline 2s infinite;
 .nav-item .nav-icon { font-size: 1.3rem; }
 
 /* Shell layout */
-.shell-below-banner {
-  padding-top: 0;
-}
 .shell-above-nav {
   padding-bottom: 64px;
 }
