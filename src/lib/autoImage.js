@@ -17,7 +17,7 @@ export function getAutoImage(marcaModelo, imagenCustom = null) {
 	if (!marcaModelo) return null;
 	const slug = slugify(marcaModelo);
 	if (!slug) return null;
-	return `${BASE}${slug}.png`;
+	return `${BASE}${slug}.webp`;
 }
 
 export function autoImageExists(marcaModelo) {

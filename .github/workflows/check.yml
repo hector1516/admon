@@ -88,6 +88,11 @@ jobs:
           set -euo pipefail
           python3 scripts/check_tokens.py --verbose
 
+      - name: Los assets no se van de peso
+        run: |
+          set -euo pipefail
+          python3 scripts/check_assets.py
+
       - name: El front compila
         run: |
           set -euo pipefail

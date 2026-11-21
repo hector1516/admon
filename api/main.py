@@ -39,6 +39,14 @@ except Exception as e:
     import logging
     logging.getLogger("response_cache").warning(f"No se pudo registrar la cache: {e}")
 
+# Compresión en el origen. Cloudflare ya comprime al cliente, pero el servidor
+# manda el JSON y el JS sin comprimir hasta el borde. Va DESPUÉS de la caché a
+# propósito: así la caché guarda el cuerpo sin comprimir y el gzip se aplica
+# según lo que pida cada cliente.
+from fastapi.middleware.gzip import GZipMiddleware  # noqa: E402
+
+app.add_middleware(GZipMiddleware, minimum_size=1024)
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
 # La configuración de la BD y el pool viven en api/db.py (Fase B). Este módulo
@@ -1521,8 +1529,21 @@ try:
     def _spa_file(name: str):
         return FileResponse(str(_dist / name))
 
+    class _AssetsInmutables(StaticFiles):
+        """Los nombres de `assets/` llevan hash del contenido: se pueden cachear
+        un año. Sin esta cabecera Cloudflare ponía su TTL por defecto (4 h)."""
+
+        async def get_response(self, path, scope):
+            respuesta = await super().get_response(path, scope)
+            respuesta.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+            return respuesta
+
     if _has_spa and (_dist / "assets").is_dir():
-        app.mount("/assets", StaticFiles(directory=str(_dist / "assets")), name="assets")
+        app.mount(
+            "/assets",
+            _AssetsInmutables(directory=str(_dist / "assets")),
+            name="assets",
+        )
 except Exception:
     _has_spa = False
     _dist = None
@@ -1552,6 +1573,10 @@ async def spa_fallback(full_path: str):
                 resp = FileResponse(str(candidate))
                 if candidate.name in _NO_STORE_FILES:
                     resp.headers.update(_NO_STORE)
+                elif full_path.startswith("models/"):
+                    # Modelos del reconocimiento facial (6,7 MB): no cambian
+                    # hasta que cambie la versión.
+                    resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
                 return resp
             # 2) Ruta de la SPA -> index.html (el router del frontend decide)
             first = full_path.split("/", 1)[0]
