@@ -113,6 +113,33 @@ export async function loginWithPasskey() {
 }
 
 /**
+ * Paso de passkey para marcar asistencia (D3 B): devuelve el token de 2 min
+ * que `/mi-asistencia/marcar` exige.
+ */
+export async function pasoAsistencia() {
+	const o = await fetch('/api/mi-asistencia/passkey/options', {
+		method: 'POST',
+		headers: authHeaders(),
+		body: JSON.stringify({ rp: RP_NUEVO })
+	}).then(async (r) => {
+		if (!r.ok) throw new Error('No se pudo iniciar la passkey');
+		return r.json();
+	});
+	const cred = await startAuthentication({ optionsJSON: asOptions(o.options) });
+	const v = await fetch('/api/mi-asistencia/passkey/verify', {
+		method: 'POST',
+		headers: authHeaders(),
+		body: JSON.stringify({ credential: cred, state: o.state })
+	});
+	if (!v.ok) {
+		const e = await v.json().catch(() => ({ detail: 'Passkey no válida' }));
+		throw new Error(e.detail || 'Passkey no válida');
+	}
+	const data = await v.json();
+	return data.stepup_token;
+}
+
+/**
  * Registro de passkey en este equipo (requiere sesión iniciada).
  * Siempre en el rp raíz; el label inicial puede sembrar el Nickname del
  * usuario si aún no tiene.

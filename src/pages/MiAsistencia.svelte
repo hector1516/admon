@@ -6,7 +6,10 @@
 	import { auth } from '$lib/stores/auth';
 	let msg = $state('');
 	import { online } from '$lib/stores/online';
-	import { Clock, MapPin, HelpCircle, FileText, ArrowLeft, CheckCircle, XCircle, Loader2, Timer, Download } from 'lucide-svelte';
+	import { Clock, MapPin, HelpCircle, FileText, ArrowLeft, CheckCircle, XCircle, Loader2, Timer, Download, Camera } from 'lucide-svelte';
+	import MarcadoCard from '$lib/components/asistencia/MarcadoCard.svelte';
+	import { cargarModelo, describir } from '$lib/components/asistencia/rostro.js';
+	import { pasoAsistencia } from '$lib/passkey.js';
 
 	let loading = $state(true);
 	let marking = $state(false);
@@ -33,6 +36,17 @@
 	let horasTrabajadas = $state('0.0');
 	let fraseActual = $state('');
 	let timerInterval: any;
+
+	// Rostro + passkey (D1 A / D2 A / D3 B)
+	let tieneReferenciaFacial = $state(false);
+	let videoEl: HTMLVideoElement;
+	let canvasEl: HTMLCanvasElement;
+	let stream: MediaStream | null = null;
+	let mostrarCamara = $state(false);
+	let modoCamara = $state<'verificar' | 'registro'>('verificar');
+	let pasoRostro = $state('');
+	let intentosRostro = $state(0);
+	let procesando = $state(false);
 
 	const frases = [
 		{ min: 0, max: 1, text: 'Apenas calentando motores... ☕' },
@@ -108,14 +122,152 @@
 		}
 	}
 
-	async function marcar() {
-		marking = true;
+	async function iniciarCamara() {
 		try {
-			await obtenerGPS();
+			stream = await navigator.mediaDevices.getUserMedia({
+				video: { facingMode: 'user', width: 320, height: 240 }
+			});
+			if (videoEl) {
+				videoEl.srcObject = stream;
+				await videoEl.play();
+			}
+		} catch {
+			throw new Error('No se pudo abrir la cámara');
+		}
+	}
+
+	function detenerCamara() {
+		if (stream) {
+			stream.getTracks().forEach((t) => t.stop());
+			stream = null;
+		}
+	}
+
+	function cerrarCamara() {
+		detenerCamara();
+		mostrarCamara = false;
+		pasoRostro = '';
+	}
+
+	async function capturarFoto(): Promise<string | null> {
+		if (!videoEl || !canvasEl) return null;
+		canvasEl.width = videoEl.videoWidth;
+		canvasEl.height = videoEl.videoHeight;
+		const ctx = canvasEl.getContext('2d');
+		if (!ctx) return null;
+		ctx.drawImage(videoEl, 0, 0);
+		return canvasEl.toDataURL('image/jpeg', 0.8);
+	}
+
+	async function abrirRegistroRostro() {
+		try {
+			await iniciarCamara();
+		} catch (e: any) {
+			error = e.message;
+			return;
+		}
+		modoCamara = 'registro';
+		mostrarCamara = true;
+		pasoRostro = 'Mira a la cámara y toca Guardar';
+	}
+
+	async function registrarRostro() {
+		procesando = true;
+		try {
+			await cargarModelo();
+			await new Promise((r) => setTimeout(r, 700));
+			const foto = await capturarFoto();
+			const embedding = await describir(videoEl);
+			if (!embedding) {
+				pasoRostro = 'No veo tu cara. Acomódate frente a la cámara.';
+				return;
+			}
+			await api.post('/mi-asistencia/facial/registrar', {
+				foto_base64: foto, content_type: 'image/jpeg', embedding
+			});
+			tieneReferenciaFacial = true;
+			cerrarCamara();
+			msg = 'Rostro registrado';
+		} catch (e: any) {
+			error = e.message || 'Error registrando rostro';
+		} finally {
+			procesando = false;
+		}
+	}
+
+	/** Verifica el rostro hasta 3 veces (D2 A). */
+	async function flujoRostro(): Promise<boolean> {
+		try {
+			await iniciarCamara();
+		} catch (e: any) {
+			error = e.message;
+			return false;
+		}
+		modoCamara = 'verificar';
+		mostrarCamara = true;
+		intentosRostro = 0;
+		try {
+			await cargarModelo();
+		} catch {
+			cerrarCamara();
+			error = 'No se pudo cargar el reconocimiento facial.';
+			return false;
+		}
+		while (intentosRostro < 3) {
+			pasoRostro = intentosRostro === 0 ? 'Mira a la cámara…' : `Intento ${intentosRostro + 1} de 3…`;
+			await new Promise((r) => setTimeout(r, 900));
+			let embedding: number[] | null = null;
+			try {
+				embedding = await describir(videoEl);
+			} catch {
+				embedding = null;
+			}
+			if (!embedding) {
+				intentosRostro++;
+				pasoRostro = 'No veo tu cara. Acomódate frente a la cámara.';
+				await new Promise((r) => setTimeout(r, 1000));
+				continue;
+			}
+			const res = await api.post('/mi-asistencia/facial/verificar', { embedding });
+			if (res.verificado) {
+				cerrarCamara();
+				return true;
+			}
+			intentosRostro++;
+			pasoRostro = `No te reconocí (${intentosRostro}/3).`;
+			await new Promise((r) => setTimeout(r, 700));
+		}
+		cerrarCamara();
+		error = 'No se pudo verificar tu rostro. Regístralo o avisa a tu supervisor.';
+		return false;
+	}
+
+	async function marcar() {
+		if (marking) return;
+		marking = true;
+		error = '';
+		try {
+			// D3 B: sin passkey registrada no se puede marcar.
+			try {
+				const pks = await api.get('/passkeys/mine');
+				if (!pks?.passkeys?.length) {
+					error = 'Registra una passkey en Configuración para poder marcar.';
+					return;
+				}
+			} catch {
+				error = 'No se pudo comprobar tu passkey. Revisa tu conexión.';
+				return;
+			}
+			try {
+				await obtenerGPS();
+			} catch {}
+			const rostroOk = await flujoRostro();
+			if (!rostroOk) return;
+			const stepup_token = await pasoAsistencia();
 			const tipo = timerActivo ? 'Salida' : 'Entrada';
 			const res = await api.post('/mi-asistencia/marcar', {
 				tipo, latitud: gpsLat, longitud: gpsLon, precision: gpsPrecision,
-				verificacion_facial: false, dispositivo: navigator.userAgent
+				verificacion_facial: true, stepup_token, dispositivo: navigator.userAgent
 			});
 			msg = res.mensaje || `${tipo} registrada`;
 			if (tipo === 'Entrada') {
@@ -206,6 +358,17 @@
 	{#if loading}
 		<div class="loading">Cargando...</div>
 	{:else}
+		{#if !tieneReferenciaFacial}
+			<div class="card" style="text-align: center;">
+				<p style="font-size: var(--font-size-sm); color: var(--color-text-dim); margin-bottom: 0.75rem;">
+					Registra tu rostro una vez para poder marcar
+				</p>
+				<button class="btn btn-sm btn-primary" onclick={abrirRegistroRostro}>
+					<Camera size={16} /> Registrar rostro
+				</button>
+			</div>
+		{/if}
+
 		<!-- Check-in button -->
 		<div class="checkin-section">
 			<button class="checkin-btn {timerActivo ? 'checkout' : 'checkin'}" onclick={marcar} disabled={marking}>
@@ -284,12 +447,7 @@
 			{:else}
 				<div class="marking-list">
 					{#each marcados.slice(0, 10) as m}
-						<div class="marking-item">
-							<span class="marking-tipo {m.Tipo === 'Entrada' ? 'entrada' : 'salida'}">{m.Tipo}</span>
-							<span class="marking-fecha">{m.Fecha}</span>
-							<span class="marking-hora">{m.Hora}</span>
-							{#if m.Latitud}<span class="marking-gps"><MapPin size={12} /></span>{/if}
-						</div>
+						<MarcadoCard marcado={m} />
 					{/each}
 				</div>
 			{/if}
@@ -319,6 +477,31 @@
 	{/if}
 
 	<!-- Help modal -->
+	{#if mostrarCamara}
+		<div class="modal-overlay">
+			<div class="modal">
+				<div class="modal-header">
+					<h2>{modoCamara === 'registro' ? 'Registrar rostro' : 'Verificación facial'}</h2>
+				</div>
+				<div class="camara-wrap">
+					<video bind:this={videoEl} autoplay playsinline muted></video>
+					<canvas bind:this={canvasEl} style="display:none"></canvas>
+				</div>
+				<p class="camara-paso">{pasoRostro}</p>
+				<div class="modal-botones">
+					<button class="btn btn-sm btn-secondary" onclick={cerrarCamara} disabled={procesando}>
+						Cancelar
+					</button>
+					{#if modoCamara === 'registro'}
+						<button class="btn btn-sm btn-primary" onclick={registrarRostro} disabled={procesando}>
+							{procesando ? 'Guardando…' : 'Guardar'}
+						</button>
+					{/if}
+				</div>
+			</div>
+		</div>
+	{/if}
+
 	{#if showHelp}
 		<div class="modal-overlay" onclick={() => showHelp = false}>
 			<div class="modal" onclick={(e) => e.stopPropagation()}>
@@ -387,6 +570,31 @@
 	.stat-row { display: flex; justify-content: space-between; padding: 0.25rem 0; font-size: var(--font-size-sm); }
 	.stat-label { color: var(--color-text-dim); }
 	.stat-value { font-weight: 600; color: var(--color-surface); }
+	.camara-wrap {
+		border-radius: var(--radius-sm);
+		overflow: hidden;
+		background: #000;
+		display: flex;
+		justify-content: center;
+	}
+	.camara-wrap video {
+		display: block;
+		width: 100%;
+		max-width: 320px;
+		height: auto;
+	}
+	.camara-paso {
+		font-size: var(--font-size-sm);
+		color: var(--color-text-muted);
+		text-align: center;
+		margin: 0.6rem 0;
+		min-height: 1.4em;
+	}
+	.modal-botones {
+		display: flex;
+		gap: 0.5rem;
+		justify-content: flex-end;
+	}
 	.marking-list { display: flex; flex-direction: column; gap: 0.5rem; }
 	.marking-item { display: flex; gap: 0.5rem; align-items: center; font-size: var(--font-size-xs); padding: 0.25rem 0; border-bottom: 1px solid var(--color-text-strong); }
 	.marking-tipo { font-weight: 600; padding: 0.125rem 0.5rem; border-radius: 0.25rem; font-size: var(--font-size-xs); }
