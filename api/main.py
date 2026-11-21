@@ -30,6 +30,15 @@ except Exception as e:
     import logging
     logging.getLogger("usage_tracker").warning(f"No se pudo registrar middleware de tracking: {e}")
 
+# Caché de respuestas GET: la BD está sin RAM, así que no se le piden dos veces
+# las mismas consultas. Ver api/response_cache.py.
+try:
+    from api.response_cache import ResponseCacheMiddleware
+    app.add_middleware(ResponseCacheMiddleware)
+except Exception as e:
+    import logging
+    logging.getLogger("response_cache").warning(f"No se pudo registrar la cache: {e}")
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
 # La configuración de la BD y el pool viven en api/db.py (Fase B). Este módulo
