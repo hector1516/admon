@@ -1,5 +1,5 @@
 <script>
-	import { Save , Plus , ArrowLeft, Clock, Pencil } from 'lucide-svelte';
+	import { Save, Plus, ArrowLeft, Clock, Pencil, FilePen } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -154,7 +154,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	{#if !embebido}
 		<div class="header">
 			<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
-			<h1>📝 Notas</h1>
+			<h1><FilePen size={20} /> Notas</h1>
 			<div style="flex:1"></div>
 			<button class="btn btn-sm btn-primary" onclick={abrirNueva}><Plus size={16} /> Nueva nota</button>
 		</div>

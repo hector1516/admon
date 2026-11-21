@@ -1,5 +1,5 @@
 <script>
-	import { Download, Eye, Save, Trash2, Upload , Skull , X , ArrowLeft, Clock, Pencil, Recycle } from 'lucide-svelte';
+	import { Download, Eye, Save, Trash2, Upload, Skull, X, ArrowLeft, Clock, Pencil, Recycle, ClipboardList } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -372,7 +372,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/registro_reportes')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>📋 {reporte.Folio || 'Cargando…'}</h1>
+		<h1><ClipboardList size={20} /> {reporte.Folio || 'Cargando…'}</h1>
 		<div style="flex:1"></div>
 		{#if !editando && !loading}
 			<button class="btn btn-sm btn-primary" onclick={empezarEdicion}><Pencil size={16} /> Editar</button>

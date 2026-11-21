@@ -1,5 +1,5 @@
 <script>
-	import { Save , Bot, Package, Receipt , X , ArrowLeft, Clock } from 'lucide-svelte';
+	import { Save, Bot, Package, Receipt, X, ArrowLeft, Clock, ClipboardList } from 'lucide-svelte';
 import HoldButton from '$lib/components/HoldButton.svelte';
 
 	import { onMount } from 'svelte';
@@ -215,7 +215,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate(`/cotizaciones/${clave}`)} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>📋 Partidas {h ? folioFmt(h.folio ?? h.idLocal) : ''}</h1>
+		<h1><ClipboardList size={20} /> Partidas {h ? folioFmt(h.folio ?? h.idLocal) : ''}</h1>
 	</div>
 
 	{#if loading}

@@ -1,7 +1,7 @@
 <script>
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
-import { Phone , ArrowLeft, Plus , Timer } from 'lucide-svelte';
+import { Phone, ArrowLeft, Plus, Timer, Wrench } from 'lucide-svelte';
 	import { auth } from '$lib/stores/auth.js';
 	import { online } from '$lib/stores/online.js';
 	import Paginacion from '$lib/components/Paginacion.svelte';
@@ -105,7 +105,7 @@ import { Phone , ArrowLeft, Plus , Timer } from 'lucide-svelte';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>🔧 Reportes de Servicio</h1>
+		<h1><Wrench size={20} /> Reportes de Servicio</h1>
 		<div style="flex:1"></div>
 		<button class="btn btn-primary btn-sm" on:click={nuevo} title="Nuevo reporte"><Plus size={16} /> Nuevo</button>
 	</div>

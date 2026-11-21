@@ -1,5 +1,5 @@
 <script>
-	import { Save, Trash2, Upload , Brush, FileText , X , ArrowLeft, Pencil } from 'lucide-svelte';
+	import { Save, Trash2, Upload, Brush, FileText, X, ArrowLeft, Pencil, ClipboardList } from 'lucide-svelte';
 import HoldButton from '$lib/components/HoldButton.svelte';
 
 	import { onMount } from 'svelte';
@@ -316,7 +316,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/reportes')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>📋 {reporte.Folio || 'Cargando…'}</h1>
+		<h1><ClipboardList size={20} /> {reporte.Folio || 'Cargando…'}</h1>
 		<div style="flex:1"></div>
 		{#if reporte.Folio}
 			<select class="input" style="width: auto; min-width: 160px;" bind:value={editForm.estatus} disabled={!editando}>

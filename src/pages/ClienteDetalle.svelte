@@ -1,5 +1,5 @@
 <script>
-	import { Save, Siren, Trash2 , X , ArrowLeft, Pencil } from 'lucide-svelte';
+	import { Save, Siren, Trash2, X, ArrowLeft, Pencil, Contact } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -195,7 +195,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/clientes')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>📇 {idCliente}</h1>
+		<h1><Contact size={20} /> {idCliente}</h1>
 	</div>
 
 	{#if loading}

@@ -1,5 +1,5 @@
 <script>
-	import { Hammer, Unlock, Wrench , Ruler , ArrowLeft, X , Pencil } from 'lucide-svelte';
+	import { Hammer, Unlock, Wrench, Ruler, ArrowLeft, X, Pencil, Car } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -204,7 +204,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	<div class="header">
 		<div class="brand-col">
 			<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
-			<h1>🚗 Automóviles</h1>
+			<h1><Car size={20} /> Automóviles</h1>
 		</div>
 		<div style="flex:1"></div>
 		<button class="btn btn-primary btn-sm" on:click={abrirNuevo}>+ Nuevo</button>

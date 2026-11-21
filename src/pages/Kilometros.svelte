@@ -1,5 +1,5 @@
 <script>
-	import { BarChart3, Save, User, Wrench , ArrowUp, Fuel, Ticket , ArrowDown, ArrowRight , ArrowLeft, Minus, Pencil, Play , ArrowLeftRight } from 'lucide-svelte';
+	import { BarChart3, Save, User, Wrench, ArrowUp, Fuel, Ticket, ArrowDown, ArrowRight, ArrowLeft, Minus, Pencil, Play, ArrowLeftRight, Route } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -194,7 +194,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>🛣️ Kilómetros</h1>
+		<h1><Route size={20} />Kilómetros</h1>
 		<div style="flex:1"></div>
 		<span class="count">{consumo ? consumo.vehiculos.length : 0} vehículos</span>
 	</div>

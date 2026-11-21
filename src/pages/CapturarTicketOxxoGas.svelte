@@ -1,5 +1,5 @@
 <script>
-	import { Brain, Save , X , ArrowLeft, Clock } from 'lucide-svelte';
+	import { Brain, Save, X, ArrowLeft, Clock, Ticket } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -174,7 +174,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/tickets_oxxogas')} title="Volver"><ArrowLeft size={16} /> Volver</button>
-		<h1>🎫 Capturar Ticket OxxoGas</h1>
+		<h1><Ticket size={20} /> Capturar Ticket OxxoGas</h1>
 	</div>
 
 	<div class="card">

@@ -1,5 +1,5 @@
 <script>
-	import { BarChart3, RefreshCw, Trash2 , Circle , X , ArrowLeft, Clock , ArrowDown } from 'lucide-svelte';
+	import { BarChart3, RefreshCw, Trash2, Circle, X, ArrowLeft, Clock, ArrowDown, ClipboardList } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -294,7 +294,7 @@ lista = Array.isArray(res) ? res : (res.items || []);
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>📋 Registro de Reportes</h1>
+		<h1><ClipboardList size={20} /> Registro de Reportes</h1>
 		<p class="subtitle">Visualización global de reportes de servicio técnico de todos los ingenieros.</p>
 		<div style="flex:1"></div>
 		<button class="btn btn-sm btn-secondary" on:click={cargar} title="Sincronizar"><RefreshCw size={16} /></button>

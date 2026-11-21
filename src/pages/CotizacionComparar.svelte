@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-import { ArrowLeft } from 'lucide-svelte';
+import { ArrowLeft, Scale } from 'lucide-svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { listar } from '$lib/cotizacionesApi.js';
@@ -59,7 +59,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/cotizaciones_materiales')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>⚖️ Comparador de Cotizaciones</h1>
+		<h1><Scale size={20} />Comparador de Cotizaciones</h1>
 	</div>
 
 	<p style="color: var(--color-text-muted); font-size: var(--font-size-sm); margin-bottom: 1rem;">

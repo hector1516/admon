@@ -1,5 +1,5 @@
 <script>
-	import { Save , ArrowLeft } from 'lucide-svelte';
+	import { Save, ArrowLeft, Plus } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -92,7 +92,7 @@
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/cotizaciones_materiales')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>➕ Nueva cotización</h1>
+		<h1><Plus size={20} /> Nueva cotización</h1>
 	</div>
 
 	<div class="card">

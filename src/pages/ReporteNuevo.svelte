@@ -1,5 +1,5 @@
 <script>
-	import { Save , X , ArrowLeft } from 'lucide-svelte';
+	import { Save, X, ArrowLeft, FilePen } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -114,7 +114,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/reportes')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>📝 Nuevo Reporte</h1>
+		<h1><FilePen size={20} /> Nuevo Reporte</h1>
 	</div>
 
 	{#if loading}

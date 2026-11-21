@@ -1,6 +1,6 @@
 <script>
 	import { onMount } from 'svelte';
-import { ArrowLeft, Plus , Clock, Minus , Scale } from 'lucide-svelte';
+import { ArrowLeft, Plus, Clock, Minus, Scale, ClipboardList } from 'lucide-svelte';
 	import { navigate } from '$lib/router.js';
 	import { auth } from '$lib/stores/auth.js';
 	import { online } from '$lib/stores/online.js';
@@ -99,7 +99,7 @@ import { ArrowLeft, Plus , Clock, Minus , Scale } from 'lucide-svelte';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>📋 Cotizaciones</h1>
+		<h1><ClipboardList size={20} /> Cotizaciones</h1>
 		<div style="flex:1"></div>
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/cotizaciones/comparar')} title="Comparar cotizaciones"><Scale size={16} /></button>
 		<button class="btn btn-sm btn-primary" on:click={() => navigate('/cotizaciones/nueva')} title="Nueva cotización"><Plus size={16} /></button>

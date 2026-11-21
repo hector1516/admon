@@ -1,5 +1,5 @@
 <script>
-	import { Save , ArrowLeft } from 'lucide-svelte';
+	import { Save, ArrowLeft, Pencil } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -122,7 +122,7 @@ import { logClick } from '$lib/audit.js';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate(`/cotizaciones/${clave}`)} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>✏️ Modificar {folio != null ? folioFmt(folio) : ''}</h1>
+		<h1><Pencil size={20} />Modificar {folio != null ? folioFmt(folio) : ''}</h1>
 	</div>
 
 	{#if loading}

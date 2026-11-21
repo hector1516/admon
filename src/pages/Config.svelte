@@ -1,5 +1,5 @@
 <script>
-	import { Bell, BellOff, FlaskConical, Megaphone, Save, Smartphone , ArrowLeft, Plus } from 'lucide-svelte';
+	import { Bell, BellOff, FlaskConical, Megaphone, Save, Smartphone, ArrowLeft, Plus, Settings } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -308,7 +308,7 @@ avUsers = Array.isArray(res) ? res : (res.items || []);
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>⚙️ Configuración</h1>
+		<h1><Settings size={20} />Configuración</h1>
 	</div>
 
 	<div class="card">

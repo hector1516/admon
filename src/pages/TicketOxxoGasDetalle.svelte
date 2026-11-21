@@ -1,5 +1,5 @@
 <script>
-	import { Search , X , ArrowLeft, Minus, Plus, RefreshCw } from 'lucide-svelte';
+	import { Search, X, ArrowLeft, Minus, Plus, RefreshCw, Ticket } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -191,7 +191,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/tickets_oxxogas')} title="Volver al listado"><ArrowLeft size={16} /> Volver</button>
-		<h1>🎫 Ticket {t ? `#${t.folio}` : ''}</h1>
+		<h1><Ticket size={20} /> Ticket {t ? `#${t.folio}` : ''}</h1>
 		<div style="flex:1"></div>
 		{#if t}
 			<span class="fecha-head">🎫 Vale: {t.fecha_vale ? fmtFecha(t.fecha_vale) : '—'}</span>

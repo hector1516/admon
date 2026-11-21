@@ -1,5 +1,5 @@
 <script>
-	import { Briefcase , Radio , ArrowLeft, ArrowRight } from 'lucide-svelte';
+	import { Briefcase, Radio, ArrowLeft, ArrowRight, Users } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -96,7 +96,7 @@ usuarios = Array.isArray(res) ? res : (res.items || []);
 	{#if !embebido}
 		<div class="header">
 			<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
-			<h1>👥 Administrador de usuarios</h1>
+			<h1><Users size={20} /> Administrador de usuarios</h1>
 		</div>
 	{:else}
 		<!-- Modo pestaña: el título corto de la sección, porque el encabezado de

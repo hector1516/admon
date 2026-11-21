@@ -17,7 +17,7 @@
 	apuntan ahí.
 -->
 <script>
-	import { ArrowLeft } from 'lucide-svelte';
+	import { ArrowLeft, Settings } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -64,7 +64,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" onclick={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>⚙️ Administración</h1>
+		<h1><Settings size={20} />Administración</h1>
 	</div>
 
 	<nav class="tabs" aria-label="Secciones de Administración">

@@ -1,5 +1,5 @@
 <script>
-	import { Calendar, Save , ArrowLeft, ArrowRight, Plus, X } from 'lucide-svelte';
+	import { Calendar, Save, ArrowLeft, ArrowRight, Plus, X, Building2 } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -177,7 +177,7 @@
 <div class="page">
 	<div class="header">
 		<button class="btn btn-sm btn-secondary" on:click={() => navigate('/dashboard')} title="Volver"><ArrowLeft size={16} /></button>
-		<h1>🏢 Clientes</h1>
+		<h1><Building2 size={20} /> Clientes</h1>
 		<div style="flex:1"></div>
 		<button
 			class="btn btn-sm btn-primary"
