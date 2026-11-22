@@ -20,6 +20,7 @@
 	import { RefreshCw, AlertTriangle } from 'lucide-svelte';
 
 	import { onMount, onDestroy } from 'svelte';
+	import AsistenciaHorarios from './AsistenciaHorarios.svelte';
 	import { auth } from '$lib/stores/auth.js';
 import EmptyState from '$lib/components/EmptyState.svelte';
 import LoadingState from '$lib/components/LoadingState.svelte';
@@ -296,6 +297,8 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	minutos y no siempre detectan todas las entradas ni todas las salidas.
 	<b>Es información orientativa, no un registro oficial de asistencia.</b>
 </p>
+
+	<AsistenciaHorarios />
 
 <style>
 	/* Todo el estilo va local al componente: `src/styles/app.css` es del shell

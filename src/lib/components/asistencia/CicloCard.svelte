@@ -151,6 +151,20 @@
 		margin-bottom: 0.6rem;
 		transition: border-color 0.15s ease;
 	}
+	/* El popup se pinta solo: ni .modal-overlay ni .modal existen en todas
+	   las apps, y sin position:fixed el detalle aparecía al final de la página
+	   en vez de encima. */
+	.modal-overlay {
+		position: fixed;
+		inset: 0;
+		background: color-mix(in srgb, var(--color-ink) 72%, transparent);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 1rem;
+		z-index: 400;
+		backdrop-filter: blur(2px);
+	}
 	/* El popup del detalle, con la superficie del tema: la clase .modal de cada
 	   app se pintaba clara y en Mi Asistencia se veía un bloque blanco. */
 	.ciclo-modal {
@@ -182,7 +196,9 @@
 		gap: 0.5rem;
 		font-size: var(--font-size-xs);
 		color: var(--color-text-soft);
-		text-transform: capitalize;
+	}
+	.ciclo-fecha > span:first-child::first-letter {
+		text-transform: uppercase;
 	}
 	.estado-chip {
 		font-size: var(--font-size-2xs);

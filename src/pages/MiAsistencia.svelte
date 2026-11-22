@@ -40,6 +40,7 @@
 	// Se sabe al cargar la página para no preguntarlo en medio del gesto del
 	// botón: si falta, la passkey se crea ahí mismo con la huella o Face ID.
 	let passkeyOk = $state<boolean | null>(null);
+	let horarioDias = $state<any>(null);
 
 	// Tarjetas por ciclo (entrada + salida) con horas extra según la LFT.
 	let configLft = $state({ horas_jornada: 8, extras_max_dia: 3, extras_dobles_semana: 9 });
@@ -49,7 +50,8 @@
 			horasJornada: Number(configLft.horas_jornada) || 8,
 			extrasMaxDia: Number(configLft.extras_max_dia) || 3,
 			extrasDoblesSemana: Number(configLft.extras_dobles_semana) || 9,
-			ahora: new Date(relojMs)
+			ahora: new Date(relojMs),
+			horario: horarioDias
 		})
 	);
 
@@ -94,6 +96,21 @@
 		} catch {}
 	}
 
+
+	// Horario asignado: manda en las horas extra (solo el tiempo fuera de la
+	// ventana del horario). Si no tiene, se cae al cálculo de la jornada.
+	async function cargarHorario() {
+		try {
+			const r = await api.get('/mi-asistencia/horario');
+			const dias = r?.dias || {};
+			horarioDias = Object.fromEntries(
+				Object.entries(dias).map(([k, v]) => [Number(k), v])
+			);
+		} catch {
+			horarioDias = null;
+		}
+	}
+
 	/** Deja `passkeyOk` resuelto antes de que el usuario toque el botón. */
 	async function verificarPasskey() {
 		try {
@@ -108,11 +125,14 @@
 		loading = true;
 		error = '';
 		try {
-			const hist = await api.get('/mi-asistencia/historial?dias=30');
+			// En paralelo: son dos consultas independientes y el SQL está lento.
+			const [hist, he] = await Promise.all([
+				api.get('/mi-asistencia/historial?dias=30'),
+				api.get('/mi-asistencia/horas-extras').catch(() => null)
+			]);
 			marcados = hist.registros || [];
 			if (hist.config_lft) configLft = hist.config_lft;
-			const he = await api.get('/mi-asistencia/horas-extras');
-			horasExtras = he;
+			if (he) horasExtras = he;
 			if (marcados.length > 0 && marcados[0].Tipo === 'Entrada') {
 				const ultima = marcados[0];
 				horaEntradaActual = new Date(ultima.Fecha + 'T' + ultima.Hora);
@@ -249,6 +269,7 @@
 		cargarReportes();
 		obtenerGPS();
 		verificarPasskey();
+		cargarHorario();
 		return () => { if (timerInterval) clearInterval(timerInterval); };
 	});
 </script>

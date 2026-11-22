@@ -539,3 +539,320 @@ def passkey_verify(req: PasskeyVerifyReq, request: Request,
     return {"ok": True, "credential_id": cred_id,
             "stepup_token": stepup.emitir(user_id, cred_id, _pk._passkey_secret())}
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Horarios de asistencia: catálogo con nombre («Operativo», «Administrativo») y
+# asignación por usuario. Las tablas viven en la migración 0061.
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class HorarioDiaReq(BaseModel):
+    dia: int                      # 1 = lunes … 7 = domingo
+    entrada: Optional[str] = None  # 'HH:MM'
+    salida: Optional[str] = None
+    comida: int = 60
+    descanso: bool = False
+
+
+class HorarioReq(BaseModel):
+    nombre: str
+    dias: List[HorarioDiaReq] = []
+
+
+class AsignarHorarioReq(BaseModel):
+    id_horario: Optional[int] = None
+
+
+def _requiere_admin(user: dict):
+    if not (user.get("acceso_usuarios") or user.get("acceso_reportes")):
+        raise HTTPException(status_code=403, detail="Sin permiso")
+
+
+def _minutos(hhmm):
+    if not hhmm:
+        return None
+    partes = str(hhmm).split(":")
+    try:
+        return int(partes[0]) * 60 + int(partes[1])
+    except (ValueError, IndexError):
+        return None
+
+
+def _horas_semana(dias):
+    """Suma de los días laborables, descontando la comida. En horas decimales."""
+    total = 0
+    for d in dias:
+        if d.get("descanso"):
+            continue
+        e, s = _minutos(d.get("entrada")), _minutos(d.get("salida"))
+        if e is None or s is None:
+            continue
+        if s < e:
+            s += 1440
+        total += max(0, s - e - int(d.get("comida") or 0))
+    return round(total / 60, 2)
+
+
+def _leer_dias(cur, id_horario):
+    cur.execute(
+        """
+        SELECT DiaSemana, HoraEntrada, HoraSalida, ComidaMin, Descanso
+        FROM HUB_AsistenciaHorarioDias
+        WHERE IdHorario = %s
+        ORDER BY DiaSemana
+        """,
+        (id_horario,),
+    )
+    dias = []
+    for r in cur.fetchall():
+        dias.append(
+            {
+                "dia": r["DiaSemana"],
+                "entrada": r["HoraEntrada"].strftime("%H:%M") if r["HoraEntrada"] else None,
+                "salida": r["HoraSalida"].strftime("%H:%M") if r["HoraSalida"] else None,
+                "comida": r["ComidaMin"],
+                "descanso": bool(r["Descanso"]),
+            }
+        )
+    return dias
+
+
+def _config_lft(cur):
+    cur.execute(
+        "SELECT TOP 1 HorasJornada, DiasTrabajoSemana, JornadaDiurnaMax "
+        "FROM HUB_AsistenciaConfigLFT WHERE Activo = 1 ORDER BY Anio DESC"
+    )
+    cfg = cur.fetchone() or {}
+    jornada = float(cfg.get("HorasJornada") or 8)
+    dias = int(cfg.get("DiasTrabajoSemana") or 6)
+    return {
+        "horas_jornada": jornada,
+        "dias_semana": dias,
+        "tope_semana": round(float(cfg.get("JornadaDiurnaMax") or jornada) * dias, 2),
+    }
+
+
+@router.get("/admin/horarios")
+def listar_horarios(current_user: dict = Depends(get_current_user)):
+    """Catálogo de horarios con sus días y el total semanal."""
+    _requiere_admin(current_user)
+    conn = get_connection()
+    cur = conn.cursor(as_dict=True)
+    try:
+        cur.execute(
+            "SELECT Id, Nombre, Activo, Notas FROM HUB_AsistenciaHorarios ORDER BY Nombre"
+        )
+        horarios = []
+        for h in cur.fetchall():
+            dias = _leer_dias(cur, h["Id"])
+            horarios.append(
+                {
+                    "id": h["Id"],
+                    "nombre": h["Nombre"],
+                    "activo": bool(h["Activo"]),
+                    "notas": h["Notas"],
+                    "dias": dias,
+                    "horas_semana": _horas_semana(dias),
+                }
+            )
+        return {"horarios": horarios, "lft": _config_lft(cur)}
+    finally:
+        cur.close()
+        conn.close()
+
+
+def _guardar_dias(cur, id_horario, dias):
+    cur.execute("DELETE FROM HUB_AsistenciaHorarioDias WHERE IdHorario = %s", (id_horario,))
+    for d in dias:
+        if d.dia < 1 or d.dia > 7:
+            continue
+        if d.descanso or not d.entrada or not d.salida:
+            cur.execute(
+                "INSERT INTO HUB_AsistenciaHorarioDias "
+                "(IdHorario, DiaSemana, Descanso, ComidaMin) VALUES (%s, %s, 1, 0)",
+                (id_horario, d.dia),
+            )
+        else:
+            cur.execute(
+                "INSERT INTO HUB_AsistenciaHorarioDias "
+                "(IdHorario, DiaSemana, HoraEntrada, HoraSalida, ComidaMin, Descanso) "
+                "VALUES (%s, %s, CONVERT(TIME(0), %s), CONVERT(TIME(0), %s), %s, 0)",
+                (id_horario, d.dia, d.entrada, d.salida, max(0, min(240, int(d.comida or 0)))),
+            )
+
+
+@router.post("/admin/horarios")
+def crear_horario(req: HorarioReq, current_user: dict = Depends(get_current_user)):
+    """Crea un horario con nombre y sus días."""
+    _requiere_admin(current_user)
+    nombre = (req.nombre or "").strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El horario necesita un nombre")
+    conn = get_connection()
+    cur = conn.cursor(as_dict=True)
+    try:
+        cur.execute("SELECT Id FROM HUB_AsistenciaHorarios WHERE Nombre = %s", (nombre,))
+        if cur.fetchone():
+            raise HTTPException(status_code=409, detail="Ya existe un horario con ese nombre")
+        cur.execute(
+            "INSERT INTO HUB_AsistenciaHorarios (Nombre, Activo, ActualizadoPor) "
+            "OUTPUT INSERTED.Id VALUES (%s, 1, %s)",
+            (nombre, current_user.get("id") or current_user.get("Id")),
+        )
+        id_horario = cur.fetchone()["Id"]
+        _guardar_dias(cur, id_horario, req.dias)
+        conn.commit()
+        return {"ok": True, "id": id_horario}
+    finally:
+        cur.close()
+        conn.close()
+
+
+@router.put("/admin/horarios/{id_horario}")
+def actualizar_horario(
+    id_horario: int, req: HorarioReq, current_user: dict = Depends(get_current_user)
+):
+    """Renombra y reemplaza los días de un horario. Afecta a todos los asignados."""
+    _requiere_admin(current_user)
+    nombre = (req.nombre or "").strip()
+    if not nombre:
+        raise HTTPException(status_code=400, detail="El horario necesita un nombre")
+    conn = get_connection()
+    cur = conn.cursor(as_dict=True)
+    try:
+        cur.execute("SELECT Id FROM HUB_AsistenciaHorarios WHERE Id = %s", (id_horario,))
+        if not cur.fetchone():
+            raise HTTPException(status_code=404, detail="Horario no encontrado")
+        cur.execute(
+            "SELECT Id FROM HUB_AsistenciaHorarios WHERE Nombre = %s AND Id <> %s",
+            (nombre, id_horario),
+        )
+        if cur.fetchone():
+            raise HTTPException(status_code=409, detail="Ya existe un horario con ese nombre")
+        cur.execute(
+            "UPDATE HUB_AsistenciaHorarios SET Nombre = %s, Actualizado = GETDATE(), "
+            "ActualizadoPor = %s WHERE Id = %s",
+            (nombre, current_user.get("id") or current_user.get("Id"), id_horario),
+        )
+        _guardar_dias(cur, id_horario, req.dias)
+        conn.commit()
+        return {"ok": True}
+    finally:
+        cur.close()
+        conn.close()
+
+
+@router.delete("/admin/horarios/{id_horario}")
+def borrar_horario(id_horario: int, current_user: dict = Depends(get_current_user)):
+    """Borra un horario. Falla si alguien lo tiene asignado."""
+    _requiere_admin(current_user)
+    conn = get_connection()
+    cur = conn.cursor(as_dict=True)
+    try:
+        cur.execute(
+            "SELECT COUNT(*) AS n FROM HUB_AsistenciaUsuarioHorario WHERE IdHorario = %s",
+            (id_horario,),
+        )
+        if (cur.fetchone() or {}).get("n", 0) > 0:
+            raise HTTPException(
+                status_code=409,
+                detail="Ese horario está asignado: quítalo de los usuarios primero",
+            )
+        cur.execute("DELETE FROM HUB_AsistenciaHorarios WHERE Id = %s", (id_horario,))
+        conn.commit()
+        return {"ok": True}
+    finally:
+        cur.close()
+        conn.close()
+
+
+@router.get("/admin/horarios/usuarios")
+def usuarios_con_horario(current_user: dict = Depends(get_current_user)):
+    """Usuarios activos con el horario que tengan asignado."""
+    _requiere_admin(current_user)
+    conn = get_connection()
+    cur = conn.cursor(as_dict=True)
+    try:
+        cur.execute(
+            """
+            SELECT u.Id, u.Nombre, uh.IdHorario, h.Nombre AS Horario
+            FROM HUB_Users u
+            LEFT JOIN HUB_AsistenciaUsuarioHorario uh ON uh.IdUsuario = u.Id
+            LEFT JOIN HUB_AsistenciaHorarios h ON h.Id = uh.IdHorario
+            ORDER BY u.Nombre
+            """
+        )
+        return {"usuarios": cur.fetchall()}
+    finally:
+        cur.close()
+        conn.close()
+
+
+@router.put("/admin/horarios/usuario/{id_usuario}")
+def asignar_horario(
+    id_usuario: int, req: AsignarHorarioReq, current_user: dict = Depends(get_current_user)
+):
+    """Asigna un horario a un usuario. `id_horario` nulo lo deja sin horario."""
+    _requiere_admin(current_user)
+    conn = get_connection()
+    cur = conn.cursor(as_dict=True)
+    try:
+        if req.id_horario is None:
+            cur.execute(
+                "DELETE FROM HUB_AsistenciaUsuarioHorario WHERE IdUsuario = %s", (id_usuario,)
+            )
+        else:
+            cur.execute(
+                "SELECT Id FROM HUB_AsistenciaHorarios WHERE Id = %s", (req.id_horario,)
+            )
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail="Horario no encontrado")
+            cur.execute(
+                """
+                IF EXISTS (SELECT 1 FROM HUB_AsistenciaUsuarioHorario WHERE IdUsuario = %s)
+                    UPDATE HUB_AsistenciaUsuarioHorario
+                       SET IdHorario = %s, Actualizado = GETDATE()
+                     WHERE IdUsuario = %s
+                ELSE
+                    INSERT INTO HUB_AsistenciaUsuarioHorario (IdUsuario, IdHorario)
+                    VALUES (%s, %s)
+                """,
+                (id_usuario, req.id_horario, id_usuario, id_usuario, req.id_horario),
+            )
+        conn.commit()
+        return {"ok": True}
+    finally:
+        cur.close()
+        conn.close()
+
+
+@router.get("/horario")
+def mi_horario(current_user: dict = Depends(get_current_user)):
+    """El horario del usuario de la sesión, día por día (para las tarjetas)."""
+    user_id = current_user.get("id") or current_user.get("Id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Usuario no identificado")
+    conn = get_connection()
+    cur = conn.cursor(as_dict=True)
+    try:
+        cur.execute(
+            "SELECT IdHorario FROM HUB_AsistenciaUsuarioHorario WHERE IdUsuario = %s",
+            (user_id,),
+        )
+        fila = cur.fetchone()
+        if not fila:
+            return {"id_horario": None, "nombre": None, "dias": {}}
+        id_horario = fila["IdHorario"]
+        cur.execute("SELECT Nombre FROM HUB_AsistenciaHorarios WHERE Id = %s", (id_horario,))
+        nombre = (cur.fetchone() or {}).get("Nombre")
+        dias = {}
+        for d in _leer_dias(cur, id_horario):
+            dias[str(d["dia"])] = (
+                None
+                if d["descanso"]
+                else {"entrada": d["entrada"], "salida": d["salida"], "comida": d["comida"]}
+            )
+        return {"id_horario": id_horario, "nombre": nombre, "dias": dias}
+    finally:
+        cur.close()
+        conn.close()
