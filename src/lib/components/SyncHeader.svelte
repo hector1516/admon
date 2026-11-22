@@ -221,10 +221,10 @@
     height: 3.4rem;
     min-width: 3.4rem;
     border-radius: 999px;
-    background: var(--color-primary, #2563eb);
+    background: var(--color-info);
     color: #fff;
     transform: translateY(-14px);
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.45);
+    box-shadow: 0 8px 20px color-mix(in srgb, var(--color-info) 45%, transparent);
   }
   .nav-item.destacado:active {
     transform: translateY(-12px) scale(0.96);
