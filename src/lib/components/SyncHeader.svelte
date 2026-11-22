@@ -79,24 +79,26 @@
     }
   }
 
-  const _navRoutes = (Array.isArray(navItems) && navItems.length >= 4)
+  // Tres destinos: inicio y los dos laterales. El del centro es siempre Mi
+  // Asistencia (`destacado`), así que aquí no se pide.
+  const _navRoutes = (Array.isArray(navItems) && navItems.length >= 3)
     ? navItems
-    : ['/dashboard', '/busqueda', '/legends', '/perfil'];
+    : ['/dashboard', '/legends', '/perfil'];
   const _navItems = [
     { action: () => { if (window.history.length > 1) window.history.back(); else navigate(_navRoutes[0] || '/'); } },
     { action: () => navigate(_navRoutes[0] || '/') },
-    { action: () => navigate(destacado || _navRoutes[1] || '/') },
+    { action: () => navigate(destacado) },
+    { action: () => navigate(_navRoutes[1] || '/') },
     { action: () => navigate(_navRoutes[2] || '/') },
-    { action: () => navigate(_navRoutes[3] || '/') },
   ];
 
   function isActiveNav(index) {
     const p = typeof window !== 'undefined' ? window.location.pathname : '';
     if (index === 0) return false;
     if (index === 1) return p === (_navRoutes[0] || '/') || p === '/' || p === '';
-    if (index === 2) return p === (destacado || _navRoutes[1] || '/');
-    if (index === 3) return p === (_navRoutes[2] || '/');
-    if (index === 4) return p === (_navRoutes[3] || '/');
+    if (index === 2) return p === destacado;
+    if (index === 3) return p === (_navRoutes[1] || '/');
+    if (index === 4) return p === (_navRoutes[2] || '/');
     return false;
   }
 </script>

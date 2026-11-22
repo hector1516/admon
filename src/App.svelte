@@ -161,6 +161,7 @@ import EstatusServicios from './pages/EstatusServicios.svelte';
 			fetcher={shellFetch}
 			onsync={shellSync}
 			destacado="/mi_asistencia"
+			navItems={['/dashboard', '/legends', '/perfil']}
 		/>
 	{/if}
 
