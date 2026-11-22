@@ -58,16 +58,23 @@
 		<div id="app"></div>
 		<script type="module" src="/src/main.js"></script>
 		<script>
-			// Force cache bust: si la versión guardada no coincide, recargar sin caché
-			try {
-				var cur = '1.0.2';
-				var stored = localStorage.getItem('admon_app_version');
-				if (stored && stored !== cur) {
+			// Cache bust por VERSIÓN REAL: se lee del changelog, no de un número
+			// escrito a mano (estaba fijo en 1.0.2, así que nunca volvía a
+			// recargar y el teléfono se quedaba con el paquete viejo).
+			(async function () {
+				try {
+					var r = await fetch('/changelog.json', { cache: 'no-store' });
+					var d = await r.json();
+					var cur = d.version || '0';
+					var stored = localStorage.getItem('admon_app_version');
+					if (stored && stored !== cur) {
+						localStorage.setItem('admon_app_version', cur);
+						location.replace(location.pathname + '?_t=' + Date.now());
+						return;
+					}
 					localStorage.setItem('admon_app_version', cur);
-					location.replace(location.pathname + '?_t=' + Date.now());
-				}
-				localStorage.setItem('admon_app_version', cur);
-			} catch(e) {}
+				} catch (e) {}
+			})();
 			// Registrar service worker al arrancar
 			if ('serviceWorker' in navigator) {
 				navigator.serviceWorker.register('/sw.js').catch(() => {});
