@@ -5,6 +5,8 @@
 	let msg = $state('');
 	import { api } from '$lib/api.js';
 	import { FileText, Download, Settings, Clock, Users, ArrowLeft } from 'lucide-svelte';
+	import AsistenciaReportes from './AsistenciaReportes.svelte';
+	import AsistenciaHorarios from './AsistenciaHorarios.svelte';
 
 	let loading = $state(true);
 	let error = $state('');
@@ -49,6 +51,8 @@
 	<div class="tabs">
 		<button class="tab" class:active={activeTab === 'reportes'} onclick={() => activeTab = 'reportes'}>Reportes</button>
 		<button class="tab" class:active={activeTab === 'config'} onclick={() => activeTab = 'config'}>Config LFT</button>
+			<button class="tab" class:active={activeTab === 'asistencias'} onclick={() => activeTab = 'asistencias'}>Asistencias</button>
+			<button class="tab" class:active={activeTab === 'horarios'} onclick={() => activeTab = 'horarios'}>Horarios</button>
 	</div>
 
 	{#if loading}
@@ -97,6 +101,12 @@
 		{/if}
 	{/if}
 </div>
+
+{#if activeTab === 'asistencias'}
+	<AsistenciaReportes />
+{:else if activeTab === 'horarios'}
+	<AsistenciaHorarios />
+{/if}
 
 <style>
 	.page { padding: 1rem; max-width: 900px; margin: 0 auto; }
