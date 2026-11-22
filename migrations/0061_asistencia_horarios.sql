@@ -1,46 +1,87 @@
--- 0061 · Horarios de asistencia por usuario y día
+-- 0061 · Horarios de asistencia: catálogo + asignación por usuario
 --
--- Una fila por persona y día de la semana (1 = lunes … 7 = domingo, ISO).
--- La comida es fija por día (minutos) y se descuenta de las horas trabajadas:
--- 09:00–18:00 con 60' son 8 h, no 9. Ver `AsistenciaAdmin.svelte`.
+-- Revisada el 2026-11-21 ANTES de aplicarse: la primera versión guardaba una
+-- fila por usuario y día, pero en la oficina hay horarios con nombre
+-- («Operativo», «Administrativo») que comparten varias personas. Se rehace con
+-- tres tablas:
 --
--- No toca ninguna tabla existente: es una tabla nueva, así que no hay ALTER.
--- Se probó primero en ECCSA_Admon_Pruebas (convención de `admon/AGENTS.md`).
+--   1. HUB_AsistenciaHorarios       · el catálogo: nombre del horario
+--   2. HUB_AsistenciaHorarioDias    · los 7 días de cada horario
+--   3. HUB_AsistenciaUsuarioHorario · a quién se le asignó cada horario
 --
--- Regla de la comida (decidida el 2026-11-21): se descuenta completa solo si la
--- persona estuvo al menos la jornada + la comida; si se fue antes, no se
--- descuenta nada. Esa regla vive en el cálculo, no en la tabla: aquí solo se
--- guarda cuántos minutos corresponden a ese día.
+-- El total semanal y la comparativa con la LFT NO se guardan: se calculan
+-- (SUM de los días) en la API y en la pantalla, para que no se desincronicen.
+--
+-- No toca ninguna tabla existente: son tres tablas nuevas, sin ALTER.
 
+-- ── 1. Catálogo de horarios ────────────────────────────────────────────────
 IF OBJECT_ID('dbo.HUB_AsistenciaHorarios', 'U') IS NULL
 BEGIN
     CREATE TABLE dbo.HUB_AsistenciaHorarios (
         Id             INT IDENTITY(1,1) NOT NULL
             CONSTRAINT PK_HUB_AsistenciaHorarios PRIMARY KEY,
-        IdUsuario      INT          NOT NULL,
-        DiaSemana      TINYINT      NOT NULL,   -- 1 = lunes … 7 = domingo
-        HoraEntrada    TIME(0)      NULL,
-        HoraSalida     TIME(0)      NULL,
-        ComidaMin      SMALLINT     NOT NULL CONSTRAINT DF_AsisHor_Comida DEFAULT (60),
-        Descanso       BIT          NOT NULL CONSTRAINT DF_AsisHor_Descanso DEFAULT (0),
-        VigenteDesde   DATE         NULL,
-        Actualizado    DATETIME     NOT NULL CONSTRAINT DF_AsisHor_Actualizado DEFAULT (GETDATE()),
-        ActualizadoPor INT          NULL,
-        CONSTRAINT CK_AsisHor_Dia    CHECK (DiaSemana BETWEEN 1 AND 7),
-        CONSTRAINT CK_AsisHor_Comida CHECK (ComidaMin >= 0 AND ComidaMin <= 240),
-        -- Un día laborable necesita hora de entrada y de salida; uno de
-        -- descanso no las usa.
-        CONSTRAINT CK_AsisHor_Horas  CHECK (
+        Nombre         NVARCHAR(60)  NOT NULL,   -- «Operativo», «Administrativo»
+        Activo         BIT           NOT NULL CONSTRAINT DF_AsisHor_Activo DEFAULT (1),
+        Notas          NVARCHAR(200) NULL,
+        Actualizado    DATETIME      NOT NULL CONSTRAINT DF_AsisHor_Actualizado DEFAULT (GETDATE()),
+        ActualizadoPor INT           NULL,
+        CONSTRAINT UQ_AsisHor_Nombre UNIQUE (Nombre)
+    );
+    PRINT 'HUB_AsistenciaHorarios creada';
+END
+ELSE
+    PRINT 'HUB_AsistenciaHorarios ya existe';
+GO
+
+-- ── 2. Los días de cada horario ────────────────────────────────────────────
+IF OBJECT_ID('dbo.HUB_AsistenciaHorarioDias', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.HUB_AsistenciaHorarioDias (
+        Id           INT IDENTITY(1,1) NOT NULL
+            CONSTRAINT PK_HUB_AsistenciaHorarioDias PRIMARY KEY,
+        IdHorario    INT          NOT NULL,
+        DiaSemana    TINYINT      NOT NULL,   -- 1 = lunes … 7 = domingo
+        HoraEntrada  TIME(0)      NULL,
+        HoraSalida   TIME(0)      NULL,
+        ComidaMin    SMALLINT     NOT NULL CONSTRAINT DF_AsisHorDia_Comida DEFAULT (60),
+        Descanso     BIT          NOT NULL CONSTRAINT DF_AsisHorDia_Descanso DEFAULT (0),
+        CONSTRAINT FK_AsisHorDia_Horario FOREIGN KEY (IdHorario)
+            REFERENCES dbo.HUB_AsistenciaHorarios (Id) ON DELETE CASCADE,
+        CONSTRAINT CK_AsisHorDia_Dia    CHECK (DiaSemana BETWEEN 1 AND 7),
+        CONSTRAINT CK_AsisHorDia_Comida CHECK (ComidaMin >= 0 AND ComidaMin <= 240),
+        -- Un día laborable necesita entrada y salida; uno de descanso no.
+        CONSTRAINT CK_AsisHorDia_Horas  CHECK (
             Descanso = 1 OR (HoraEntrada IS NOT NULL AND HoraSalida IS NOT NULL)
         )
     );
 
-    -- Una sola fila por persona y día: el horario se edita, no se acumula.
-    CREATE UNIQUE INDEX UX_AsisHor_Usuario_Dia
-        ON dbo.HUB_AsistenciaHorarios (IdUsuario, DiaSemana);
-
-    PRINT 'HUB_AsistenciaHorarios creada';
+    -- Un solo juego de horas por día y horario.
+    CREATE UNIQUE INDEX UX_AsisHorDia_Horario_Dia
+        ON dbo.HUB_AsistenciaHorarioDias (IdHorario, DiaSemana);
+    PRINT 'HUB_AsistenciaHorarioDias creada';
 END
 ELSE
-    PRINT 'HUB_AsistenciaHorarios ya existe: nada que hacer';
+    PRINT 'HUB_AsistenciaHorarioDias ya existe';
+GO
+
+-- ── 3. A quién se le asignó ────────────────────────────────────────────────
+IF OBJECT_ID('dbo.HUB_AsistenciaUsuarioHorario', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.HUB_AsistenciaUsuarioHorario (
+        Id           INT IDENTITY(1,1) NOT NULL
+            CONSTRAINT PK_HUB_AsistenciaUsuarioHorario PRIMARY KEY,
+        IdUsuario    INT      NOT NULL,
+        IdHorario    INT      NOT NULL,
+        VigenteDesde DATE     NOT NULL CONSTRAINT DF_AsisUsuHor_Desde DEFAULT (CAST(GETDATE() AS date)),
+        Actualizado  DATETIME NOT NULL CONSTRAINT DF_AsisUsuHor_Actualizado DEFAULT (GETDATE()),
+        CONSTRAINT FK_AsisUsuHor_Horario FOREIGN KEY (IdHorario)
+            REFERENCES dbo.HUB_AsistenciaHorarios (Id),
+        -- Un horario activo por persona; el histórico queda en VigenteDesde si
+        -- algún día se necesita (hoy se sobrescribe).
+        CONSTRAINT UQ_AsisUsuHor_Usuario UNIQUE (IdUsuario)
+    );
+    PRINT 'HUB_AsistenciaUsuarioHorario creada';
+END
+ELSE
+    PRINT 'HUB_AsistenciaUsuarioHorario ya existe';
 GO
