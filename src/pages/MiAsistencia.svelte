@@ -449,11 +449,12 @@
 </div>
 
 <style>
-	.page { padding: 1rem; max-width: 600px; margin: 0 auto; }
+	.page { padding: 1rem; max-width: 600px; margin: 0 auto; 	padding-bottom: calc(var(--nav-h, 64px) + 1.5rem);
+	}
 	.header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
 	.header h1 { font-size: var(--font-size-xl); font-weight: 700; flex: 1; }
-	.card { background: white; border-radius: 0.75rem; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-	.card h2 { font-size: var(--font-size-base); font-weight: 600; margin-bottom: 0.75rem; color: var(--color-surface); }
+	.card { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 1rem; }
+	.card h2 { font-size: var(--font-size-base); font-weight: 600; margin-bottom: 0.75rem; color: var(--color-text-strong); }
 	.checkin-section { display: flex; flex-direction: column; align-items: center; gap: 1rem; padding: 1.5rem 0; }
 	.checkin-btn { width: 200px; height: 200px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.5rem; font-size: var(--font-size-xl); font-weight: 800; cursor: pointer; border: none; transition: all 0.3s; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
 	.checkin-btn.checkin { background: linear-gradient(135deg, var(--color-success), #16a34a); color: white; }
@@ -486,7 +487,7 @@
 	.spin { animation: spin 1s linear infinite; }
 	@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 	.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
-	.modal { background: white; border-radius: 0.75rem; max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; }
+	.modal { background: var(--color-surface); border: 1px solid var(--color-line); border-radius: var(--radius-sm); max-width: 500px; width: 100%; max-height: 80vh; overflow-y: auto; }
 	.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid var(--color-text-soft); }
 	.modal-header h2 { font-size: var(--font-size-lg); font-weight: 600; }
 	.modal-body { padding: 1rem; }
