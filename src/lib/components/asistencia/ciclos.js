@@ -1,20 +1,36 @@
 /*
  * ciclos.js — agrupa los marcados de Mi Asistencia en ciclos entrada→salida.
  *
- * El backend devuelve los marcados sueltos (`HUB_AsistenciaMarcado`). Aquí se
- * empareja cada Entrada con la Salida que le sigue para pintar **una tarjeta
- * por ciclo**, con horas trabajadas y horas extra calculadas con la LFT:
- *   - jornada diaria configurable (`HUB_AsistenciaConfigLFT.HorasJornada`)
- *   - las primeras 9 h extra de la semana se pagan dobles
- *   - el resto de la semana, triples
- *   - máximo 3 h extra al día (LFT art. 66)
+ * Horas extra (decidido el 2026-11-21): **solo el tiempo fuera del horario
+ * asignado**. Si el horario del día es 09:00–18:30, entrar 08:20 suma 40 min y
+ * salir 19:10 suma otros 40, aunque la persona no haya cumplido el horario
+ * completo. Se aplica tal cual, sin condiciones.
  *
- * Sin dependencias: se puede probar con `node --test` (ver tests/).
+ * - Día de descanso trabajado → todo el turno es extra.
+ * - Sin horario asignado → se mantiene la regla vieja (lo que pase de la
+ *   jornada), para no romper a quien todavía no tiene horario.
+ * - La comida fija del día se descuenta de las horas trabajadas solo si estuvo
+ *   al menos la jornada + la comida; si se fue antes, no se descuenta.
+ * - La LFT reparte la extra semanal: primeras 9 h dobles, el resto triples, y
+ *   avisa si un día pasa de 3 h.
+ *
+ * Sin dependencias: se prueba con `node --test` (ver tests/).
  */
 
 export const HORAS_JORNADA = 8;
 export const EXTRAS_DOBLES_SEMANA = 9;
 export const EXTRAS_MAX_DIA = 3;
+
+/** 'HH:MM' o 'HH:MM:SS' → minutos desde medianoche. `null` si no se entiende. */
+export function minutos(hora) {
+	if (hora == null) return null;
+	const partes = String(hora).split(':');
+	if (partes.length < 2) return null;
+	const h = Number(partes[0]);
+	const m = Number(partes[1]);
+	if (Number.isNaN(h) || Number.isNaN(m)) return null;
+	return h * 60 + m;
+}
 
 /** Convierte Fecha + Hora de un marcado en un Date local (nunca UTC). */
 export function instante(marcado) {
@@ -25,8 +41,7 @@ export function instante(marcado) {
 					marcado.Fecha.getDate()
 				).padStart(2, '0')}`
 			: String(marcado.Fecha).slice(0, 10);
-	const hora = String(marcado.Hora).slice(0, 8);
-	const d = new Date(`${fecha}T${hora}`);
+	const d = new Date(`${fecha}T${String(marcado.Hora).slice(0, 8)}`);
 	return Number.isNaN(d.getTime()) ? null : d;
 }
 
@@ -36,6 +51,11 @@ export function claveSemana(fecha) {
 	const desdeLunes = (d.getDay() + 6) % 7; // domingo=6, lunes=0
 	d.setDate(d.getDate() - desdeLunes);
 	return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+}
+
+/** Día ISO de la fecha: 1 = lunes … 7 = domingo. */
+export function diaIso(fecha) {
+	return ((fecha.getDay() + 6) % 7) + 1;
 }
 
 function redondear(n) {
@@ -54,26 +74,56 @@ export function formatoHoras(horas) {
 }
 
 function mismoDia(a, b) {
-	return (
-		a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
-	);
+	return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+/**
+ * Minutos fuera de la ventana del horario.
+ * Devuelve `{ antes, despues }` en minutos, o `null` si el día es descanso.
+ */
+function minutosFuera(inicio, fin, sched) {
+	const eS = minutos(sched.entrada);
+	const sS = minutos(sched.salida);
+	if (eS == null || sS == null) return null;
+
+	let eA = inicio.getHours() * 60 + inicio.getMinutes();
+	let sA = fin.getHours() * 60 + fin.getMinutes();
+	let salidaProg = sS;
+	if (salidaProg < eS) salidaProg += 1440; // horario nocturno
+	if (sA < eA) sA += 1440; // el turno cruzó medianoche
+
+	return {
+		antes: Math.max(0, eS - eA),
+		despues: Math.max(0, sA - salidaProg)
+	};
+}
+
+function ubicacionDe(marcados) {
+	const conGps = marcados.find((m) => m && m.Latitud != null && m.Longitud != null);
+	if (!conGps) return null;
+	return {
+		lat: Number(conGps.Latitud),
+		lon: Number(conGps.Longitud),
+		precision: conGps.Precision != null ? Number(conGps.Precision) : null
+	};
 }
 
 /**
  * Agrupa los marcados en ciclos.
  *
- * @param {Array} marcados filas de /mi-asistencia/historial (en cualquier orden)
+ * @param {Array} marcados filas de /mi-asistencia/historial
  * @param {Object} opciones
- * @param {Date}   opciones.ahora        instante de referencia para ciclos abiertos
- * @param {number} opciones.horasJornada horas de la jornada diaria (LFT)
- * @returns {Array} ciclos del más nuevo al más viejo
+ * @param {Date}   opciones.ahora               instante de referencia para ciclos abiertos
+ * @param {number} opciones.horasJornada        jornada de la LFT (respaldo sin horario)
+ * @param {Object} opciones.horario             mapa día ISO → { entrada, salida, comida } o null
  */
 export function agruparCiclos(marcados = [], opciones = {}) {
 	const {
 		ahora = new Date(),
 		horasJornada = HORAS_JORNADA,
 		extrasDoblesSemana = EXTRAS_DOBLES_SEMANA,
-		extrasMaxDia = EXTRAS_MAX_DIA
+		extrasMaxDia = EXTRAS_MAX_DIA,
+		horario = null
 	} = opciones;
 
 	const orden = marcados
@@ -82,20 +132,18 @@ export function agruparCiclos(marcados = [], opciones = {}) {
 		.filter((x) => x.t && (x.marcado.Tipo === 'Entrada' || x.marcado.Tipo === 'Salida'))
 		.sort((a, b) => a.t - b.t);
 
+	const config = { horasJornada, extrasMaxDia, horario };
 	const ciclos = [];
 	let abierto = null;
 
 	for (const { marcado, t } of orden) {
 		if (marcado.Tipo === 'Entrada') {
-			if (abierto) ciclos.push(cerrarCiclo(abierto, null, ahora, { horasJornada, extrasMaxDia }));
+			if (abierto) ciclos.push(cerrarCiclo(abierto, null, ahora, config));
 			abierto = { marcado, t };
 			continue;
 		}
-		// Salida
 		if (abierto) {
-			ciclos.push(
-				cerrarCiclo(abierto, { marcado, t }, ahora, { horasJornada, extrasMaxDia })
-			);
+			ciclos.push(cerrarCiclo(abierto, { marcado, t }, ahora, config));
 			abierto = null;
 		} else {
 			ciclos.push({
@@ -105,18 +153,22 @@ export function agruparCiclos(marcados = [], opciones = {}) {
 				fin: t,
 				horas: null,
 				extras: 0,
+				extra_antes: 0,
+				extra_despues: 0,
 				dobles: 0,
 				triples: 0,
 				excede_limite_dia: false,
 				abierto: false,
 				olvidado: false,
 				sinEntrada: true,
+				comida: 0,
+				horario: null,
 				ubicacion: ubicacionDe([marcado])
 			});
 		}
 	}
 
-	if (abierto) ciclos.push(cerrarCiclo(abierto, null, ahora, { horasJornada, extrasMaxDia }));
+	if (abierto) ciclos.push(cerrarCiclo(abierto, null, ahora, config));
 
 	// Reparto semanal de extras: dobles hasta 9 h, luego triples.
 	const usado = new Map();
@@ -132,21 +184,44 @@ export function agruparCiclos(marcados = [], opciones = {}) {
 	return ciclos.reverse();
 }
 
-function ubicacionDe(marcados) {
-	const conGps = marcados.find((m) => m && m.Latitud != null && m.Longitud != null);
-	if (!conGps) return null;
-	return {
-		lat: Number(conGps.Latitud),
-		lon: Number(conGps.Longitud),
-		precision: conGps.Precision != null ? Number(conGps.Precision) : null
-	};
-}
-
-function cerrarCiclo(inicio, fin, ahora, { horasJornada, extrasMaxDia }) {
+function cerrarCiclo(inicio, fin, ahora, { horasJornada, extrasMaxDia, horario }) {
 	const esHoy = mismoDia(inicio.t, ahora);
 	const finReal = fin ? fin.t : esHoy ? ahora : null;
-	const horas = finReal ? redondear((finReal - inicio.t) / 3600000) : null;
-	const extras = horas == null ? 0 : redondear(Math.max(0, horas - horasJornada));
+	const sched = horario ? horario[diaIso(inicio.t)] ?? null : undefined;
+
+	// ── horas trabajadas ────────────────────────────────────────────────────
+	const bruto = finReal ? (finReal - inicio.t) / 3600000 : null;
+	let comida = 0;
+	if (finReal && sched && !sched.descanso) {
+		// La comida se descuenta si estuvo presente al menos todo el tramo del
+		// horario (de la entrada a la salida programadas).
+		const tramo = Math.max(0, (minutos(sched.salida) - minutos(sched.entrada)) / 60);
+		const comidaDia = Number(sched.comida) || 0;
+		if (bruto >= tramo) comida = comidaDia;
+	}
+	const horas = bruto == null ? null : redondear(Math.max(0, bruto - comida / 60));
+
+	// ── extras ──────────────────────────────────────────────────────────────
+	let minAntes = 0;
+	let minDespues = 0;
+	if (horas != null) {
+		if (horario == null) {
+			// Sin horario asignado: regla de la jornada (la de antes).
+			minDespues = Math.max(0, horas - horasJornada) * 60;
+		} else if (!sched || sched.descanso) {
+			// Día de descanso trabajado: todo el turno es extra.
+			minDespues = horas * 60;
+		} else {
+			const fuera = minutosFuera(inicio.t, finReal, sched);
+			if (fuera) {
+				minAntes = fuera.antes;
+				minDespues = fuera.despues;
+			}
+		}
+	}
+	const extras = redondear((minAntes + minDespues) / 60);
+	const extra_antes = redondear(minAntes / 60);
+	const extra_despues = redondear(minDespues / 60);
 
 	return {
 		entrada: inicio.marcado,
@@ -154,13 +229,17 @@ function cerrarCiclo(inicio, fin, ahora, { horasJornada, extrasMaxDia }) {
 		inicio: inicio.t,
 		fin: finReal,
 		horas,
+		comida,
 		extras,
+		extra_antes,
+		extra_despues,
 		dobles: 0,
 		triples: 0,
 		excede_limite_dia: extras > extrasMaxDia,
 		abierto: !fin,
 		olvidado: !fin && !esHoy,
 		sinEntrada: false,
+		horario: sched || null,
 		ubicacion: ubicacionDe([inicio.marcado, fin && fin.marcado])
 	};
 }
