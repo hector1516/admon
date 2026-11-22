@@ -173,7 +173,19 @@
 		border: 1px solid var(--color-line);
 		width: calc(100% - 2rem);
 		max-width: 26rem;
+		max-height: 84vh;
+		overflow-y: auto;
+		padding: 1rem 1.1rem 1.1rem;
+		border-radius: var(--radius-sm);
 		font: inherit;
+		box-shadow: 0 12px 40px color-mix(in srgb, var(--color-ink) 60%, transparent);
+	}
+	.ciclo-modal .modal-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		margin-bottom: 0.75rem;
 	}
 	.ciclo-modal h2 {
 		color: var(--color-text-strong);
@@ -277,14 +289,15 @@
 	.detalle {
 		display: flex;
 		flex-direction: column;
-		gap: 0.9rem;
-		max-height: 68vh;
-		overflow-y: auto;
-		padding-right: 0.25rem;
+		gap: 1rem;
 	}
 	.marcado {
 		border-bottom: 1px solid var(--color-line);
-		padding-bottom: 0.7rem;
+		padding-bottom: 0.85rem;
+	}
+	.marcado:last-of-type {
+		border-bottom: none;
+		padding-bottom: 0;
 	}
 	.marcado-head {
 		display: flex;

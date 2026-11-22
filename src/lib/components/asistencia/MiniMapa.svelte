@@ -1,35 +1,53 @@
 <!-- MiniMapa — fragmento de mapa con enlace (Mi Asistencia, D4 A).
-     Usa el mapa estático de OpenStreetMap (sin API key) y cae al enlace si la
-     imagen no carga o no hay red. -->
+     Usa una tesela de OpenStreetMap (256 px, sin API key) y un pin al centro.
+     Antes se pedía el mapa estático de staticmap.openstreetmap.de, que se cae a
+     menudo: cuando falla no queda imagen y parece que no hay mapa.
+     Si la tesela no carga, queda el enlace, que siempre funciona. -->
 <script>
-	let { lat = null, lon = null, ancho = 280, alto = 140, zoom = 16 } = $props();
+	let { lat = null, lon = null, zoom = 16, alto = 160 } = $props();
 
 	let roto = $state(false);
 	const hay = $derived(lat != null && lon != null);
-	const url = $derived(hay ? `https://www.google.com/maps?q=${lat},${lon}` : null);
+
+	/** Tesela (x, y) de OSM que contiene el punto (slippy map estándar). */
+	function tesela(latitud, longitud, z) {
+		const n = 2 ** z;
+		const x = Math.floor(((longitud + 180) / 360) * n);
+		const rad = (latitud * Math.PI) / 180;
+		const y = Math.floor(
+			((1 - Math.log(Math.tan(rad) + 1 / Math.cos(rad)) / Math.PI) / 2) * n
+		);
+		return { x, y };
+	}
+
+	const t = $derived(hay ? tesela(Number(lat), Number(lon), zoom) : null);
 	const img = $derived(
-		hay
-			? `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}` +
-				`&zoom=${zoom}&size=${ancho}x${alto}&markers=${lat},${lon},red-pushpin`
-			: null
+		t ? `https://tile.openstreetmap.org/${zoom}/${t.x}/${t.y}.png` : null
+	);
+	const url = $derived(hay ? `https://www.google.com/maps?q=${lat},${lon}` : null);
+	const coords = $derived(
+		hay ? `${Number(lat).toFixed(5)}, ${Number(lon).toFixed(5)}` : ''
 	);
 </script>
 
 {#if hay}
 	<div class="mini-mapa">
 		{#if !roto}
-			<a href={url} target="_blank" rel="noopener" title="Ver en Google Maps">
+			<a class="marco" href={url} target="_blank" rel="noopener" title="Abrir en Google Maps">
 				<img
 					src={img}
-					alt="Ubicación de la comprobación"
-					width={ancho}
-					height={alto}
+					alt="Mapa de la ubicación"
 					loading="lazy"
+					style="height: {alto}px"
 					onerror={() => (roto = true)}
 				/>
+				<span class="pin" aria-hidden="true"></span>
 			</a>
 		{/if}
-		<a class="ver-mapa" href={url} target="_blank" rel="noopener">Ver en el mapa</a>
+		<div class="pie">
+			<span class="coords">{coords}</span>
+			<a class="ver-mapa" href={url} target="_blank" rel="noopener">Ver en el mapa →</a>
+		</div>
 	</div>
 {/if}
 
@@ -40,16 +58,43 @@
 		gap: 0.35rem;
 		margin-top: 0.6rem;
 	}
-	.mini-mapa img {
+	.marco {
+		position: relative;
+		display: block;
+		border-radius: var(--radius-xs);
+		overflow: hidden;
+		border: 1px solid var(--color-line);
+		background: var(--color-surface-2);
+	}
+	/* La tesela de OSM es clara: se invierte para que case con el tema. */
+	.marco img {
 		display: block;
 		width: 100%;
-		max-width: 280px;
-		height: auto;
-		border-radius: var(--radius-xs);
-		border: 1px solid var(--color-line);
-		/* Las teselas de OpenStreetMap son claras: en una app oscura el mapa se
-		   veía como un recuadro blanco. Se invierte para que case con el tema. */
-		filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+		object-fit: cover;
+		filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.9);
+	}
+	.pin {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		width: 0.7rem;
+		height: 0.7rem;
+		margin: -0.35rem 0 0 -0.35rem;
+		border-radius: 999px;
+		background: var(--color-info);
+		box-shadow: 0 0 0 2px var(--color-surface);
+	}
+	.pie {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		flex-wrap: wrap;
+	}
+	.coords {
+		font-size: var(--font-size-2xs);
+		color: var(--color-text-dim);
+		font-variant-numeric: tabular-nums;
 	}
 	.ver-mapa {
 		font-size: var(--font-size-xs);
