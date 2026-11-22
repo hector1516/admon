@@ -74,7 +74,7 @@
 
 {#if detalle}
 	<div class="modal-overlay" onclick={() => (detalle = false)} role="presentation">
-		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+		<div class="modal ciclo-modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
 			<div class="modal-header">
 				<h2>{fecha}</h2>
 				<button class="btn btn-sm btn-secondary" onclick={() => (detalle = false)} aria-label="Cerrar">
@@ -150,6 +150,21 @@
 		cursor: pointer;
 		margin-bottom: 0.6rem;
 		transition: border-color 0.15s ease;
+	}
+	/* El popup del detalle, con la superficie del tema: la clase .modal de cada
+	   app se pintaba clara y en Mi Asistencia se veía un bloque blanco. */
+	.ciclo-modal {
+		background: var(--color-surface);
+		color: var(--color-text-strong);
+		border: 1px solid var(--color-line);
+		width: calc(100% - 2rem);
+		max-width: 26rem;
+		font: inherit;
+	}
+	.ciclo-modal h2 {
+		color: var(--color-text-strong);
+		font-size: var(--font-size-lg);
+		margin: 0;
 	}
 	.ciclo-card:hover {
 		border-color: var(--color-text-dim);
