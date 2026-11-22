@@ -47,13 +47,17 @@
 		height: auto;
 		border-radius: var(--radius-xs);
 		border: 1px solid var(--color-line);
+		/* Las teselas de OpenStreetMap son claras: en una app oscura el mapa se
+		   veía como un recuadro blanco. Se invierte para que case con el tema. */
+		filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
 	}
 	.ver-mapa {
 		font-size: var(--font-size-xs);
-		color: var(--color-info);
-		text-decoration: none;
+		color: var(--color-text-strong);
+		text-decoration: underline;
+		text-underline-offset: 2px;
 	}
 	.ver-mapa:hover {
-		text-decoration: underline;
+		color: var(--color-info);
 	}
 </style>

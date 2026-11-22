@@ -1,9 +1,8 @@
 <!-- CicloCard — un ciclo completo de Mi Asistencia (entrada + salida).
-     Una sola tarjeta por ciclo, con los datos de ese ciclo: horas, ubicación,
-     horas extra según la LFT y cómo se verificó (rostro, passkey, GPS).
-     Recibe un ciclo ya armado por `agruparCiclos()` (ciclos.js). -->
+     La tarjeta es solo el resumen: al tocarla se abre el detalle del día con
+     los dos marcados, sus mini mapas y el desglose de horas extra. -->
 <script>
-	import { LogIn, LogOut, MapPin, ShieldCheck, ShieldAlert, Fingerprint, Clock, TriangleAlert } from 'lucide-svelte';
+	import { LogIn, LogOut, MapPin, ShieldCheck, ShieldAlert, Fingerprint, ChevronRight, X } from 'lucide-svelte';
 	import MiniMapa from './MiniMapa.svelte';
 	import { formatoHoras, HORAS_JORNADA } from './ciclos.js';
 
@@ -14,102 +13,146 @@
 	const abierto = $derived(!!ciclo?.abierto);
 	const olvidado = $derived(!!ciclo?.olvidado);
 	const sinEntrada = $derived(!!ciclo?.sinEntrada);
-	const tieneGps = $derived(!!ciclo?.ubicacion);
 	const rostro = $derived(!!(entrada?.VerificacionFacial || salida?.VerificacionFacial));
 	const passkey = $derived(!!(entrada?.PasskeyCredentialId || salida?.PasskeyCredentialId));
 	const estado = $derived(salida?.Estado || entrada?.Estado || 'Valido');
-	const dispositivo = $derived(
-		entrada?.Dispositivo || salida?.Dispositivo
-			? String(entrada?.Dispositivo || salida?.Dispositivo).slice(0, 48)
-			: null
-	);
 
 	const fecha = $derived(
 		ciclo?.inicio
-			? new Intl.DateTimeFormat('es-MX', {
-					weekday: 'short',
-					day: 'numeric',
-					month: 'short'
-				}).format(ciclo.inicio)
+			? new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long' }).format(ciclo.inicio)
 			: ''
 	);
+
+	let detalle = $state(false);
+	const hora = (m) => (m?.Hora ? String(m.Hora).slice(0, 5) : '—');
+	const tieneGps = (m) => m != null && m.Latitud != null && m.Longitud != null;
 </script>
 
-<div class="ciclo-card" class:abierto class:olvidado>
+<div
+	class="card ciclo-card"
+	class:abierto
+	class:olvidado
+	role="button"
+	tabindex="0"
+	onclick={() => (detalle = true)}
+	onkeydown={(e) => {
+		if (e.key === 'Enter' || e.key === ' ') {
+			e.preventDefault();
+			detalle = true;
+		}
+	}}
+	aria-label="Ver el detalle del {fecha}"
+>
 	<div class="ciclo-fecha">
 		<span>{fecha}</span>
-		{#if abierto}
-			<span class="estado-chip en-curso">{olvidado ? 'Sin salida' : 'En curso'}</span>
-		{:else if sinEntrada}
-			<span class="estado-chip revisar">Salida sin entrada</span>
-		{:else}
-			<span class="estado-chip" class:revisar={estado !== 'Valido'}>{estado}</span>
-		{/if}
+		<span class="estado-chip" class:en-curso={abierto} class:revisar={olvidado || estado !== 'Valido'}>
+			{abierto ? (olvidado ? 'Sin salida' : 'En curso') : sinEntrada ? 'Salida sin entrada' : estado}
+		</span>
 	</div>
 
 	<div class="ciclo-horas">
 		<div class="tramo">
 			<span class="tramo-titulo"><LogIn size={14} /> Entrada</span>
-			<span class="tramo-hora">{entrada?.Hora ? String(entrada.Hora).slice(0, 5) : '—'}</span>
+			<span class="tramo-hora">{hora(entrada)}</span>
 		</div>
 		<div class="flecha">→</div>
 		<div class="tramo salida">
 			<span class="tramo-titulo"><LogOut size={14} /> Salida</span>
-			<span class="tramo-hora">{salida?.Hora ? String(salida.Hora).slice(0, 5) : '—'}</span>
+			<span class="tramo-hora">{hora(salida)}</span>
 		</div>
+		<ChevronRight size={16} class="chevron" />
 	</div>
 
 	<div class="ciclo-totales">
-		<span class="total">
-			<Clock size={14} /> {formatoHoras(ciclo?.horas)}
-		</span>
-		<span class="jornada">de {formatoHoras(horasJornada)} de jornada</span>
+		<span class="total">{formatoHoras(ciclo?.horas)}</span>
+		<span class="jornada">de {formatoHoras(horasJornada)}</span>
 		{#if ciclo?.extras > 0}
-			<span class="extras" class:excedido={ciclo.excede_limite_dia}>
-				{#if ciclo.excede_limite_dia}
-					<TriangleAlert size={14} />
-				{:else}
-					<Clock size={14} />
-				{/if}
-				{formatoHoras(ciclo.extras)} extra
-				{#if ciclo.dobles > 0}<span class="tarifa">dobles {formatoHoras(ciclo.dobles)}</span>{/if}
-				{#if ciclo.triples > 0}<span class="tarifa">triples {formatoHoras(ciclo.triples)}</span>{/if}
-			</span>
+			<span class="extras">{formatoHoras(ciclo.extras)} extra</span>
 		{/if}
 	</div>
-
-	{#if ciclo?.excede_limite_dia}
-		<p class="aviso">Supera el máximo de 3 h extra al día (LFT art. 66).</p>
-	{/if}
-
-	<div class="ciclo-chips">
-		<span class="chip" class:ok={rostro}>
-			{#if rostro}<ShieldCheck size={13} /> Rostro{:else}<ShieldAlert size={13} /> Sin rostro{/if}
-		</span>
-		<span class="chip" class:ok={passkey}>
-			<Fingerprint size={13} /> {passkey ? 'Passkey' : 'Sin passkey'}
-		</span>
-		{#if tieneGps}
-			<span class="chip"><MapPin size={13} /> {ciclo.ubicacion.precision != null ? `±${ciclo.ubicacion.precision} m` : 'GPS'}</span>
-		{/if}
-	</div>
-
-	{#if tieneGps}
-		<MiniMapa lat={ciclo.ubicacion.lat} lon={ciclo.ubicacion.lon} />
-	{/if}
-
-	{#if dispositivo}
-		<div class="ciclo-meta" title={dispositivo}>{dispositivo}…</div>
-	{/if}
 </div>
+
+{#if detalle}
+	<div class="modal-overlay" onclick={() => (detalle = false)} role="presentation">
+		<div class="modal" onclick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+			<div class="modal-header">
+				<h2>{fecha}</h2>
+				<button class="btn btn-sm btn-secondary" onclick={() => (detalle = false)} aria-label="Cerrar">
+					<X size={16} />
+				</button>
+			</div>
+
+			<div class="detalle">
+				{#each [{ m: entrada, t: 'Entrada' }, { m: salida, t: 'Salida' }] as par}
+					<div class="marcado">
+						<div class="marcado-head">
+							<strong>{par.t}</strong>
+							<span class="marcado-hora">{hora(par.m)}</span>
+						</div>
+						{#if par.m}
+							<div class="chips">
+								<span class="chip">
+									<Fingerprint size={13} /> {par.m.PasskeyCredentialId ? 'Con passkey' : 'Sin passkey'}
+								</span>
+								{#if tieneGps(par.m)}
+									<span class="chip"><MapPin size={13} /> ±{par.m.Precision ?? '?'} m</span>
+								{:else}
+									<span class="chip">Sin GPS</span>
+								{/if}
+								{#if par.m.Dispositivo}
+									<span class="chip" title={par.m.Dispositivo}>
+										{String(par.m.Dispositivo).slice(0, 26)}…
+									</span>
+								{/if}
+							</div>
+							{#if tieneGps(par.m)}
+								<MiniMapa lat={par.m.Latitud} lon={par.m.Longitud} />
+							{:else}
+								<p class="sin-gps">Ese marcado no guardó ubicación.</p>
+							{/if}
+						{:else}
+							<p class="sin-gps">Sin marcado.</p>
+						{/if}
+					</div>
+				{/each}
+
+				<div class="resumen">
+					<div class="linea"><span>Horas trabajadas</span><strong>{formatoHoras(ciclo?.horas)}</strong></div>
+					<div class="linea"><span>Jornada</span><span>{formatoHoras(horasJornada)}</span></div>
+					{#if ciclo?.extras > 0}
+						<div class="linea"><span>Horas extra</span><strong>{formatoHoras(ciclo.extras)}</strong></div>
+						{#if ciclo?.dobles > 0}
+							<div class="linea"><span>Dobles (LFT)</span><span>{formatoHoras(ciclo.dobles)}</span></div>
+						{/if}
+						{#if ciclo?.triples > 0}
+							<div class="linea"><span>Triples (LFT)</span><span>{formatoHoras(ciclo.triples)}</span></div>
+						{/if}
+						{#if ciclo?.excede_limite_dia}
+							<div class="linea aviso-lft"><span>Excede 3 h extra al día</span><span>LFT art. 66</span></div>
+						{/if}
+					{/if}
+					<div class="linea">
+						<span>Verificación</span>
+						<span class="verif">
+							{#if rostro}<ShieldCheck size={13} /> rostro{/if}
+							{#if passkey}<Fingerprint size={13} /> passkey{/if}
+							{#if !rostro && !passkey}<ShieldAlert size={13} /> sin verificar{/if}
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <style>
 	.ciclo-card {
-		background: var(--color-surface);
-		border: 1px solid var(--color-line);
-		border-radius: var(--radius-sm);
-		padding: 0.7rem 0.8rem;
+		cursor: pointer;
 		margin-bottom: 0.6rem;
+		transition: border-color 0.15s ease;
+	}
+	.ciclo-card:hover {
+		border-color: var(--color-text-dim);
 	}
 	.ciclo-card.abierto {
 		border-color: var(--color-success);
@@ -164,7 +207,6 @@
 		font-size: var(--font-size-2xs);
 		color: var(--color-text-dim);
 		text-transform: uppercase;
-		letter-spacing: 0.02em;
 	}
 	.tramo.salida .tramo-titulo {
 		justify-content: flex-end;
@@ -179,18 +221,18 @@
 		text-align: center;
 		color: var(--color-text-dim);
 	}
+	.chevron {
+		color: var(--color-text-dim);
+		flex-shrink: 0;
+	}
 	.ciclo-totales {
 		display: flex;
-		flex-wrap: wrap;
 		align-items: baseline;
 		gap: 0.45rem;
 		margin-top: 0.5rem;
 		font-size: var(--font-size-sm);
 	}
 	.total {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
 		font-weight: 700;
 	}
 	.jornada {
@@ -198,48 +240,75 @@
 		font-size: var(--font-size-xs);
 	}
 	.extras {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
 		font-size: var(--font-size-xs);
 		color: var(--color-info);
 	}
-	.extras.excedido {
-		color: var(--color-warning);
+	.detalle {
+		display: flex;
+		flex-direction: column;
+		gap: 0.9rem;
+		max-height: 68vh;
+		overflow-y: auto;
+		padding-right: 0.25rem;
 	}
-	.tarifa {
-		opacity: 0.75;
+	.marcado {
+		border-bottom: 1px solid var(--color-line);
+		padding-bottom: 0.7rem;
 	}
-	.aviso {
-		margin: 0.35rem 0 0;
-		font-size: var(--font-size-2xs);
-		color: var(--color-warning);
+	.marcado-head {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+		font-size: var(--font-size-sm);
 	}
-	.ciclo-chips {
+	.marcado-hora {
+		font-size: var(--font-size-lg);
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
+	.chips {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.4rem;
-		margin-top: 0.5rem;
+		gap: 0.35rem;
+		margin-top: 0.35rem;
 	}
 	.chip {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.25rem;
-		font-size: var(--font-size-xs);
+		font-size: var(--font-size-2xs);
 		color: var(--color-text-dim);
 		background: var(--color-surface-2);
 		border-radius: 999px;
 		padding: 0.15rem 0.5rem;
 	}
-	.chip.ok {
-		color: var(--color-success-light);
-	}
-	.ciclo-meta {
-		margin-top: 0.4rem;
-		font-size: var(--font-size-2xs);
+	.sin-gps {
+		margin: 0.35rem 0 0;
+		font-size: var(--font-size-xs);
 		color: var(--color-text-dim);
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
+	}
+	.resumen {
+		display: flex;
+		flex-direction: column;
+		gap: 0.3rem;
+		font-size: var(--font-size-sm);
+	}
+	.linea {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 0.5rem;
+		color: var(--color-text-soft);
+	}
+	.linea strong {
+		color: var(--color-text-strong);
+	}
+	.aviso-lft {
+		color: var(--color-warning);
+	}
+	.verif {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3rem;
 	}
 </style>
