@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime, date, time, timedelta
 import sys, os
+import io
 import json
 import base64
 
@@ -853,6 +854,214 @@ def mi_horario(current_user: dict = Depends(get_current_user)):
                 else {"entrada": d["entrada"], "salida": d["salida"], "comida": d["comida"]}
             )
         return {"id_horario": id_horario, "nombre": nombre, "dias": dias}
+    finally:
+        cur.close()
+        conn.close()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Asistencias por usuario y reportes semanales en PDF
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def _marcados_periodo(cur, desde: str, hasta: str, id_usuario=None):
+    base = """
+        SELECT m.IdUsuario, u.Nombre, m.Fecha, m.Tipo, m.Hora, m.Estado
+        FROM HUB_AsistenciaMarcado m
+        LEFT JOIN HUB_Users u ON u.Id = m.IdUsuario
+        WHERE m.Fecha BETWEEN %s AND %s
+    """
+    if id_usuario:
+        cur.execute(base + " AND m.IdUsuario = %s ORDER BY u.Nombre, m.Fecha, m.Hora",
+                    (desde, hasta, id_usuario))
+    else:
+        cur.execute(base + " ORDER BY u.Nombre, m.Fecha, m.Hora", (desde, hasta))
+    return cur.fetchall()
+
+
+def _por_usuario_y_dia(filas):
+    """{usuario: {fecha: {'entrada': time, 'salida': time}}} conservando el orden."""
+    orden = []
+    datos = {}
+    for f in filas:
+        nombre = f.get("Nombre") or f"Usuario {f['IdUsuario']}"
+        if nombre not in datos:
+            datos[nombre] = {}
+            orden.append(nombre)
+        dia = datos[nombre].setdefault(f["Fecha"], {"entrada": None, "salida": None})
+        hora = f["Hora"]
+        if hora is not None and hasattr(hora, "strftime"):
+            texto = hora.strftime("%H:%M")
+        else:
+            texto = str(hora)[:5]
+        if f["Tipo"] == "Entrada" and dia["entrada"] is None:
+            dia["entrada"] = texto
+        elif f["Tipo"] == "Salida":
+            dia["salida"] = texto
+    return orden, datos
+
+
+def _horas_dia(entrada, salida):
+    if not entrada or not salida:
+        return None
+    eh, em = (int(x) for x in entrada.split(":"))
+    sh, sm = (int(x) for x in salida.split(":"))
+    minutos = (sh * 60 + sm) - (eh * 60 + em)
+    if minutos < 0:
+        minutos += 24 * 60
+    return round(minutos / 60, 2)
+
+
+def _pdf_asistencia(orden, datos, titulo, desde, hasta):
+    """PDF con una tabla por usuario y un resumen general al final."""
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.styles import getSampleStyleSheet
+    from reportlab.lib.units import mm
+    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+
+    buf = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buf, pagesize=letter, title=titulo,
+        leftMargin=18 * mm, rightMargin=18 * mm, topMargin=16 * mm, bottomMargin=16 * mm,
+    )
+    estilos = getSampleStyleSheet()
+    historia = [
+        Paragraph(titulo, estilos["Title"]),
+        Paragraph(f"Del {desde} al {hasta}", estilos["Normal"]),
+        Spacer(1, 6 * mm),
+    ]
+
+    total_general = 0.0
+    resumen = []
+    DIAS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+
+    for nombre in orden:
+        dias = datos[nombre]
+        filas = [["Fecha", "Día", "Entrada", "Salida", "Horas"]]
+        total = 0.0
+        for fecha in sorted(dias):
+            d = dias[fecha]
+            horas = _horas_dia(d["entrada"], d["salida"])
+            if horas is not None:
+                total += horas
+            filas.append([
+                fecha.strftime("%d/%m/%Y") if hasattr(fecha, "strftime") else str(fecha),
+                DIAS[fecha.weekday()] if hasattr(fecha, "weekday") else "",
+                d["entrada"] or "—",
+                d["salida"] or "—",
+                f"{horas:g} h" if horas is not None else "—",
+            ])
+        filas.append(["", "", "", "Total", f"{round(total, 2):g} h"])
+        total_general += total
+        resumen.append([nombre, f"{round(total, 2):g} h"])
+
+        historia.append(Paragraph(nombre, estilos["Heading2"]))
+        tabla = Table(filas, colWidths=[30 * mm, 16 * mm, 28 * mm, 28 * mm, 26 * mm])
+        tabla.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1E293B")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("FONTSIZE", (0, 0), (-1, -1), 9),
+            ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#CBD5E1")),
+            ("ALIGN", (2, 1), (-1, -1), "CENTER"),
+            ("BACKGROUND", (0, -1), (-1, -1), colors.HexColor("#E2E8F0")),
+            ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -2), [colors.white, colors.HexColor("#F8FAFC")]),
+        ]))
+        historia += [tabla, Spacer(1, 7 * mm)]
+
+    if len(orden) > 1:
+        historia.append(Paragraph("Resumen general", estilos["Heading2"]))
+        tabla = Table([["Usuario", "Horas"]] + resumen + [["Total", f"{round(total_general, 2):g} h"]],
+                      colWidths=[90 * mm, 30 * mm])
+        tabla.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1E293B")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("FONTSIZE", (0, 0), (-1, -1), 9),
+            ("GRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#CBD5E1")),
+            ("ALIGN", (1, 1), (1, -1), "CENTER"),
+            ("BACKGROUND", (0, -1), (-1, -1), colors.HexColor("#E2E8F0")),
+            ("FONTNAME", (0, -1), (-1, -1), "Helvetica-Bold"),
+        ]))
+        historia.append(tabla)
+
+    doc.build(historia)
+    return buf.getvalue()
+
+
+@router.get("/admin/asistencias")
+def listar_asistencias(
+    desde: str, hasta: str, current_user: dict = Depends(get_current_user)
+):
+    """Todas las asistencias del periodo, agrupadas por usuario (para la tabla)."""
+    _requiere_admin(current_user)
+    conn = get_connection()
+    cur = conn.cursor(as_dict=True)
+    try:
+        filas = _marcados_periodo(cur, desde, hasta)
+        orden, datos = _por_usuario_y_dia(filas)
+        ids = {}
+        for f in filas:
+            nombre = f.get("Nombre") or f"Usuario {f['IdUsuario']}"
+            ids[nombre] = f["IdUsuario"]
+        salida = []
+        for nombre in orden:
+            dias = []
+            total = 0.0
+            for fecha in sorted(datos[nombre]):
+                d = datos[nombre][fecha]
+                horas = _horas_dia(d["entrada"], d["salida"])
+                if horas is not None:
+                    total += horas
+                dias.append(
+                    {
+                        "fecha": fecha.strftime("%Y-%m-%d") if hasattr(fecha, "strftime") else str(fecha),
+                        "entrada": d["entrada"],
+                        "salida": d["salida"],
+                        "horas": horas,
+                    }
+                )
+            salida.append(
+                {
+                    "usuario": nombre,
+                    "id_usuario": ids.get(nombre),
+                    "dias": dias,
+                    "total": round(total, 2),
+                }
+            )
+        return {"desde": desde, "hasta": hasta, "usuarios": salida}
+    finally:
+        cur.close()
+        conn.close()
+
+
+@router.get("/admin/asistencia/reporte")
+def reporte_asistencia_pdf(
+    desde: str, hasta: str, id_usuario: Optional[int] = None,
+    current_user: dict = Depends(get_current_user),
+):
+    """PDF del periodo. Con `id_usuario` es el reporte de esa persona; sin él,
+    es el general de todos."""
+    _requiere_admin(current_user)
+    conn = get_connection()
+    cur = conn.cursor(as_dict=True)
+    try:
+        filas = _marcados_periodo(cur, desde, hasta, id_usuario)
+        if not filas:
+            raise HTTPException(status_code=404, detail="Sin asistencias en ese periodo")
+        orden, datos = _por_usuario_y_dia(filas)
+        titulo = "Reporte semanal de asistencia"
+        if id_usuario:
+            titulo = f"Reporte semanal de asistencia · {orden[0]}"
+        pdf = _pdf_asistencia(orden, datos, titulo, desde, hasta)
+        nombre = "asistencia_semanal" + (f"_u{id_usuario}" if id_usuario else "_general")
+        from fastapi.responses import Response
+
+        return Response(
+            content=pdf,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{nombre}_{desde}_{hasta}.pdf"'},
+        )
     finally:
         cur.close()
         conn.close()
