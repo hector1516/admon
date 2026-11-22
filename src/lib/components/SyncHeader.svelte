@@ -222,7 +222,7 @@
     min-width: 3.4rem;
     border-radius: 999px;
     background: var(--color-info);
-    color: #fff;
+    color: var(--color-surface);
     transform: translateY(-14px);
     box-shadow: 0 8px 20px color-mix(in srgb, var(--color-info) 45%, transparent);
   }
