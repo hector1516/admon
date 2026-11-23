@@ -188,7 +188,13 @@
 								<img src={getAutoImage(t.marca_modelo)} alt={t.marca_modelo} onerror={(e) => { e.target.style.display = 'none'; }} loading="lazy" />
 							</div>
 						{/if}
-						<div class="folio">{t.pendiente_ticket ? '<Ticket size={16} /> ' + t.vale : '#' + t.folio}</div>
+						<div class="folio">
+							{#if t.pendiente_ticket}
+								<Ticket size={16} /> {t.vale}
+							{:else}
+								#{t.folio}
+							{/if}
+						</div>
 						<div class="fecha"><Receipt size={16} /> Ticket: {fmtFecha(t.fecha)}</div>
 						{#if t.fecha_vale}
 							<div class="fecha"><Ticket size={16} /> Vale: {fmtFecha(t.fecha_vale)}</div>
