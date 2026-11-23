@@ -142,7 +142,11 @@
 			{#if valesRestantes !== null}
 				<div class="vales-estimado" class:sin-vales={sinVales}>
 					<span class="vales-num">
-						{sinVales ? '⚠️ No alcanza para 1 vale' : `<Ticket size={16} /> ~${valesRestantes} vale${valesRestantes === 1 ? '' : 's'}`}
+						{#if sinVales}
+							⚠️ No alcanza para 1 vale
+						{:else}
+							<Ticket size={16} /> ~{valesRestantes} vale{valesRestantes === 1 ? '' : 's'}
+						{/if}
 					</span>
 					<span class="vales-nota">aprox. a ${fmtSaldo(montoVale)} c/u</span>
 				</div>

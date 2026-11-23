@@ -14,6 +14,36 @@ _CLIENTES_UNICOS = (
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
+# ── Caché de facturas ────────────────────────────────────────────────────
+# Las facturas con su XML son la parte cara del módulo: 404 filas y ~2.6 MB
+# de CFDI que SQL Server tiene que leer de disco (el host vive con ~2 MB de
+# caché). Antes se leían en CADA petición y con la base ahogada cortaba la
+# conexión: el usuario veía "La base no respondió" y la pantalla tardaba.
+# Se guardan 2 minutos y se invalidan solas cuando cambia el número de filas
+# (una factura nueva lo mueve), así abrir el módulo otra vez es instantáneo.
+_VALES_CACHE = {"ts": 0.0, "n": -1, "datos": []}
+_VALES_TTL = 120
+
+
+def _vales_facturados(cursor):
+    """Facturas (con XML) en caché de 2 minutos. Lanza si la base falla."""
+    import time
+
+    cursor.execute("SELECT COUNT(*) AS n FROM HUB_OxxoGasVales")
+    n = int(cursor.fetchone()["n"] or 0)
+    ahora = time.time()
+    if _VALES_CACHE["n"] == n and (ahora - _VALES_CACHE["ts"]) < _VALES_TTL:
+        return _VALES_CACHE["datos"]
+    cursor.execute(
+        "SELECT XmlFolio, Fecha, Monto, XmlLitros, XmlConcepto, XmlContent, "
+        "IdSolicitudVale, IdUsuario FROM HUB_OxxoGasVales ORDER BY Fecha DESC"
+    )
+    datos = cursor.fetchall()
+    _VALES_CACHE.update(ts=ahora, n=n, datos=datos)
+    return datos
+
+
+
 
 def get_connection():
     from api import main as _m
@@ -106,29 +136,16 @@ def tickets_oxxogas_list(
 
         # Los vales se leen del más reciente al más viejo: el primero que
         # contiene el folio es el que se queda, como el TOP 1 por Fecha.
-        # Las facturas (con el XML del CFDI dentro) son la parte pesada: ~36 MB
-        # de texto que se leen en cada petición. Si SQL Server está sin memoria
-        # corta la conexión ("DBPROCESS is dead") y antes eso se llevaba la
-        # pantalla entera con un 500. Ahora se avisa y los tickets se muestran
-        # igual, sin emparejar factura.
+        # Las facturas se leen de la caché (2 min). Si la base corta la
+        # conexión se avisa y los tickets se muestran igual, sin factura.
         aviso = None
-        vales = []
         try:
-            cursor.execute(
-                "SELECT XmlFolio, Fecha, Monto, XmlLitros, XmlConcepto, XmlContent, IdSolicitudVale, IdUsuario "
-                "FROM HUB_OxxoGasVales ORDER BY Fecha DESC"
-            )
-            vales = cursor.fetchall()
+            vales = _vales_facturados(cursor)
         except Exception as e:
             aviso = ('La base no respondió al leer las facturas: los tickets se muestran '
                      'sin su factura. Vuelve a cargar en un momento.')
             print(f"[tickets-oxxogas] no se pudieron leer las facturas: {str(e)[:200]}")
-        finally:
-            try:
-                conn.close()
-            except Exception:
-                pass
-            conn = None
+            vales = []
 
         # Atajo por folio exacto, sin recorrer el XML.
         por_folio = {}
@@ -154,11 +171,8 @@ def tickets_oxxogas_list(
 
         # Vales GENERADOS desde ayer que aún no tienen ticket capturado.
         solicitudes_pendientes = []
-        conn2 = None
         try:
-            conn2 = get_connection()
-            cur2 = conn2.cursor(as_dict=True)
-            cur2.execute("""
+            cursor.execute("""
             SELECT S.Id, S.IdSolicitante, S.FechaSolicitud, S.Placa, S.Descripcion,
                    S.Cantidad, S.MontoUnit, S.IdAutomovil, S.IdCliente, S.IdValeGoVale,
                    U.Nombre AS SolicitanteNombre,
@@ -178,19 +192,13 @@ def tickets_oxxogas_list(
               AND S.FechaSolicitud >= DATEADD(day, -1, CAST(GETDATE() AS DATE))
             ORDER BY S.FechaSolicitud DESC
         """)
-            solicitudes_pendientes = cur2.fetchall()
+            solicitudes_pendientes = cursor.fetchall()
         except Exception as e:
             # Sin esto se pierde justo lo que el módulo existe para mostrar,
             # pero un 500 es peor: se dice y se pinta lo que haya.
             aviso = aviso or ('La base no respondió: puede que falten vales '
                               'pendientes de ticket. Vuelve a cargar en un momento.')
             print(f"[tickets-oxxogas] no se pudieron leer los pendientes: {str(e)[:200]}")
-        finally:
-            if conn2 is not None:
-                try:
-                    conn2.close()
-                except Exception:
-                    pass
 
         resultado = []
         for t in tickets:
@@ -279,6 +287,12 @@ def tickets_oxxogas_list(
         resultado.sort(key=lambda x: x.get("fecha") or "", reverse=True)
         resultado.sort(key=lambda x: 0 if x.get("pendiente_ticket") else 1)
         total = len(resultado)
+        try:
+            conn.close()
+        except Exception:
+            pass
+        conn = None
+
         return {"items": resultado, "total": total, "limit": limit,
                 "offset": offset, "aviso": aviso}
     except Exception as e:
