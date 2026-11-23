@@ -34,11 +34,18 @@ def _vales_facturados(cursor):
     ahora = time.time()
     if _VALES_CACHE["n"] == n and (ahora - _VALES_CACHE["ts"]) < _VALES_TTL:
         return _VALES_CACHE["datos"]
+    # SIN ORDER BY a propósito. Medido el 23-nov: ordenar en SQL esta misma
+    # consulta tarda 29 s (la base ordena arrastrando los XML y se queda sin
+    # memoria); sin el ORDER BY tarda 0.2 s. Ordenar 404 filas en Python es
+    # gratis, así que el orden se hace aquí abajo.
     cursor.execute(
         "SELECT XmlFolio, Fecha, Monto, XmlLitros, XmlConcepto, XmlContent, "
-        "IdSolicitudVale, IdUsuario FROM HUB_OxxoGasVales ORDER BY Fecha DESC"
+        "IdSolicitudVale, IdUsuario FROM HUB_OxxoGasVales"
     )
     datos = cursor.fetchall()
+    # `Fecha` puede venir NULL en alguna fila: se comparan tuplas para no
+    # mezclar datetime con None y reventar el orden.
+    datos.sort(key=lambda v: (v.get("Fecha") is not None, v.get("Fecha")), reverse=True)
     _VALES_CACHE.update(ts=ahora, n=n, datos=datos)
     return datos
 
@@ -139,12 +146,20 @@ def tickets_oxxogas_list(
         # Las facturas se leen de la caché (2 min). Si la base corta la
         # conexión se avisa y los tickets se muestran igual, sin factura.
         aviso = None
+        conexion_muerta = False
         try:
             vales = _vales_facturados(cursor)
         except Exception as e:
             aviso = ('La base no respondió al leer las facturas: los tickets se muestran '
                      'sin su factura. Vuelve a cargar en un momento.')
             print(f"[tickets-oxxogas] no se pudieron leer las facturas: {str(e)[:200]}")
+            # Una conexión que falló queda inservible: si vuelve al pool, las
+            # siguientes peticiones fallan al instante con "DBPROCESS is dead".
+            try:
+                conn.mark_broken()
+            except Exception:
+                pass
+            conexion_muerta = True
             vales = []
 
         # Atajo por folio exacto, sin recorrer el XML.
@@ -171,6 +186,15 @@ def tickets_oxxogas_list(
 
         # Vales GENERADOS desde ayer que aún no tienen ticket capturado.
         solicitudes_pendientes = []
+        if conexion_muerta:
+            # Los pendientes son lo más importante del módulo: se piden por una
+            # conexión nueva en vez de reusar la que acaba de fallar.
+            try:
+                conn.close()
+            except Exception:
+                pass
+            conn = get_connection()
+            cursor = conn.cursor(as_dict=True)
         try:
             cursor.execute("""
             SELECT S.Id, S.IdSolicitante, S.FechaSolicitud, S.Placa, S.Descripcion,
@@ -199,6 +223,10 @@ def tickets_oxxogas_list(
             aviso = aviso or ('La base no respondió: puede que falten vales '
                               'pendientes de ticket. Vuelve a cargar en un momento.')
             print(f"[tickets-oxxogas] no se pudieron leer los pendientes: {str(e)[:200]}")
+            try:
+                conn.mark_broken()
+            except Exception:
+                pass
 
         resultado = []
         for t in tickets:
