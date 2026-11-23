@@ -225,7 +225,7 @@
 	.state { text-align: center; color: var(--color-text-muted); padding: 3rem 1rem; font-size: var(--font-size-sm); }
 	.state.err { color: var(--color-danger-light); }
 	/* Aviso parcial (la base no respondió): no es un error, hay lista. */
-	.aviso-base { display: flex; align-items: center; gap: 0.4rem; margin: 0 0 0.9rem; padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); font-size: var(--font-size-xs); color: var(--color-warning-light, #fbbf24); background: rgba(245, 158, 11, 0.10); border: 1px solid rgba(245, 158, 11, 0.35); }
+	.aviso-base { display: flex; align-items: center; gap: 0.4rem; margin: 0 0 0.9rem; padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); font-size: var(--font-size-xs); color: var(--color-warning-light); background: rgba(251, 191, 36, 0.10); border: 1px solid rgba(251, 191, 36, 0.35); }
 
 	.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 0.9rem; }
 
