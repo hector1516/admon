@@ -1,7 +1,8 @@
 {
   "app": "admon",
-  "version": "1.9.6",
+  "version": "1.9.7",
   "cambios": [
+    "Mi Asistencia dice a cuántos kilómetros estás de la oficina y si con esa distancia te tocan viáticos (desde 50 km).",
     "🔐 Para marcar ahora solo usas la huella o Face ID del teléfono: si no tienes passkey se crea en ese momento, y ya no hay que capturar el rostro.",
     "📷 La cámara de Mi Asistencia ya muestra la imagen en el teléfono: antes se veía negra y decía que no te reconocía.",
     "⚡ Admon carga más rápido: las imágenes pesaban 15 MB y ahora pesan menos de 1 MB.",
@@ -12,7 +13,6 @@
     "🗺️ Cada ciclo muestra el rostro, la passkey y un mapa de dónde se hizo.",
     "🏆 Legends se rediseñó en Admon: ranking semanal, temporada, racha y 20 logros.",
     "💵 Ahora los puntos siguen el dinero: cotización pagada +15 a +75 según el subtotal, entregada +10, cliente nuevo cotizado +5 y cobranza +3.",
-    "📸 El reporte suma por fotos de evidencia y por cerrarse el mismo día del servicio.",
-    "⛔ Los vales sin comprobante, los reportes tardíos y el retrabajo restan puntos."
+    "📸 El reporte suma por fotos de evidencia y por cerrarse el mismo día del servicio."
   ]
 }
