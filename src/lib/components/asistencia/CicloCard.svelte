@@ -4,9 +4,13 @@
 <script>
 	import { LogIn, LogOut, MapPin, ShieldCheck, ShieldAlert, Fingerprint, ChevronRight, X } from 'lucide-svelte';
 	import MiniMapa from './MiniMapa.svelte';
-	import { formatoHoras, HORAS_JORNADA } from './ciclos.js';
+	import { formatoHoras, HORAS_JORNADA, distanciaDelCiclo, OFICINA_DEFECTO } from './ciclos.js';
 
-	let { ciclo = {}, horasJornada = HORAS_JORNADA } = $props();
+	let { ciclo = {}, horasJornada = HORAS_JORNADA, oficina = OFICINA_DEFECTO } = $props();
+
+	// Distancia del marcado más preciso del ciclo a la oficina. Se calcula aquí
+	// y no en la página para que esta tarjeta sirva sola en cualquier pantalla.
+	const distancia = $derived(distanciaDelCiclo(ciclo, oficina));
 
 	const entrada = $derived(ciclo?.entrada || null);
 	const salida = $derived(ciclo?.salida || null);
@@ -68,6 +72,19 @@
 		<span class="jornada">de {formatoHoras(horasJornada)}</span>
 		{#if ciclo?.extras > 0}
 			<span class="extras">{formatoHoras(ciclo.extras)} extra</span>
+		{/if}
+	</div>
+
+	<div class="ciclo-dist">
+		{#if distancia.km == null}
+			<MapPin size={14} /> sin ubicación
+		{:else if distancia.enOficina}
+			<MapPin size={14} /> en la oficina
+		{:else}
+			<MapPin size={14} /> a {distancia.km.toFixed(1)} km de la oficina
+		{/if}
+		{#if distancia.km != null && distancia.precision != null && distancia.precision > 100}
+			<span class="gps-aviso">· GPS impreciso</span>
 		{/if}
 	</div>
 </div>
@@ -274,6 +291,21 @@
 		gap: 0.45rem;
 		margin-top: 0.5rem;
 		font-size: var(--font-size-sm);
+	}
+	/* Distancia a la oficina: informativa, en segundo plano como las horas. */
+	.ciclo-dist {
+		display: flex;
+		align-items: center;
+		gap: 0.3rem;
+		margin-top: 0.35rem;
+		font-size: var(--font-size-xs);
+		color: var(--color-text-dim);
+	}
+	.ciclo-dist .gps-aviso {
+		color: var(--color-warning);
+	}
+	.ciclo-dist :global(svg) {
+		flex-shrink: 0;
 	}
 	.total {
 		font-weight: 700;

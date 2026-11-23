@@ -243,3 +243,63 @@ function cerrarCiclo(inicio, fin, ahora, { horasJornada, extrasMaxDia, horario }
 		ubicacion: ubicacionDe([inicio.marcado, fin && fin.marcado])
 	};
 }
+
+
+// ── Distancia a la oficina y viáticos ─────────────────────────────────
+// El establecimiento está en Fray Luis de León 1713, Jardín Español,
+// Monterrey. La LISR (art. 28, fracc. V) solo permite deducir gastos de
+// viaje fuera de una faja de 50 km alrededor del establecimiento, así que la
+// distancia se mide EN LÍNEA RECTA desde aquí, no como recorrido del día.
+export const OFICINA_DEFECTO = { lat: 25.662117, lon: -100.280684 };
+export const VIATICOS_KM_DEFECTO = 50;
+
+const RADIO_TIERRA_KM = 6371.0088;
+
+/**
+ * Distancia en km entre dos coordenadas (haversine). `null` si falta alguna
+ * o si están en (0,0): los dispositivos sin GPS reportan 0,0 y tomarlo como
+ * ubicación real daría ~1,100 km de distancia.
+ */
+export function distanciaKm(lat1, lon1, lat2, lon2) {
+	const [a, b, c, d] = [lat1, lon1, lat2, lon2].map(Number);
+	if (![a, b, c, d].every(Number.isFinite)) return null;
+	if ((a === 0 && b === 0) || (c === 0 && d === 0)) return null;
+	const rad = (g) => (g * Math.PI) / 180;
+	const dLat = rad(c - a);
+	const dLon = rad(d - b);
+	const h = Math.sin(dLat / 2) ** 2 +
+		Math.cos(rad(a)) * Math.cos(rad(c)) * Math.sin(dLon / 2) ** 2;
+	return 2 * RADIO_TIERRA_KM * Math.asin(Math.min(1, Math.sqrt(h)));
+}
+
+export function distanciaDelCiclo(ciclo, oficina = OFICINA_DEFECTO) {
+	let mejor = null;
+	for (const m of [ciclo?.entrada, ciclo?.salida]) {
+		if (!m) continue;
+		const km = distanciaKm(m.Latitud, m.Longitud, oficina?.lat, oficina?.lon);
+		if (km == null) continue;
+		const p = Number(m.Precision);
+		const orden = Number.isFinite(p) ? p : Infinity;
+		if (!mejor || orden < mejor.orden) {
+			mejor = { km, orden, precision: Number.isFinite(p) ? p : null };
+		}
+	}
+	if (!mejor) return { km: null, enOficina: false, precision: null };
+	return { km: mejor.km, enOficina: mejor.km < 0.3, precision: mejor.precision };
+}
+
+/**
+ * Resumen del día: la MAYOR distancia a la oficina entre los marcados con GPS.
+ * `aplica` es la regla de viáticos (>= umbral, por defecto 50 km).
+ */
+export function resumenViatico(ciclos = [], opciones = {}) {
+	const { oficina = OFICINA_DEFECTO, umbralKm = VIATICOS_KM_DEFECTO } = opciones;
+	let maxKm = null;
+	for (const ciclo of ciclos) {
+		const { km } = distanciaDelCiclo(ciclo, oficina);
+		if (km == null) continue;
+		if (maxKm == null || km > maxKm) maxKm = km;
+	}
+	if (maxKm == null) return { maxKm: null, aplica: false, sinGps: true };
+	return { maxKm, aplica: maxKm >= Number(umbralKm), sinGps: false };
+}

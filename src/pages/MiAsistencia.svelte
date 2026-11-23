@@ -8,7 +8,7 @@
 	import { online } from '$lib/stores/online';
 	import { Clock, MapPin, HelpCircle, FileText, ArrowLeft, CheckCircle, XCircle, Loader2, Timer, Download } from 'lucide-svelte';
 	import CicloCard from '$lib/components/asistencia/CicloCard.svelte';
-	import { agruparCiclos } from '$lib/components/asistencia/ciclos.js';
+	import { agruparCiclos, resumenViatico } from '$lib/components/asistencia/ciclos.js';
 	import { pasoAsistencia, registerPasskey, randomDeviceName } from '$lib/passkey.js';
 
 	let loading = $state(true);
@@ -44,6 +44,9 @@
 
 	// Tarjetas por ciclo (entrada + salida) con horas extra según la LFT.
 	let configLft = $state({ horas_jornada: 8, extras_max_dia: 3, extras_dobles_semana: 9 });
+	// Oficina y umbral de viáticos: llegan de la API (HUB_Config) y aquí solo
+	// se usan; los valores de arriba son el respaldo si la API no los manda.
+	let oficina = $state({ lat: 25.662117, lon: -100.280684, viaticos_km: 50 });
 	let relojMs = $state(Date.now());
 	let ciclos = $derived(
 		agruparCiclos(marcados, {
@@ -53,6 +56,11 @@
 			ahora: new Date(relojMs),
 			horario: horarioDias
 		})
+	);
+	// Viáticos del día: la mayor distancia a la oficina entre los marcados con
+	// GPS, contra el umbral (50 km por LISR art. 28-V).
+	let viatico = $derived(
+		resumenViatico(ciclos, { oficina, umbralKm: Number(oficina.viaticos_km) || 50 })
 	);
 
 	const frases = [
@@ -132,6 +140,7 @@
 			]);
 			marcados = hist.registros || [];
 			if (hist.config_lft) configLft = hist.config_lft;
+			if (hist.oficina) oficina = hist.oficina;
 			if (he) horasExtras = he;
 			if (marcados.length > 0 && marcados[0].Tipo === 'Entrada') {
 				const ultima = marcados[0];
@@ -371,9 +380,18 @@
 			{#if ciclos.length === 0}
 				<p class="empty">Sin marcados recientes</p>
 			{:else}
+				{#if !viatico.sinGps}
+					<div class="chip-viatico" class:si={viatico.aplica}>
+						<MapPin size={16} />
+						<span>
+							{viatico.aplica ? 'Viáticos posibles' : 'Sin viáticos'}
+							· {viatico.maxKm.toFixed(1)} km de la oficina
+						</span>
+					</div>
+				{/if}
 				<div class="marking-list">
 					{#each ciclos.slice(0, 10) as ciclo}
-						<CicloCard {ciclo} horasJornada={Number(configLft.horas_jornada) || 8} />
+						<CicloCard {ciclo} horasJornada={Number(configLft.horas_jornada) || 8} {oficina} />
 					{/each}
 				</div>
 			{/if}
@@ -507,4 +525,22 @@
 	.badge.Generado { background: #dbeafe; color: #1e40af; }
 	.badge.Pagado { background: var(--color-success-soft); color: #166534; }
 	.badge.Cancelado { background: var(--color-danger-soft); color: var(--color-danger-dark); }
+	/* Indicador de viáticos del día: informativo, no es un botón. */
+	.chip-viatico {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		margin: 0 0 0.7rem;
+		padding: 0.55rem 0.8rem;
+		border-radius: var(--radius-sm);
+		font-size: var(--font-size-sm);
+		color: var(--color-text-muted);
+		background: rgba(148, 163, 184, 0.12);
+		border: 1px solid var(--color-line);
+	}
+	.chip-viatico.si {
+		color: var(--color-warning);
+		background: rgba(251, 191, 36, 0.10);
+		border-color: rgba(251, 191, 36, 0.35);
+	}
 </style>
