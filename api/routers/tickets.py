@@ -166,13 +166,16 @@ def tickets_oxxogas_list(
             FROM HUB_SolicitudVales S
             LEFT JOIN HUB_Users U ON U.Id = S.IdSolicitante
             LEFT JOIN HUB_Automoviles A ON A.Id = S.IdAutomovil
-            -- Sin filtro de fecha a propósito: antes solo se miraba el vale de
-            -- AYER y uno que se quedaba sin ticket más de un día desaparecía
-            -- del módulo aunque siguiera abierto (había 5 así, del 14-oct al
-            -- 19-nov). El pendiente es deuda: se muestra hasta que se captura
-            -- el ticket o se cancela el vale.
+            -- Ventana de un día, a propósito (decisión del 22-nov): este módulo
+            -- es para "esperando la foto del ticket" de lo que se acaba de
+            -- generar, no un buzón de deuda vieja. Un vale aparece SOLO cuando
+            -- el worker ya lo marcó GENERADO (o sea, cuando existe en Go Vale):
+            -- nunca antes. Los que se quedaron sin ticket más de un día están
+            -- documentados en docs/PENDIENTES-VALES-SIN-TICKET.md y se cierran
+            -- aparte.
             WHERE S.Estatus = 'GENERADO'
               AND S.IdTicketCierre IS NULL
+              AND S.FechaSolicitud >= DATEADD(day, -1, CAST(GETDATE() AS DATE))
             ORDER BY S.FechaSolicitud DESC
         """)
             solicitudes_pendientes = cur2.fetchall()
