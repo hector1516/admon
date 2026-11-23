@@ -20,6 +20,9 @@
 	let pagina = $state(1);
 	let loading = $state(true);
 	let error = $state('');
+	// Aviso parcial: la base no respondió y la lista se pintó incompleta.
+	// No es un error de la pantalla: hay datos, solo faltan las facturas.
+	let aviso = $state('');
 	let busqueda = $state('');
 
 	// Saldo Go Vale (HUB_Config): lo refresca el worker del HUB cada ~5 min.
@@ -88,6 +91,7 @@
 				api.get('/tickets-oxxogas/saldo').catch(() => null)
 			]);
 			tickets = Array.isArray(lista) ? lista : (lista.items || []);
+			aviso = (!Array.isArray(lista) && lista && lista.aviso) ? String(lista.aviso) : '';
 			if (s && typeof s.saldo === 'number') {
 				saldo = s.saldo;
 				saldoFecha = s.fecha || 'Nunca';
@@ -156,6 +160,10 @@
 
 	<p class="hint">Tickets capturados desde Field/HUB · orden por fecha y hora de captura (más reciente arriba) · escribe <strong>pendiente</strong> para filtrar los que faltan</p>
 
+	{#if aviso && !loading && !error}
+		<div class="aviso-base"><AlertTriangle size={15} /> {aviso}</div>
+	{/if}
+
 	{#if loading}
 		<LoadingState message="Cargando tickets..." />
 	{:else if error}
@@ -216,6 +224,8 @@
 	.hint strong { color: var(--color-primary-light); }
 	.state { text-align: center; color: var(--color-text-muted); padding: 3rem 1rem; font-size: var(--font-size-sm); }
 	.state.err { color: var(--color-danger-light); }
+	/* Aviso parcial (la base no respondió): no es un error, hay lista. */
+	.aviso-base { display: flex; align-items: center; gap: 0.4rem; margin: 0 0 0.9rem; padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); font-size: var(--font-size-xs); color: var(--color-warning-light, #fbbf24); background: rgba(245, 158, 11, 0.10); border: 1px solid rgba(245, 158, 11, 0.35); }
 
 	.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 0.9rem; }
 

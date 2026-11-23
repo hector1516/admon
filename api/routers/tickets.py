@@ -106,13 +106,29 @@ def tickets_oxxogas_list(
 
         # Los vales se leen del más reciente al más viejo: el primero que
         # contiene el folio es el que se queda, como el TOP 1 por Fecha.
-        cursor.execute(
-            "SELECT XmlFolio, Fecha, Monto, XmlLitros, XmlConcepto, XmlContent, IdSolicitudVale, IdUsuario "
-            "FROM HUB_OxxoGasVales ORDER BY Fecha DESC"
-        )
-        vales = cursor.fetchall()
-        conn.close()
-        conn = None
+        # Las facturas (con el XML del CFDI dentro) son la parte pesada: ~36 MB
+        # de texto que se leen en cada petición. Si SQL Server está sin memoria
+        # corta la conexión ("DBPROCESS is dead") y antes eso se llevaba la
+        # pantalla entera con un 500. Ahora se avisa y los tickets se muestran
+        # igual, sin emparejar factura.
+        aviso = None
+        vales = []
+        try:
+            cursor.execute(
+                "SELECT XmlFolio, Fecha, Monto, XmlLitros, XmlConcepto, XmlContent, IdSolicitudVale, IdUsuario "
+                "FROM HUB_OxxoGasVales ORDER BY Fecha DESC"
+            )
+            vales = cursor.fetchall()
+        except Exception as e:
+            aviso = ('La base no respondió al leer las facturas: los tickets se muestran '
+                     'sin su factura. Vuelve a cargar en un momento.')
+            print(f"[tickets-oxxogas] no se pudieron leer las facturas: {str(e)[:200]}")
+        finally:
+            try:
+                conn.close()
+            except Exception:
+                pass
+            conn = None
 
         # Atajo por folio exacto, sin recorrer el XML.
         por_folio = {}
@@ -137,9 +153,12 @@ def tickets_oxxogas_list(
             vales_por_usuario[uid].append(v)
 
         # Vales GENERADOS desde ayer que aún no tienen ticket capturado.
-        conn2 = get_connection()
-        cur2 = conn2.cursor(as_dict=True)
-        cur2.execute("""
+        solicitudes_pendientes = []
+        conn2 = None
+        try:
+            conn2 = get_connection()
+            cur2 = conn2.cursor(as_dict=True)
+            cur2.execute("""
             SELECT S.Id, S.IdSolicitante, S.FechaSolicitud, S.Placa, S.Descripcion,
                    S.Cantidad, S.MontoUnit, S.IdAutomovil, S.IdCliente, S.IdValeGoVale,
                    U.Nombre AS SolicitanteNombre,
@@ -147,13 +166,28 @@ def tickets_oxxogas_list(
             FROM HUB_SolicitudVales S
             LEFT JOIN HUB_Users U ON U.Id = S.IdSolicitante
             LEFT JOIN HUB_Automoviles A ON A.Id = S.IdAutomovil
+            -- Sin filtro de fecha a propósito: antes solo se miraba el vale de
+            -- AYER y uno que se quedaba sin ticket más de un día desaparecía
+            -- del módulo aunque siguiera abierto (había 5 así, del 14-oct al
+            -- 19-nov). El pendiente es deuda: se muestra hasta que se captura
+            -- el ticket o se cancela el vale.
             WHERE S.Estatus = 'GENERADO'
               AND S.IdTicketCierre IS NULL
-              AND S.FechaSolicitud >= DATEADD(day, -1, CAST(GETDATE() AS DATE))
             ORDER BY S.FechaSolicitud DESC
         """)
-        solicitudes_pendientes = cur2.fetchall()
-        conn2.close()
+            solicitudes_pendientes = cur2.fetchall()
+        except Exception as e:
+            # Sin esto se pierde justo lo que el módulo existe para mostrar,
+            # pero un 500 es peor: se dice y se pinta lo que haya.
+            aviso = aviso or ('La base no respondió: puede que falten vales '
+                              'pendientes de ticket. Vuelve a cargar en un momento.')
+            print(f"[tickets-oxxogas] no se pudieron leer los pendientes: {str(e)[:200]}")
+        finally:
+            if conn2 is not None:
+                try:
+                    conn2.close()
+                except Exception:
+                    pass
 
         resultado = []
         for t in tickets:
@@ -235,10 +269,15 @@ def tickets_oxxogas_list(
                 "pendiente_ticket": True,
                 "id_solicitud": s["Id"],
             })
-        # Ordenar por fecha descendente (más reciente primero)
+        # Pendientes ARRIBA: son los que piden acción. Antes todo iba por fecha
+        # y un vale de hace un mes sin ticket quedaba al final de 50 tickets,
+        # o sea invisible. Dos ordenamientos estables: primero por fecha, luego
+        # por grupo (pendiente / capturado).
         resultado.sort(key=lambda x: x.get("fecha") or "", reverse=True)
+        resultado.sort(key=lambda x: 0 if x.get("pendiente_ticket") else 1)
         total = len(resultado)
-        return {"items": resultado, "total": total, "limit": limit, "offset": offset}
+        return {"items": resultado, "total": total, "limit": limit,
+                "offset": offset, "aviso": aviso}
     except Exception as e:
         if conn:
             try:
