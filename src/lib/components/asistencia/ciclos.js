@@ -261,7 +261,11 @@ const RADIO_TIERRA_KM = 6371.0088;
  * ubicación real daría ~1,100 km de distancia.
  */
 export function distanciaKm(lat1, lon1, lat2, lon2) {
-	const [a, b, c, d] = [lat1, lon1, lat2, lon2].map(Number);
+	// `Number(null)` y `Number('')` dan 0, así que una coordenada ausente se
+	// colaba como si fuera el ecuador y daba miles de km. Se revisa antes.
+	const crudas = [lat1, lon1, lat2, lon2];
+	if (crudas.some((v) => v == null || v === '')) return null;
+	const [a, b, c, d] = crudas.map(Number);
 	if (![a, b, c, d].every(Number.isFinite)) return null;
 	if ((a === 0 && b === 0) || (c === 0 && d === 0)) return null;
 	const rad = (g) => (g * Math.PI) / 180;
@@ -289,13 +293,26 @@ export function distanciaDelCiclo(ciclo, oficina = OFICINA_DEFECTO) {
 }
 
 /**
- * Resumen del día: la MAYOR distancia a la oficina entre los marcados con GPS.
- * `aplica` es la regla de viáticos (>= umbral, por defecto 50 km).
+ * Resumen del DÍA: la MAYOR distancia a la oficina entre los marcados con GPS
+ * de hoy. `aplica` es la regla de viáticos (>= umbral, por defecto 50 km).
+ *
+ * Solo cuentan los ciclos de hoy: la pantalla recibe 30 días de historial, y
+ * sin este filtro un día a 60 km de hace tres semanas dejaba «viáticos
+ * posibles» para siempre.
  */
+function claveDia(valor) {
+	const f = valor instanceof Date ? valor : new Date(valor);
+	if (Number.isNaN(f.getTime())) return null;
+	return `${f.getFullYear()}-${f.getMonth() + 1}-${f.getDate()}`;
+}
+
 export function resumenViatico(ciclos = [], opciones = {}) {
-	const { oficina = OFICINA_DEFECTO, umbralKm = VIATICOS_KM_DEFECTO } = opciones;
+	const { oficina = OFICINA_DEFECTO, umbralKm = VIATICOS_KM_DEFECTO,
+		hoy = new Date() } = opciones;
+	const dia = claveDia(hoy);
 	let maxKm = null;
 	for (const ciclo of ciclos) {
+		if (claveDia(ciclo?.inicio) !== dia) continue;
 		const { km } = distanciaDelCiclo(ciclo, oficina);
 		if (km == null) continue;
 		if (maxKm == null || km > maxKm) maxKm = km;

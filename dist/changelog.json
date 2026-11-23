@@ -1,6 +1,6 @@
 {
   "app": "admon",
-  "version": "1.9.7",
+  "version": "1.9.8",
   "cambios": [
     "Mi Asistencia dice a cuántos kilómetros estás de la oficina y si con esa distancia te tocan viáticos (desde 50 km).",
     "🔐 Para marcar ahora solo usas la huella o Face ID del teléfono: si no tienes passkey se crea en ese momento, y ya no hay que capturar el rostro.",
