@@ -134,7 +134,31 @@ def historial_asistencia(dias: int = 30, current_user: dict = Depends(get_curren
             "extras_max_dia": float(cfg.get("LimiteHorasExtrasDia") or 3),
             "extras_dobles_semana": float(cfg.get("HorasExtrasDoblesMax") or 9),
         }
-        return {"registros": rows, "total": len(rows), "config_lft": config_lft}
+
+        # Oficina y umbral de viáticos. El frente calcula la distancia a la
+        # oficina y la compara con el umbral; los dos valores se cambian desde
+        # HUB_Config sin desplegar. El 50 km es la faja de la LISR art. 28-V.
+        cur.execute("""
+            SELECT Clave, Valor FROM HUB_Config
+            WHERE Clave IN ('asistencia_oficina_lat',
+                            'asistencia_oficina_lon',
+                            'asistencia_viaticos_km')
+        """)
+        of = {f["Clave"]: f["Valor"] for f in cur.fetchall()}
+
+        def _num(valor, por_defecto):
+            try:
+                return float(str(valor).replace(",", "."))
+            except (TypeError, ValueError):
+                return por_defecto
+
+        oficina = {
+            "lat": _num(of.get("asistencia_oficina_lat"), 25.662117),
+            "lon": _num(of.get("asistencia_oficina_lon"), -100.280684),
+            "viaticos_km": _num(of.get("asistencia_viaticos_km"), 50),
+        }
+        return {"registros": rows, "total": len(rows),
+                "config_lft": config_lft, "oficina": oficina}
     finally:
         cur.close()
         conn.close()
