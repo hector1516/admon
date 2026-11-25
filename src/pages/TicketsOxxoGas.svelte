@@ -1,5 +1,5 @@
 <script>
-	import { User, Building2, Car, Receipt, Ticket, Plus, ArrowLeft, Clock, Fuel, AlertTriangle } from 'lucide-svelte';
+	import { User, Building2, Car, Receipt, Ticket, Plus, ArrowLeft, Clock, Fuel, AlertTriangle, X } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -23,6 +23,9 @@
 	// Aviso parcial: la base no respondió y la lista se pintó incompleta.
 	// No es un error de la pantalla: hay datos, solo faltan las facturas.
 	let aviso = $state('');
+	// Vale pendiente abierto en el detalle: una tarjeta pendiente no tiene
+	// ticket que mostrar, pero sí todo lo que ya sabemos del vale.
+	let pendienteSel = $state(null);
 	let busqueda = $state('');
 
 	// Saldo Go Vale (HUB_Config): lo refresca el worker del HUB cada ~5 min.
@@ -178,7 +181,7 @@
 	{:else}
 		<div class="grid">
 			{#each pagActual as t (t.id)}
-				<button class="card-ticket" class:pendiente={t.pendiente_ticket} onclick={() => navigate(t.pendiente_ticket ? '#' : `/tickets_oxxogas/${t.id}`)} title={t.pendiente_ticket ? 'Ticket pendiente de captura' : 'Ver detalle completo'}>
+				<button class="card-ticket" class:pendiente={t.pendiente_ticket} onclick={() => t.pendiente_ticket ? (pendienteSel = t) : navigate(`/tickets_oxxogas/${t.id}`)} title={t.pendiente_ticket ? 'Ver todo lo que sabemos del vale' : 'Ver detalle completo'}>
 					<div class="body">
 						{#if t.pendiente_ticket}
 							<div class="pendiente-badge"><Clock size={16} /> Ticket pendiente</div>
@@ -222,6 +225,54 @@
 		</div>
 		<!-- La rejilla es CSS grid; la paginación va debajo para que no ocupe una celda. -->
 		<Paginacion total={filtrados.length} bind:pagina porPagina={POR_PAGINA} etiqueta="tickets" />
+	{/if}
+
+	{#if pendienteSel}
+		<!-- Detalle de un vale pendiente: toda la información que existe hoy,
+		     con una nota clara de lo que falta (la foto del ticket). -->
+		<div class="overlay" role="presentation" onclick={() => (pendienteSel = null)}>
+			<div class="sheet" role="dialog" aria-modal="true" aria-label="Vale pendiente de ticket" onclick={(e) => e.stopPropagation()}>
+				<div class="sheet-hd">
+					<span class="sheet-tit"><Clock size={18} /> Ticket pendiente</span>
+					<button class="sheet-x" onclick={() => (pendienteSel = null)} aria-label="Cerrar"><X size={18} /></button>
+				</div>
+
+				<div class="sheet-vale">
+					<div class="sheet-folio">{pendienteSel.vale}</div>
+					<div class="sheet-sub">Emitido el {fmtFecha(pendienteSel.fecha_vale)} · aún sin ticket capturado</div>
+				</div>
+
+				<div class="sheet-monto">
+					<div class="monto-n">${(pendienteSel.monto_emitido ?? pendienteSel.monto ?? 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+					<div class="monto-l">
+						{pendienteSel.monto_emitido != null ? 'Emitido' : 'Solicitado'}
+						{#if pendienteSel.monto_emitido != null && pendienteSel.monto != null && pendienteSel.monto_emitido !== pendienteSel.monto}
+							· se pidieron ${pendienteSel.monto}
+						{/if}
+					</div>
+				</div>
+
+				<dl class="sheet-dl">
+					<dt>Folio en Go Vale</dt><dd>{pendienteSel.codigo_qr || '—'}</dd>
+					<dt>Estatus del vale</dt><dd>{pendienteSel.estatus_vale || '—'}</dd>
+					<dt>Cantidad</dt><dd>{pendienteSel.cantidad} vale{pendienteSel.cantidad === 1 ? '' : 's'}</dd>
+					<dt>Solicitante</dt><dd>{pendienteSel.capturo || '—'}</dd>
+					<dt>Vehículo</dt><dd>{[pendienteSel.marca_modelo, pendienteSel.placas].filter(Boolean).join(' · ') || '—'}</dd>
+					<dt>Cliente</dt><dd>{pendienteSel.cliente || '—'}</dd>
+					<dt>Concepto</dt><dd>{pendienteSel.descripcion || '—'}</dd>
+					<dt>Kilómetros</dt><dd>{pendienteSel.kilometros ?? '—'}</dd>
+					<dt>Aprobado</dt><dd>{pendienteSel.fecha_aprobado ? fmtFecha(pendienteSel.fecha_aprobado) : '—'}</dd>
+					{#if pendienteSel.motivo}
+						<dt>Nota</dt><dd>{pendienteSel.motivo}</dd>
+					{/if}
+				</dl>
+
+				<div class="sheet-falta">
+					<AlertTriangle size={16} />
+					<span>Falta la foto del ticket. Sin ella este vale no se puede cerrar ni comprobar el consumo.</span>
+				</div>
+			</div>
+		</div>
 	{/if}
 </div>
 
@@ -277,4 +328,36 @@
 	.vales-estimado.sin-vales { background: rgba(239,68,68,.16); border-color: rgba(239,68,68,.5); }
 	.vales-estimado.sin-vales .vales-num { color: #FCA5A5; }
 	.vales-nota { font-size: .74rem; color: var(--color-text-muted); }
+	/* Detalle del vale pendiente */
+	.overlay {
+		position: fixed; inset: 0; z-index: calc(var(--z-toast, 300) - 1);
+		display: flex; align-items: flex-end; justify-content: center;
+		background: rgba(2, 6, 23, 0.72); -webkit-backdrop-filter: blur(4px);
+		backdrop-filter: blur(4px); padding: 0;
+	}
+	.sheet {
+		width: 100%; max-width: 30rem; max-height: 88dvh; overflow-y: auto;
+		-webkit-overflow-scrolling: touch;
+		background: var(--color-surface); color: var(--color-text);
+		border: 1px solid var(--color-line); border-bottom: none;
+		border-radius: var(--radius) var(--radius) 0 0;
+		padding: 1rem 1.1rem calc(1.1rem + env(safe-area-inset-bottom));
+	}
+	@media (min-width: 640px) {
+		.overlay { align-items: center; }
+		.sheet { border-radius: var(--radius); border-bottom: 1px solid var(--color-line); }
+	}
+	.sheet-hd { display: flex; align-items: center; gap: .5rem; margin-bottom: .8rem; }
+	.sheet-tit { display: inline-flex; align-items: center; gap: .4rem; font-weight: 700; color: var(--color-warning); }
+	.sheet-x { margin-left: auto; background: none; border: none; color: var(--color-text-muted); cursor: pointer; min-width: 40px; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+	.sheet-vale { margin-bottom: .9rem; }
+	.sheet-folio { font-family: ui-monospace, Consolas, monospace; font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; }
+	.sheet-sub { font-size: var(--font-size-xs); color: var(--color-text-dim); margin-top: .2rem; }
+	.sheet-monto { padding: .7rem .9rem; border-radius: var(--radius-sm); background: rgba(251, 191, 36, .10); border: 1px solid rgba(251, 191, 36, .35); margin-bottom: .9rem; }
+	.monto-n { font-size: 1.7rem; font-weight: 800; color: var(--color-warning); }
+	.monto-l { font-size: var(--font-size-xs); color: var(--color-text-dim); }
+	.sheet-dl { display: grid; grid-template-columns: 9.5rem 1fr; gap: .35rem .8rem; margin: 0 0 .9rem; font-size: var(--font-size-sm); }
+	.sheet-dl dt { color: var(--color-text-muted); }
+	.sheet-dl dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+	.sheet-falta { display: flex; gap: .5rem; align-items: flex-start; padding: .7rem .8rem; border-radius: var(--radius-sm); background: rgba(239, 68, 68, .10); border: 1px solid rgba(239, 68, 68, .35); color: var(--color-danger-light); font-size: var(--font-size-xs); line-height: 1.4; }
 </style>

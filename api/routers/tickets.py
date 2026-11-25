@@ -199,6 +199,8 @@ def tickets_oxxogas_list(
             cursor.execute("""
             SELECT S.Id, S.IdSolicitante, S.FechaSolicitud, S.Placa, S.Descripcion,
                    S.Cantidad, S.MontoUnit, S.IdAutomovil, S.IdCliente, S.IdValeGoVale,
+                   S.CodigoQR, S.MontoEmitido, S.Estatus, S.FechaAprobado,
+                   S.Kilometros, S.Motivo, S.MotivoCodigo,
                    U.Nombre AS SolicitanteNombre,
                    A.MarcaModelo, A.Placas AS AutoPlacas
             FROM HUB_SolicitudVales S
@@ -307,6 +309,18 @@ def tickets_oxxogas_list(
                 "concepto": None,
                 "pendiente_ticket": True,
                 "id_solicitud": s["Id"],
+                # Todo lo que ya sabemos del vale, para que la tarjeta
+                # pendiente tenga detalle al tocarla (antes no abría nada).
+                "codigo_qr": s.get("CodigoQR") or None,
+                "monto_emitido": (float(s["MontoEmitido"])
+                                  if s.get("MontoEmitido") is not None else None),
+                "estatus_vale": s.get("Estatus"),
+                "fecha_aprobado": (s["FechaAprobado"].isoformat()
+                                   if s.get("FechaAprobado") else None),
+                "kilometros": s.get("Kilometros"),
+                "motivo": s.get("Motivo"),
+                "motivo_codigo": s.get("MotivoCodigo"),
+                "cantidad": int(s.get("Cantidad") or 1),
             })
         # Pendientes ARRIBA: son los que piden acción. Antes todo iba por fecha
         # y un vale de hace un mes sin ticket quedaba al final de 50 tickets,
