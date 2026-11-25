@@ -202,10 +202,13 @@ def tickets_oxxogas_list(
                    S.CodigoQR, S.MontoEmitido, S.Estatus, S.FechaAprobado,
                    S.Kilometros, S.Motivo, S.MotivoCodigo,
                    U.Nombre AS SolicitanteNombre,
-                   A.MarcaModelo, A.Placas AS AutoPlacas
+                   A.MarcaModelo, A.Placas AS AutoPlacas,
+                   C.Cliente AS ClienteNombre
             FROM HUB_SolicitudVales S
             LEFT JOIN HUB_Users U ON U.Id = S.IdSolicitante
             LEFT JOIN HUB_Automoviles A ON A.Id = S.IdAutomovil
+            LEFT JOIN (SELECT IdCliente, MIN(Cliente) AS Cliente
+                       FROM clientes GROUP BY IdCliente) C ON C.IdCliente = S.IdCliente
             -- Ventana de un día, a propósito (decisión del 22-nov): este módulo
             -- es para "esperando la foto del ticket" de lo que se acaba de
             -- generar, no un buzón de deuda vieja. Un vale aparece SOLO cuando
@@ -298,7 +301,9 @@ def tickets_oxxogas_list(
                 "estacion": None,
                 "descripcion": s["Descripcion"] or "",
                 "tiene_foto": False,
-                "cliente": s["IdCliente"],
+                # El nombre, no el código: en la tarjeta se lee "Fersinsa GB",
+                # no "IJDS".
+                "cliente": s.get("ClienteNombre") or s["IdCliente"],
                 "vale": f"VL-{int(s['Id']):05d}",
                 "marca_modelo": s["MarcaModelo"],
                 "placas": s["AutoPlacas"] or s["Placa"],

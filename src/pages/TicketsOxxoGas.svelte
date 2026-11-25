@@ -1,5 +1,5 @@
 <script>
-	import { User, Building2, Car, Receipt, Ticket, Plus, ArrowLeft, Clock, Fuel, AlertTriangle, X } from 'lucide-svelte';
+	import { User, Building2, Car, Receipt, Ticket, Plus, ArrowLeft, Clock, Fuel, AlertTriangle, X, FileText, Wallet } from 'lucide-svelte';
 
 	import { onMount } from 'svelte';
 	import { navigate } from '$lib/router.js';
@@ -214,7 +214,11 @@
 								<span class="chip pend" title="Sin estación"><Clock size={16} /> Estación: Pendiente</span>
 							{/if}
 						</div>
+						{#if t.descripcion}<div class="row"><FileText size={16} /> {t.descripcion}</div>{/if}
 						{#if t.cliente}<div class="row"><Building2 size={16} /> {t.cliente}</div>{/if}
+						{#if t.pendiente_ticket && t.monto != null}
+							<div class="row"><Wallet size={16} /> ${Number(t.monto).toLocaleString('es-MX', { minimumFractionDigits: 2 })}</div>
+						{/if}
 						{#if t.marca_modelo || t.placas}
 							<div class="row"><Car size={16} /> {[t.marca_modelo, t.placas].filter(Boolean).join(' · ')}</div>
 						{/if}

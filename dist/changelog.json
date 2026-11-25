@@ -1,7 +1,8 @@
 {
   "app": "admon",
-  "version": "1.9.9",
+  "version": "1.9.10",
   "cambios": [
+    "Las tarjetas de vales pendientes muestran el proyecto, el cliente y el monto, no solo el folio.",
     "Al tocar un vale pendiente ves todo lo que ya sabemos: folio, monto, vehículo, cliente y qué falta.",
     "Mi Asistencia dice a cuántos kilómetros estás de la oficina y si con esa distancia te tocan viáticos (desde 50 km).",
     "🔐 Para marcar ahora solo usas la huella o Face ID del teléfono: si no tienes passkey se crea en ese momento, y ya no hay que capturar el rostro.",
@@ -12,7 +13,6 @@
     "📸 Si no te reconoce el rostro tienes 3 intentos; luego te ofrece registrarlo.",
     "🧾 Los marcados se ven por ciclo: entrada, salida, horas totales y horas extra calculadas con la LFT.",
     "🗺️ Cada ciclo muestra el rostro, la passkey y un mapa de dónde se hizo.",
-    "🏆 Legends se rediseñó en Admon: ranking semanal, temporada, racha y 20 logros.",
-    "💵 Ahora los puntos siguen el dinero: cotización pagada +15 a +75 según el subtotal, entregada +10, cliente nuevo cotizado +5 y cobranza +3."
+    "🏆 Legends se rediseñó en Admon: ranking semanal, temporada, racha y 20 logros."
   ]
 }
