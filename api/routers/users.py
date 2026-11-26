@@ -5,6 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict
 from api import usuarios_foto as _foto_usuario
+from api import usuarios_whatsapp as _whatsapp
 from api import ficha_nfc as _ficha_nfc
 
 router = APIRouter()
@@ -45,6 +46,8 @@ class UserInfo(BaseModel):
     acceso_vales_oxxogas: bool = False
     nickname: str = ""
     mac_telefono: str = ""
+    # WhatsApp de la persona (HUB_UsuariosWhatsapp), solo dígitos con país.
+    whatsapp: str = ""
     # Puesto y si tiene foto (para la lista/avatares). El NSS NO va aquí:
     # es dato personal y solo se entrega en la ficha del usuario.
     puesto: str = ""
@@ -151,6 +154,8 @@ def get_users(
         macs = {r[0]: (r[1] or "").strip() for r in cursor.fetchall()}
         # Un solo SELECT para saber quiénes tienen foto (no se traen binarios).
         con_foto = set(_foto_usuario.listar_fotos(get_connection))
+        # WhatsApp por usuario en un solo SELECT (tabla aparte, migración 0066).
+        whatsapps = _whatsapp.mapa_whatsapps(get_connection)
         conn.close()
         result = []
         for row in rows:
@@ -166,6 +171,7 @@ def get_users(
                 mac_telefono=macs.get(row[0], ""),
                 puesto=row[11] or "",
                 tiene_foto=row[0] in con_foto,
+                whatsapp=whatsapps.get(row[0], ""),
             ))
         return {"items": result, "total": total, "limit": limit, "offset": offset}
     except Exception as e:
@@ -278,7 +284,11 @@ def get_user_detail(user_id: int, current_user: dict = Depends(get_current_user)
         conn.close()
         if not row:
             raise HTTPException(status_code=404, detail="Usuario no encontrado")
-        return _user_row_to_dict(row)
+        d = _user_row_to_dict(row)
+        # WhatsApp: tabla aparte (HUB_UsuariosWhatsapp). Tolerante a que la
+        # migración 0066 todavía no esté aplicada: la ficha abre sin él.
+        d["whatsapp"] = _whatsapp.leer_whatsapp(get_connection, user_id)
+        return d
     except HTTPException:
         raise
     except Exception as e:
@@ -323,6 +333,7 @@ class UserUpdateRequest(BaseModel):
     curp_rfc: str = ""
     nss: str = ""
     puesto: str = ""
+    whatsapp: str = ""
     accesos: Dict[str, bool] = {}
 
 
@@ -331,6 +342,12 @@ def update_user_detail(user_id: int, body: UserUpdateRequest, current_user: dict
     _require_admin(current_user)
     if not body.nombre.strip() or not body.email.strip() or not body.password.strip():
         raise HTTPException(status_code=400, detail="Nombre, correo y contraseña son obligatorios.")
+    # El WhatsApp se valida ANTES de tocar la BD: si viene mal, no se guarda
+    # media ficha. Vacío = quitar (se borra la fila).
+    try:
+        whatsapp = _whatsapp.normalizar_telefono(body.whatsapp)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     try:
         conn = get_connection()
         cursor = conn.cursor()
@@ -359,7 +376,11 @@ def update_user_detail(user_id: int, body: UserUpdateRequest, current_user: dict
         vals.append(int(user_id))
         cursor.execute(f"UPDATE HUB_Users SET {', '.join(sets)} WHERE Id = %s", tuple(vals))
         conn.close()
-        return {"ok": True}
+        # Tabla aparte: MERGE con el número normalizado (vacío = borrar fila).
+        r = _whatsapp.guardar_whatsapp(get_connection, int(user_id), whatsapp)
+        if not r.get("ok"):
+            raise HTTPException(status_code=500, detail=r.get("error") or "No se pudo guardar el WhatsApp.")
+        return {"ok": True, "whatsapp": whatsapp}
     except HTTPException:
         raise
     except Exception as e:

@@ -72,6 +72,8 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	let curpRfc = $state('');
 	let nss = $state('');
 	let puesto = $state('');
+	let whatsapp = $state('');
+	let errWhatsapp = $state('');
 	let password = $state('');
 	let fechaIngreso = $state('');
 	let activo = $state(true);
@@ -220,6 +222,37 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 		return { 'Content-Type': 'application/json', ...auth.authHeader() };
 	}
 
+	// WhatsApp: misma regla que el servidor (api/usuarios_whatsapp.py). 10
+	// dígitos = México (52 + los 10); 12 a 15 se respetan; 11 que empieza con
+	// 1 se rechaza por ambiguo (EUA o formato viejo de México).
+	function normalizarWhatsapp(valor) {
+		const txt = String(valor || '').trim();
+		if (!txt) return '';
+		const digitos = txt.replace(/\D/g, '');
+		if (!digitos) {
+			throw new Error('WhatsApp inválido: escribe el número con dígitos (10 dígitos o 52…).');
+		}
+		if (digitos.length === 11 && digitos.startsWith('1')) {
+			throw new Error(
+				'WhatsApp inválido: un número de 11 dígitos que empieza con 1 es ambiguo (EUA o formato viejo de México). Escribe el código de país, por ejemplo 52 81 2123 4567.'
+			);
+		}
+		if (digitos.length === 10) return '52' + digitos;
+		if (digitos.length >= 12 && digitos.length <= 15) return digitos;
+		throw new Error('WhatsApp inválido: escribe 10 dígitos o el número con código de país (52…).');
+	}
+
+	function revisarWhatsapp() {
+		try {
+			normalizarWhatsapp(whatsapp);
+			errWhatsapp = '';
+			return true;
+		} catch (e) {
+			errWhatsapp = e.message;
+			return false;
+		}
+	}
+
 	function tieneAcceso() {
 		try {
 			const raw = localStorage.getItem('admon_user');
@@ -258,6 +291,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 			curpRfc = d.curp_rfc || '';
 			nss = d.nss || '';
 			puesto = d.puesto || '';
+			whatsapp = d.whatsapp || '';
 			password = d.password || '';
 			fechaIngreso = d.fecha_ingreso || '';
 			activo = !!d.activo;
@@ -300,6 +334,11 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 			error = 'Nombre, correo y contraseña son obligatorios.';
 			return;
 		}
+		if (!revisarWhatsapp()) {
+			error = 'Revisa el WhatsApp antes de guardar.';
+			return;
+		}
+		const whatsappGuardar = normalizarWhatsapp(whatsapp);
 		busy = true;
 		try {
 			const res = await fetch(`/api/users/${id}`, {
@@ -314,11 +353,13 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					curp_rfc: curpRfc.trim(),
 					nss: nss.trim(),
 					puesto: puesto.trim(),
+					whatsapp: whatsappGuardar,
 					accesos
 				})
 			});
 			const data = await res.json().catch(() => ({}));
 			if (!res.ok) throw new Error(data.detail || 'Error al actualizar.');
+			whatsapp = typeof data.whatsapp === 'string' ? data.whatsapp : whatsappGuardar;
 			msg = '✅ Usuario actualizado.';
 		} catch (e) {
 			error = e.message || 'Error al actualizar.';
@@ -495,6 +536,21 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					/>
 				</div>
 				<div class="field">
+					<label for="ud-whatsapp">WhatsApp:</label>
+					<input
+						id="ud-whatsapp"
+						class="input"
+						type="tel"
+						inputmode="tel"
+						placeholder="Ej: 8121234567 o 52 81 2123 4567"
+						bind:value={whatsapp}
+						on:blur={revisarWhatsapp}
+						aria-invalid={errWhatsapp ? 'true' : 'false'}
+					/>
+					<p class="hint campo-hint">10 dígitos o el número con 52. Se guarda solo dígitos.</p>
+					{#if errWhatsapp}<div class="msg err" style="margin-bottom: 0;">{errWhatsapp}</div>{/if}
+				</div>
+				<div class="field">
 					<label for="ud-fecha">Fecha de ingreso:</label>
 					<input id="ud-fecha" type="date" class="input" bind:value={fechaIngreso} />
 				</div>
@@ -599,6 +655,7 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 	.check { display: flex; align-items: center; gap: 0.5rem; font-size: var(--font-size-sm); margin-bottom: 0.5rem; cursor: pointer; }
 	.check input { width: 1.1rem; height: 1.1rem; flex-shrink: 0; }
 	.hint { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+	.campo-hint { margin: 0.35rem 0 0.4rem; font-size: var(--font-size-xs); }
 	.tel-estado { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.6rem; }
 	.tel-chip {
 		display: inline-flex;
