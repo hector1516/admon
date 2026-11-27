@@ -540,8 +540,13 @@ import ErrorState from '$lib/components/ErrorState.svelte';
 					<input
 						id="ud-whatsapp"
 						class="input"
-						type="tel"
-						inputmode="tel"
+						type="text"
+						inputmode="numeric"
+						autocomplete="off"
+						autocapitalize="off"
+						autocorrect="off"
+						spellcheck="false"
+						maxlength="15"
 						placeholder="Ej: 8121234567 o 52 81 2123 4567"
 						bind:value={whatsapp}
 						on:blur={revisarWhatsapp}
